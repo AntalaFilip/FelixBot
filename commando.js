@@ -147,7 +147,7 @@ client
 											client.endLesson(lessonKey);
 										}
 									}
-								}, 3000);
+								}, 300000);
 							});
 						}
 						else {
