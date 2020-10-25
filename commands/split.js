@@ -35,7 +35,7 @@ module.exports = {
 						.setTitle('Split')
 						.setDescription(`Created ${gSize} groups`)
 						.setAuthor(`${memberName}`, sender.avatarURL())
-						.setThumbnail('https://cloud1p.edupage.org/cloud?z%3AkhC0isQrynC2RbuTUyyl%2FmcaKKwqy1TsRRY8IutBDggGZOK31CbLE7BtBZe89eyL%2B9WJgUXp1Hl5H82y9Z2xkg%3D%3D')
+						.setThumbnail('https://cdn.discordapp.com/attachments/371283762853445643/768906541277380628/Felix-logo-01.png')
 						.setFooter('Run !merge to move everyone back')
 						.setTimestamp();
 					for (let ii = 1; ii <= gSize; ii++) {
@@ -49,7 +49,7 @@ module.exports = {
 					console.log(userlist);
 				}
 				else {
-					message.reply('You need to provide a number!');
+					message.reply('You need to provide the group size!');
 				}
 			}
 			else {
