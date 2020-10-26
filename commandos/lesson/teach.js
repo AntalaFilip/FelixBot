@@ -59,6 +59,7 @@ module.exports = class TeachCommand extends commando.Command {
 							user: usr[1],
 							id: usr[1].id,
 							name: usr[1].nickname || usr[1].user.username,
+							chan: usr[1].voice.channel,
 							attendance: {
 								joined: [new Date().getTime()],
 								left: [],

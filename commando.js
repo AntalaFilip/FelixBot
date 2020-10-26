@@ -9,7 +9,7 @@ const client = new commando.CommandoClient({
 	owner: `329957366042984449`,
 	commandPrefix: `!`,
 });
-function watchStudent() {
+async function watchStudent() {
 	client.guilds.cache.find(gld => gld.id === `702836521622962198`).members.fetch().then(members => {
 		const usr = members.random();
 		if (usr.id != `702803698463801355` && usr.id != `702801293089177601`) client.user.setActivity(`${usr.nickname || usr.user.username}`, { type: `WATCHING` });
@@ -28,7 +28,7 @@ client.sendWelcomeMessage = (member) => {
 	console.log(`Sent a welcome message to ${member.user.username}`);
 };
 
-client.endLesson = (lessonKey) => {
+client.endLesson = async (lessonKey) => {
 	const lesson = client.lessons.get(lessonKey);
 	const students = lesson.students;
 	const textchan = lesson.textchannel;
@@ -121,7 +121,7 @@ client
 			${guild ? `in guild ${guild.name} (${guild.id})` : 'globally'}.
 		`);
 	})
-	.on(`voiceStateUpdate`, (oldstate, newstate) => {
+	.on(`voiceStateUpdate`, async (oldstate, newstate) => {
 		const member = newstate.member;
 		console.log(`${member.id} updated their voice state`);
 		const oldchan = oldstate.channel;
@@ -152,9 +152,14 @@ client
 						}
 						else {
 							const student = lesson.students.find(map => map.id === member.id);
+							student.chan = newchan;
 							student.attendance.left.push(new Date().getTime());
 							console.log(`${student.name} (${student.id}) has left the lesson!`);
 						}
+					}
+					else if (member != lesson.teacher) {
+						const student = lesson.students.find(map => map.id === member.id);
+						student.chan = newchan;
 					}
 				}
 			}
@@ -177,6 +182,7 @@ client
 								user: member,
 								id: member.id,
 								name: member.nickname || member.user.username,
+								chan: newchan,
 								attendance: {
 									joined: [new Date().getTime()],
 									left: [],
@@ -185,7 +191,8 @@ client
 							console.log(`${member.id} joined the lesson for the first time`);
 						}
 						else {
-							student.attendance.joined.push(new Date().getTime);
+							student.attendance.joined.push(new Date().getTime());
+							student.chan = newchan;
 							console.log(`${student.name} (${student.id}) joined the lesson again (${student.attendance.joined.length})`);
 						}
 					}
