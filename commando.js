@@ -27,8 +27,14 @@ client.sendWelcomeMessage = (member) => {
 	});
 	console.log(`Sent a welcome message to ${member.user.username}`);
 };
+client.leftLesson = (member) => {
 
-client.endLesson = async (lessonKey) => {
+}
+client.joinedLesson = (member) => {
+
+}
+
+client.endLesson = (lessonKey) => {
 	const lesson = client.lessons.get(lessonKey);
 	const students = lesson.students;
 	const textchan = lesson.textchannel;
@@ -36,11 +42,12 @@ client.endLesson = async (lessonKey) => {
 	const publicembed = new MessageEmbed()
 		.setColor(`#ff0000`)
 		.setTitle(`Lesson ended!`)
-		.setAuthor(`${lesson.teacherName}`, `${teacher.user.avatarURL()}`)
 		.setDescription(`${lesson.lesson.toUpperCase()} has ended!`)
 		.setThumbnail(`https://cdn.discordapp.com/attachments/371283762853445643/768906541277380628/Felix-logo-01.png`)
 		.setTimestamp()
 		.setFooter(`The lesson has ended!`);
+		if (teacher.user.avatarURL(publicembed.setAuthor(`${lesson.teacherName}`, `${teacher.user.avatarURL()}`))) {}
+		else (publicembed.setAuthor(`${lesson.teacherName}`))
 
 	textchan.send(publicembed);
 	const privateembed = new MessageEmbed()
@@ -53,8 +60,8 @@ client.endLesson = async (lessonKey) => {
 
 	console.log(`Size: ${students.length}`);
 	for (let i = 0; i < students.length; i++) {
-		console.log(`##Looping (private) ${i}##`);
 		const name = students[i].name;
+		console.log(`##Looping (private) ${i} - ${name}##`);
 		const atten = [];
 		let joinedms = 0;
 		let leftms = 0;
@@ -71,10 +78,11 @@ client.endLesson = async (lessonKey) => {
 		console.log(`Joined: ${joinedms} Left: ${leftms}`);
 		if (joinedms > leftms) netms = joinedms - leftms;
 		else netms = leftms - joinedms;
-		console.log(`push netms ${netms}`);
+		const min = netms / 60000;
+		console.log(`push ${netms} (${min})`);
 		const firstjoined = new Date(students[i].attendance.joined[0]);
 		atten.push(`First joined at ${firstjoined.getHours()}:${firstjoined.getMinutes()}`);
-		atten.push(`Total time: ${Math.round(netms / 60000)} min`);
+		atten.push(`Total time: ${min} min`);
 		privateembed.addField(`${name}`, atten, true);
 	}
 	teacher.createDM().then(dm => dm.send(privateembed));
@@ -123,7 +131,7 @@ client
 	})
 	.on(`voiceStateUpdate`, async (oldstate, newstate) => {
 		const member = newstate.member;
-		console.log(`${member.id} updated their voice state`);
+		console.log(`${member.nickname || member.user.username} (${member.id}) updated their voice state`);
 		const oldchan = oldstate.channel;
 		const newchan = newstate.channel;
 		const lessons = client.lessons;
