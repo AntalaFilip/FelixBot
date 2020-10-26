@@ -25,13 +25,90 @@ client.sendWelcomeMessage = (member) => {
 		dm.send(`Ak sa Ti ale nechce písať administrátorovi (alebo žiaden práve nie je online), môžeš napísať meno a triedu aj mne nasledovne (prosím, používaj diakritiku):`);
 		dm.send(`iam [Meno] [Priezvisko] [Trieda]`);
 	});
+	// Debug log
 	console.log(`Sent a welcome message to ${member.user.username}`);
 };
-client.leftLesson = (member) => {
-
+client.joinedLesson = (member, lessonKey) => {
+	// Get current lesson
+	const lesson = client.lessons.get(lessonKey);
+	// If the member is the teacher
+	if (member == lesson.teacher) {
+		// Set teacher presence
+		lesson.teacherPresent = true;
+		// Notify teacher
+		member.createDM().then(dm => {
+			dm.send(`You have reconnected to ${lesson.lesson.toUpperCase()}@${lesson.class.charAt(0).toUpperCase() + lesson.class.slice(1)}`);
+		});
+	}
+	// Else if it is a student
+	else {
+		// Fetch student from lesson
+		const student = lesson.students.find(map => map.id === member.id);
+		// Get current channel
+		const chan = member.voice.channel;
+		// If the student joined for the first time
+		if (!student) {
+			// Push new student array
+			lesson.students.push({
+				user: member,
+				id: member.id,
+				name: member.nickname || member.user.username,
+				chan: chan,
+				attendance: {
+					joined: [(new Date().getTime())],
+					left: [],
+				},
+			});
+			// Debug log
+			console.log(`${member.id} joined the lesson for the first time`);
+		}
+		// Else...
+		else {
+			// Push new join time to attendance
+			student.attendance.joined.push(new Date().getTime());
+			// Set current channel
+			student.chan = chan;
+			// Debug log
+			console.log(`${student.name} (${student.id}) joined the lesson again (${student.attendance.joined.length})`);
+		}
+	}
 };
-client.joinedLesson = (member) => {
-
+client.leftLesson = (member, lessonKey) => {
+	// Get current lesson
+	const lesson = client.lessons.get(lessonKey);
+	// If the member is the teacher
+	if (member == lesson.teacher) {
+		// Get class ID
+		const clsid = lesson.class;
+		// Set teacher presence
+		lesson.teacherPresent = false;
+		// Warn teacher
+		member.createDM().then(dm => {
+			dm.send(`You disconnected from an ongoing lesson (${lesson.lesson.toUpperCase()}@${clsid.charAt(0).toUpperCase() + clsid.slice(1)})! Please reconnect or end the lesson (!teach end). The lesson is going to be ended automatically in 5 minutes`);
+			// Set the five min timeout
+			setTimeout(() => {
+				// If the lesson still exists
+				if (client.lessons.get(lessonKey)) {
+					// And if the teacher is still not present
+					if (!lesson.teacherPresent) {
+						// Notify teacher
+						dm.send(`The lesson (${lesson.lesson.toUpperCase()}@${clsid.charAt(0).toUpperCase() + clsid.slice(1)}) was ended due to you not being present for five minutes!`);
+						// End the lesson
+						client.endLesson(lessonKey);
+					}
+				}
+			}, 300000);
+		});
+	}
+	// Else if it is a student
+	else {
+		// Get student from the lesson
+		const student = lesson.students.find(std => std.id === member.id);
+		// Get current time in ms
+		const curtimems = new Date().getTime();
+		// Push ms time to attendance array
+		student.attendance.left.push(curtimems);
+	}
 };
 
 client.endLesson = (lessonKey) => {
@@ -142,100 +219,36 @@ client
 			const lessonKey = lessons.findKey(les => les.class === clsid);
 			// Is there an ongoing lesson in the old channel?
 			if (lesson) {
+				// Does the old channel not match the new channel
 				if (oldchan !== newchan) {
+					// If the channel is not in the same category
 					if (newchan == null || newchan.name.slice(0, 2) !== clsid) {
-						if (member == lesson.teacher) {
-							lesson.teacherPresent = false;
-							member.createDM().then(dm => {
-								dm.send(`You disconnected from an ongoing lesson (${lesson.lesson.toUpperCase()}@${clsid.charAt(0).toUpperCase() + clsid.slice(1)})! Please reconnect or end the lesson (!teach end). The lesson is going to be ended automatically in 5 minutes`);
-								setTimeout(() => {
-									if (lessons.get(lessonKey)) {
-										if (!lesson.teacherPresent) {
-											dm.send(`The lesson (${lesson.lesson.toUpperCase()}@${clsid.charAt(0).toUpperCase() + clsid.slice(1)}) was ended due to you not being present for five minutes!`);
-											client.endLesson(lessonKey);
-										}
-									}
-								}, 300000);
-							});
-						}
-						else {
-							const student = lesson.students.find(map => map.id === member.id);
-							student.chan = newchan;
-							student.attendance.left.push(new Date().getTime());
-							console.log(`${student.name} (${student.id}) has left the lesson!`);
-						}
-					}
-					else if (member != lesson.teacher) {
-						const student = lesson.students.find(map => map.id === member.id);
-						student.chan = newchan;
+						client.leftLesson(member, lessonKey);
 					}
 				}
 			}
 			// Does the new channel exist?
 			if (newchan) {
+				// Get the class ID
 				const clsidnew = newchan.name.slice(0, 2);
+				// Find the lesson and key
 				const lessonnew = lessons.find(les => les.class === clsidnew);
-				// Is there an ongoing leson in the new channel?
-				if (lessonnew) {
-					if (member == lessonnew.teacher) {
-						lessonnew.teacherPresent = true;
-						member.createDM().then(dm => {
-							dm.send(`You have reconnected to ${lessonnew.lesson.toUpperCase()}@${clsidnew.charAt(0).toUpperCase() + clsidnew.slice(1)}`);
-						});
-					}
-					else {
-						const student = lessonnew.students.find(map => map.id === member.id);
-						if (!student) {
-							lessonnew.students.push({
-								user: member,
-								id: member.id,
-								name: member.nickname || member.user.username,
-								chan: newchan,
-								attendance: {
-									joined: [new Date().getTime()],
-									left: [],
-								},
-							});
-							console.log(`${member.id} joined the lesson for the first time`);
-						}
-						else {
-							student.attendance.joined.push(new Date().getTime());
-							student.chan = newchan;
-							console.log(`${student.name} (${student.id}) joined the lesson again (${student.attendance.joined.length})`);
-						}
-					}
+				const lessonnewKey = lessons.findKey(les => les.class == clsidnew);
+				// Is there an ongoing lesson in the new channel, are the lessons not the same, are the channels not the same
+				if (lessonnew && lessonnewKey != lessonKey && newchan != oldchan) {
+					client.joinedLesson(member, lessonnewKey);
 				}
 			}
 		}
 		else if (newchan) {
+			// Get the class ID
 			const clsidnew = newchan.name.slice(0, 2);
+			// Find the lesson and key
 			const lessonnew = lessons.find(les => les.class === clsidnew);
+			const lessonnewKey = lessons.findKey(les => les.class === clsidnew);
+			// Is there an ongoing lesson in the new channel
 			if (lessonnew) {
-				if (member == lessonnew.teacher) {
-					lessonnew.teacherPresent = true;
-					member.createDM().then(dm => {
-						dm.send(`You have reconnected to ${lessonnew.lesson.toUpperCase()}@${clsidnew.charAt(0).toUpperCase() + clsidnew.slice(1)}`);
-					});
-				}
-				else {
-					const student = lessonnew.students.find(map => map.id === member.id);
-					if (!student) {
-						lessonnew.students.push({
-							user: member,
-							id: member.id,
-							name: member.nickname || member.user.username,
-							attendance: {
-								joined: [new Date().getTime()],
-								left: [],
-							},
-						});
-						console.log(`${member.id} joined the lesson for the first time`);
-					}
-					else {
-						student.attendance.joined.push(new Date().getTime());
-						console.log(`${member.id} joined the lesson again (${student.attendance.joined.length})`);
-					}
-				}
+				client.joinedLesson(member, lessonnewKey);
 			}
 		}
 	})
