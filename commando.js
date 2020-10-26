@@ -78,7 +78,7 @@ client.endLesson = (lessonKey) => {
 		console.log(`Joined: ${joinedms} Left: ${leftms}`);
 		if (joinedms > leftms) netms = joinedms - leftms;
 		else netms = leftms - joinedms;
-		const min = netms / 60000;
+		const min = Math.floor(netms / 60000);
 		console.log(`push ${netms} (${min})`);
 		const firstjoined = new Date(students[i].attendance.joined[0]);
 		atten.push(`First joined at ${firstjoined.getHours()}:${firstjoined.getMinutes()}`);
