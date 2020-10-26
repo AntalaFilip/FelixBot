@@ -53,22 +53,22 @@ client.endLesson = async (lessonKey) => {
 
 	console.log(`Size: ${students.length}`);
 	for (let i = 0; i < students.length; i++) {
-		console.log(`for privateembed ${i}`);
+		console.log(`##Looping (private) ${i}##`);
 		const name = students[i].name;
 		const atten = [];
 		let joinedms = 0;
 		let leftms = 0;
 		for (let ii = 0; ii < students[i].attendance.joined.length; ii++) {
-			console.log(`joined ${ii}`);
 			joinedms = joinedms + students[i].attendance.joined[i];
+			console.log(`Joined ${ii} - ${joinedms}`);
 		}
 		for (let ii = 0; ii < students[i].attendance.left.length; ii++) {
-			console.log(`left ${ii}`);
 			leftms = leftms + students[i].attendance.left[i];
+			console.log(`Left ${ii} - ${leftms}`);
 		}
 		if (leftms == 0) leftms = new Date().getTime();
 		let netms = 0;
-		console.log(`j${joinedms} l${leftms}`);
+		console.log(`Joined: ${joinedms} Left: ${leftms}`);
 		if (joinedms > leftms) netms = joinedms - leftms;
 		else netms = leftms - joinedms;
 		console.log(`push netms ${netms}`);
