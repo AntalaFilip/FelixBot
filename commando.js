@@ -29,6 +29,8 @@ client.sendWelcomeMessage = (member) => {
 	console.log(`Sent a welcome message to ${member.user.username}`);
 };
 client.joinedLesson = (member, lessonKey) => {
+	// Get current time
+	const curtimems = new Date().getTime();
 	// Get current lesson
 	const lesson = client.lessons.get(lessonKey);
 	// If the member is the teacher
@@ -39,11 +41,13 @@ client.joinedLesson = (member, lessonKey) => {
 		member.createDM().then(dm => {
 			dm.send(`You have reconnected to ${lesson.lesson.toUpperCase()}@${lesson.class.charAt(0).toUpperCase() + lesson.class.slice(1)}`);
 		});
+		// Debug log
+		console.log(`The teacher (${lesson.teacherName}) has rejoined!`);
 	}
 	// Else if it is a student
 	else {
 		// Fetch student from lesson
-		const student = lesson.students.find(map => map.id === member.id);
+		const student = lesson.students.find(mem => mem.id === member.id);
 		// Get current channel
 		const chan = member.voice.channel;
 		// If the student joined for the first time
@@ -55,12 +59,12 @@ client.joinedLesson = (member, lessonKey) => {
 				name: member.nickname || member.user.username,
 				chan: chan,
 				attendance: {
-					joined: [(new Date().getTime())],
+					joined: [curtimems],
 					left: [],
 				},
 			});
 			// Debug log
-			console.log(`${member.id} joined the lesson for the first time`);
+			console.log(`${member.id} joined the lesson for the first time [${curtimems}]`);
 		}
 		// Else...
 		else {
@@ -69,7 +73,7 @@ client.joinedLesson = (member, lessonKey) => {
 			// Set current channel
 			student.chan = chan;
 			// Debug log
-			console.log(`${student.name} (${student.id}) joined the lesson again (${student.attendance.joined.length})`);
+			console.log(`${student.name} (${student.id}) joined the lesson again (${student.attendance.joined.length}) [${curtimems}]`);
 		}
 	}
 };
@@ -99,6 +103,7 @@ client.leftLesson = (member, lessonKey) => {
 				}
 			}, 300000);
 		});
+		console.log(`The teacher (${lesson.teacherName}) has left the lesson!`);
 	}
 	// Else if it is a student
 	else {
@@ -108,6 +113,8 @@ client.leftLesson = (member, lessonKey) => {
 		const curtimems = new Date().getTime();
 		// Push ms time to attendance array
 		student.attendance.left.push(curtimems);
+		// Debug log
+		console.log(`${student.name} has left the lesson! (${curtimems})`);
 	}
 };
 

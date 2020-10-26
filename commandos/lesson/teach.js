@@ -34,6 +34,8 @@ module.exports = class TeachCommand extends commando.Command {
 				const classId = message.member.voice.channel.name.slice(0, 2);
 				const lessonId = `${classId}-${lesson}-${teacherId}`;
 				const channel = teacher.voice.channel;
+				const date = new Date();
+				const mstime = new Date().getTime();
 
 				lessons.set(lessonId, {
 					textchannel: message.channel,
@@ -45,27 +47,16 @@ module.exports = class TeachCommand extends commando.Command {
 					endMessageId: null,
 					students: [],
 					startedAt: {
-						date: `${new Date().getDate()}/${new Date().getMonth()}/${new Date().getFullYear()}`,
-						time: `${new Date().getHours()}:${new Date().getMinutes()}`,
-						mstime: new Date().getTime(),
+						date: `${date.getDate()}/${date.getMonth()}/${date.getFullYear()}`,
+						time: `${date.getHours()}:${date.getMinutes()}`,
+						mstime: mstime,
 					},
 					period: null,
 					embedmsg: null,
 				});
 				const crntlsn = lessons.get(lessonId);
-				for (const usr of channel.members) {
-					crntlsn.students.push(
-						{
-							user: usr[1],
-							id: usr[1].id,
-							name: usr[1].nickname || usr[1].user.username,
-							chan: usr[1].voice.channel,
-							attendance: {
-								joined: [new Date().getTime()],
-								left: [],
-							},
-						},
-					);
+				for (const mem of channel.members) {
+					this.client.joinedLesson(mem[1], lessonId);
 				}
 				const embed = new MessageEmbed()
 					.setColor(`#00ff00`)
@@ -87,8 +78,8 @@ module.exports = class TeachCommand extends commando.Command {
 				this.client.endLesson(key);
 			}
 			else {
-				message.reply(`You do not have any ongoing lessons`).then(setTimeout(newmsg => {newmsg.delete();}, 10000));
-				message.delete();
+				message.reply(`You do not have any ongoing lessons`).then(newmsg => newmsg.delete({ timeout: 10000 }));
+				message.delete({ reason: `Invalid command` });
 			}
 		}
 	}
