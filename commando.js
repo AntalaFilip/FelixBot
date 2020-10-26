@@ -141,7 +141,7 @@ client.endLesson = (lessonKey) => {
 		console.log(`##Looping (private) ${i} - ${name}##`);
 		const atten = [];
 		let joinedms = 0;
-		let leftms = 0;
+		let leftms = new Date().getTime();
 		for (let ii = 0; ii < students[i].attendance.joined.length; ii++) {
 			joinedms = joinedms + students[i].attendance.joined[i];
 			console.log(`Joined ${ii} - ${joinedms}`);
@@ -150,7 +150,6 @@ client.endLesson = (lessonKey) => {
 			leftms = leftms + students[i].attendance.left[i];
 			console.log(`Left ${ii} - ${leftms}`);
 		}
-		if (leftms == 0) leftms = new Date().getTime();
 		let netms = 0;
 		console.log(`Joined: ${joinedms} Left: ${leftms}`);
 		if (joinedms > leftms) netms = joinedms - leftms;
