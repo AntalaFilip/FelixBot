@@ -29,10 +29,10 @@ client.sendWelcomeMessage = (member) => {
 };
 client.leftLesson = (member) => {
 
-}
+};
 client.joinedLesson = (member) => {
 
-}
+};
 
 client.endLesson = (lessonKey) => {
 	const lesson = client.lessons.get(lessonKey);
@@ -46,8 +46,8 @@ client.endLesson = (lessonKey) => {
 		.setThumbnail(`https://cdn.discordapp.com/attachments/371283762853445643/768906541277380628/Felix-logo-01.png`)
 		.setTimestamp()
 		.setFooter(`The lesson has ended!`);
-		if (teacher.user.avatarURL(publicembed.setAuthor(`${lesson.teacherName}`, `${teacher.user.avatarURL()}`))) {}
-		else (publicembed.setAuthor(`${lesson.teacherName}`))
+	if (teacher.user.avatarURL()) publicembed.setAuthor(`${lesson.teacherName}`, `${teacher.user.avatarURL()}`);
+	else (publicembed.setAuthor(`${lesson.teacherName}`));
 
 	textchan.send(publicembed);
 	const privateembed = new MessageEmbed()
@@ -232,7 +232,7 @@ client
 						console.log(`${member.id} joined the lesson for the first time`);
 					}
 					else {
-						student.attendance.joined.push(new Date().getTime);
+						student.attendance.joined.push(new Date().getTime());
 						console.log(`${member.id} joined the lesson again (${student.attendance.joined.length})`);
 					}
 				}
