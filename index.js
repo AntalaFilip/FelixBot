@@ -1,6 +1,7 @@
 const { Collection, MessageEmbed } = require("discord.js");
 const commando = require(`discord.js-commando`);
 const oneLine = require(`common-tags`).oneLine;
+const fs = require(`fs`);
 const path = require(`path`);
 // const sqlite = require(`sqlite`);
 const { token } = require(`./config.json`);
@@ -221,13 +222,16 @@ client
 		if (newchan != oldchan) {
 			if (oldchan) {
 				if (newchan) {
+					fs.writeFile('attendance', `${currenttime} - ${member.nickname || member.user.username} ${oldchan.name} -> ${newchan.name}`);
 					console.log(`${currenttime} - ${member.nickname || member.user.username} changed channels from ${oldchan.name} to ${newchan.name}`);
 				}
 				else {
+					fs.writeFile('attendance', `${currenttime} - ${member.nickname || member.user.username} ${oldchan.name} ->`);
 					console.log(`${currenttime} - ${member.nickname || member.user.username} left ${oldchan.name}`);
 				}
 			}
 			else if (newchan) {
+				fs.writeFile('attendance', `${currenttime} - ${member.nickname || member.user.username} -> ${newchan.name}`);
 				console.log(`${currenttime} - ${member.nickname || member.user.username} joined ${newchan.name}`);
 			}
 		}
