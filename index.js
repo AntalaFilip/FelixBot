@@ -285,6 +285,7 @@ client.registry
 		[`lesson`, `Teaching commands`],
 		[`fun`, `Fun commands`],
 		[`dev`, `Utilites`],
+		[`audio`, `Audio commands`],
 	])
 	.registerDefaultGroups()
 	.registerDefaultCommands()
