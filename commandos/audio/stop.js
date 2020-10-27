@@ -4,7 +4,6 @@ module.exports = class AudioCommand extends commando.Command {
 	constructor(client) {
 		super(client, {
 			name: `stop`,
-			aliases: [`p`],
 			group: `audio`,
 			memberName: `stop`,
 			description: `Stops current audio`,
