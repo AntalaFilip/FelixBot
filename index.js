@@ -222,22 +222,16 @@ client
 		if (newchan != oldchan) {
 			if (oldchan) {
 				if (newchan) {
-					fs.writeFile('attendance', `${currenttime} - ${member.nickname || member.user.username} ${oldchan.name} -> ${newchan.name}`, err => {
-						if (err) console.log(err);
-					});
+					fs.writeFile('attendance', `${currenttime} - ${member.nickname || member.user.username} ${oldchan.name} -> ${newchan.name}`);
 					console.log(`${currenttime} - ${member.nickname || member.user.username} changed channels from ${oldchan.name} to ${newchan.name}`);
 				}
 				else {
-					fs.writeFile('attendance', `${currenttime} - ${member.nickname || member.user.username} ${oldchan.name} ->`, err => {
-						if (err) console.log(err);
-					});
+					fs.writeFile('attendance', `${currenttime} - ${member.nickname || member.user.username} ${oldchan.name} ->`);
 					console.log(`${currenttime} - ${member.nickname || member.user.username} left ${oldchan.name}`);
 				}
 			}
 			else if (newchan) {
-				fs.writeFile('attendance', `${currenttime} - ${member.nickname || member.user.username} -> ${newchan.name}`, err => {
-					if (err) console.log(err);
-				});
+				fs.writeFile('attendance', `${currenttime} - ${member.nickname || member.user.username} -> ${newchan.name}`);
 				console.log(`${currenttime} - ${member.nickname || member.user.username} joined ${newchan.name}`);
 			}
 		}
