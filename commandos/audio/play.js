@@ -10,7 +10,6 @@ module.exports = class AudioCommand extends commando.Command {
 			memberName: `play`,
 			description: `Play custom audio`,
 			guildOnly: true,
-			ownerOnly: true,
 			examples: [ `play /etc/felixai/FelixBot/audio.mp3`, `play http://example.com/audio.mp3`, `http://youtube.com/watch?v=...` ],
 			args: [
 				{
