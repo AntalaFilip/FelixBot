@@ -69,7 +69,7 @@ client.joinedLesson = (member, lessonKey) => {
 		// Else...
 		else {
 			// Push new join time to attendance
-			student.attendance.joined.push(new Date().getTime());
+			student.attendance.joined.push(curtimems);
 			// Set current channel
 			student.chan = chan;
 			// Debug log
@@ -214,10 +214,11 @@ client
 	})
 	.on(`voiceStateUpdate`, async (oldstate, newstate) => {
 		const member = newstate.member;
-		console.log(`${member.nickname || member.user.username} (${member.id}) updated their voice state`);
+		const currenttime = `${new Date().getHours()}:${new Date().getMinutes()}`;
 		const oldchan = oldstate.channel;
 		const newchan = newstate.channel;
 		const lessons = client.lessons;
+		if (newchan != oldchan) console.log(`${currenttime} - ${member.nickname || member.user.username} changed channels from ${oldchan.name} to ${newchan.name}`);
 		// Does the old channel exist?
 		if (oldchan) {
 			const clsid = oldchan.name.slice(0, 2);
