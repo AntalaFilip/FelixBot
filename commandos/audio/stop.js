@@ -19,24 +19,28 @@ module.exports = class AudioCommand extends commando.Command {
 				const dispatcher = con.dispatcher;
 				if (dispatcher) {
 					dispatcher.destroy();
-					const response = message.reply(`Playback stopped!`);
-					message.delete({ timeout: 10000 });
-					response.delete({ timeout: 10000 });
+					con.disconnect();
+					message.reply(`Playback stopped!`).then(res => {
+						message.delete({ timeout: 10000 });
+						res.delete({ timeout: 10000 });
+					});
 				}
 				else {
 					con.disconnect();
 				}
 			}
 			else {
-				const response = message.reply(`You have to be in the same channel as me!`);
-				message.delete({ timeout: 10000 });
-				response.delete({ timeout: 10000 });
+				message.reply(`You have to be in the same channel as me!`).then(res => {
+					message.delete({ timeout: 10000 });
+					res.delete({ timeout: 10000 });
+				});
 			}
 		}
 		else {
-			const response = message.reply(`You need to join a voice channel first!`);
-			message.delete({ timeout: 10000 });
-			response.delete({ timeout: 10000 });
+			message.reply(`You need to join a voice channel first!`).then(res => {
+				message.delete({ timeout: 10000 });
+				res.delete({ timeout: 10000 });
+			});
 		}
 	}
 };
