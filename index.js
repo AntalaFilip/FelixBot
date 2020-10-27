@@ -218,7 +218,19 @@ client
 		const oldchan = oldstate.channel;
 		const newchan = newstate.channel;
 		const lessons = client.lessons;
-		if (newchan != oldchan) console.log(`${currenttime} - ${member.nickname || member.user.username} changed channels from ${oldchan.name} to ${newchan.name}`);
+		if (newchan != oldchan) {
+			if (oldchan) {
+				if (newchan) {
+					console.log(`${currenttime} - ${member.nickname || member.user.username} changed channels from ${oldchan.name} to ${newchan.name}`);
+				}
+				else {
+					console.log(`${currenttime} - ${member.nickname || member.user.username} left ${oldchan.name}`);
+				}
+			}
+			else if (newchan) {
+				console.log(`${currenttime} - ${member.nickname || member.user.username} joined ${newchan.name}`);
+			}
+		}
 		// Does the old channel exist?
 		if (oldchan) {
 			const clsid = oldchan.name.slice(0, 2);
