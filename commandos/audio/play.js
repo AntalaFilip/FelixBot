@@ -11,13 +11,13 @@ module.exports = class AudioCommand extends commando.Command {
 			description: `Play custom audio`,
 			guildOnly: true,
 			ownerOnly: true,
-			examples: [ `date seconds`, `date minutes` ],
+			examples: [ `play /etc/felixai/FelixBot/audio.mp3`, `play http://example.com/audio.mp3`, `http://youtube.com/watch?v=...` ],
 			args: [
 				{
 					key: `type`,
 					prompt: `What audio type do you want to play?`,
 					type: `string`,
-					oneOf: [ `local`, `youtube` ],
+					oneOf: [ `local`, `link`, `youtube` ],
 				},
 				{
 					key: `loc`,
@@ -46,6 +46,14 @@ module.exports = class AudioCommand extends commando.Command {
 				});
 			}
 			else if (args.type === `local`) {
+				const connection = await message.member.voice.channel.join();
+				const dispatcher = connection.play(`${args.loc}`);
+				dispatcher.on(`finish`, () => {
+					message.reply(`I have finished playing!`);
+					dispatcher.destroy();
+				});
+			}
+			else if (args.type === `link`) {
 				const connection = await message.member.voice.channel.join();
 				const dispatcher = connection.play(`${args.loc}`);
 				dispatcher.on(`finish`, () => {
