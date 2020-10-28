@@ -2,7 +2,8 @@ const { Collection, MessageEmbed } = require("discord.js");
 const commando = require(`discord.js-commando`);
 const oneLine = require(`common-tags`).oneLine;
 const path = require(`path`);
-const sqlite = require(`sqlite`);
+const { open } = require(`sqlite`);
+const sqlite3 = require(`sqlite3`);
 const { token } = require(`./config.json`);
 
 const client = new commando.CommandoClient({
@@ -282,7 +283,10 @@ client
 	});
 
 client.setProvider(
-	sqlite.open('/etc/felixai/FelixBot/database.sqlite3').then(db => new commando.SQLiteProvider(db)),
+	open({
+		filename: `./database.db`,
+		driver: sqlite3.Database,
+	}).then(db => new commando.SQLiteProvider(db)),
 ).catch(console.error);
 
 client.registry
