@@ -29,10 +29,16 @@ module.exports = class AudioCommand extends commando.Command {
 				const dispatcher = con.dispatcher;
 				if (dispatcher) {
 					dispatcher.setVolume(args.vol / 10);
-					message.reply(`Set volume to ${args.vol}!`);
+					message.reply(`Set volume to ${args.vol}!`).then(res => {
+						message.delete({ timeout: 10000 });
+						res.delete({ timeout: 10000 });
+					});
 				}
 				else {
-					message.reply(`I am not playing anything!`);
+					message.reply(`I am not playing anything!`).then(res => {
+						message.delete({ timeout: 10000 });
+						res.delete({ timeout: 10000 });
+					});
 				}
 			}
 			else {

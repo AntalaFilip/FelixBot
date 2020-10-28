@@ -20,15 +20,24 @@ module.exports = class AudioCommand extends commando.Command {
 				if (dispatcher) {
 					if (dispatcher.paused) {
 						dispatcher.resume();
-						message.reply(`Playback resumed!`);
+						message.reply(`Playback resumed!`).then(res => {
+							message.delete({ timeout: 10000 });
+							res.delete({ timeout: 10000 });
+						});
 					}
 					else {
 						dispatcher.pause();
-						message.reply(`Playback paused!`);
+						message.reply(`Playback paused!`).then(res => {
+							message.delete({ timeout: 10000 });
+							res.delete({ timeout: 10000 });
+						});
 					}
 				}
 				else {
-					message.reply(`I am not playing anything!`);
+					message.reply(`I am not playing anything!`).then(res => {
+						message.delete({ timeout: 10000 });
+						res.delete({ timeout: 10000 });
+					});
 				}
 			}
 			else {

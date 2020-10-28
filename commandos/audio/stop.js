@@ -27,6 +27,7 @@ module.exports = class AudioCommand extends commando.Command {
 				}
 				else {
 					con.disconnect();
+					message.delete();
 				}
 			}
 			else {

@@ -42,6 +42,7 @@ module.exports = class AudioCommand extends commando.Command {
 				dispatcher.on(`finish`, () => {
 					message.reply(`I have finished playing!`);
 					dispatcher.destroy();
+					connection.disconnect();
 				});
 			}
 			else if (args.type === `local`) {
@@ -50,6 +51,7 @@ module.exports = class AudioCommand extends commando.Command {
 				dispatcher.on(`finish`, () => {
 					message.reply(`I have finished playing!`);
 					dispatcher.destroy();
+					connection.disconnect();
 				});
 			}
 			else if (args.type === `link`) {
@@ -58,6 +60,7 @@ module.exports = class AudioCommand extends commando.Command {
 				dispatcher.on(`finish`, () => {
 					message.reply(`I have finished playing!`);
 					dispatcher.destroy();
+					connection.disconnect();
 				});
 			}
 		}
