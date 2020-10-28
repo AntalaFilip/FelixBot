@@ -24,7 +24,7 @@ module.exports = class AudioCommand extends commando.Command {
 					}
 					else {
 						dispatcher.pause();
-						message.reply(`Playback resumed!`);
+						message.reply(`Playback paused!`);
 					}
 				}
 				else {
