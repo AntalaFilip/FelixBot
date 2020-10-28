@@ -8,9 +8,9 @@ module.exports = class AudioCommand extends commando.Command {
 			aliases: [`p`],
 			group: `audio`,
 			memberName: `play`,
-			description: `Play custom audio`,
+			description: `Plays custom audio`,
 			guildOnly: true,
-			examples: [ `play /etc/felixai/FelixBot/audio.mp3`, `play http://example.com/audio.mp3`, `http://youtube.com/watch?v=...` ],
+			examples: [ `play local /etc/felixai/FelixBot/audio.mp3`, `play link http://example.com/audio.mp3`, `play youtube http://youtube.com/watch?v=...` ],
 			args: [
 				{
 					key: `type`,
@@ -25,11 +25,11 @@ module.exports = class AudioCommand extends commando.Command {
 				},
 				{
 					key: `vol`,
-					prompt: `Specify volume (0-2)`,
+					prompt: `Specify volume (1-20)`,
 					type: `integer`,
-					min: `0.1`,
-					max: `2`,
-					default: `1`,
+					min: 1,
+					max: 20,
+					default: 10,
 				},
 			],
 		});
@@ -38,7 +38,7 @@ module.exports = class AudioCommand extends commando.Command {
 		if (message.member.voice.channel) {
 			if (args.type === `youtube`) {
 				const connection = await message.member.voice.channel.join();
-				const dispatcher = connection.play(ytdl(args.loc, { filter: "audioonly" }));
+				const dispatcher = connection.play(ytdl(args.loc, { filter: "audioonly" }), { volume: args.vol / 10 });
 				dispatcher.on(`finish`, () => {
 					message.reply(`I have finished playing!`);
 					dispatcher.destroy();
@@ -46,7 +46,7 @@ module.exports = class AudioCommand extends commando.Command {
 			}
 			else if (args.type === `local`) {
 				const connection = await message.member.voice.channel.join();
-				const dispatcher = connection.play(`${args.loc}`);
+				const dispatcher = connection.play(`${args.loc}`, { volume: args.vol / 10 });
 				dispatcher.on(`finish`, () => {
 					message.reply(`I have finished playing!`);
 					dispatcher.destroy();
@@ -54,7 +54,7 @@ module.exports = class AudioCommand extends commando.Command {
 			}
 			else if (args.type === `link`) {
 				const connection = await message.member.voice.channel.join();
-				const dispatcher = connection.play(`${args.loc}`);
+				const dispatcher = connection.play(`${args.loc}`, { volume: args.vol / 10 });
 				dispatcher.on(`finish`, () => {
 					message.reply(`I have finished playing!`);
 					dispatcher.destroy();

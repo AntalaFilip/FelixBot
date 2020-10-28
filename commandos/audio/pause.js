@@ -3,12 +3,12 @@ const commando = require(`discord.js-commando`);
 module.exports = class AudioCommand extends commando.Command {
 	constructor(client) {
 		super(client, {
-			name: `stop`,
+			name: `pause`,
 			group: `audio`,
-			memberName: `stop`,
-			description: `Stops current playback`,
+			memberName: `pause`,
+			description: `(Un)pauses current playback`,
 			guildOnly: true,
-			examples: [ `stop` ],
+			examples: [ `pause` ],
 		});
 	}
 	async run(message) {
@@ -18,15 +18,17 @@ module.exports = class AudioCommand extends commando.Command {
 			if (con) {
 				const dispatcher = con.dispatcher;
 				if (dispatcher) {
-					dispatcher.destroy();
-					con.disconnect();
-					message.reply(`Playback stopped!`).then(res => {
-						message.delete({ timeout: 10000 });
-						res.delete({ timeout: 10000 });
-					});
+					if (dispatcher.paused) {
+						dispatcher.resume();
+						message.reply(`Playback resumed!`);
+					}
+					else {
+						dispatcher.pause();
+						message.reply(`Playback resumed!`);
+					}
 				}
 				else {
-					con.disconnect();
+					message.reply(`I am not playing anything!`);
 				}
 			}
 			else {
