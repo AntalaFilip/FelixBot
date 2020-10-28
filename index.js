@@ -2,7 +2,7 @@ const { Collection, MessageEmbed } = require("discord.js");
 const commando = require(`discord.js-commando`);
 const oneLine = require(`common-tags`).oneLine;
 const path = require(`path`);
-// const sqlite = require(`sqlite`);
+const sqlite = require(`sqlite`);
 const { token } = require(`./config.json`);
 
 const client = new commando.CommandoClient({
@@ -275,11 +275,15 @@ client
 	})
 	.on(`guildMemberAdd`, member => {
 		client.sendWelcomeMessage(member);
+	})
+	.on(`message`, message => {
+		if (!message.guild) return;
+		
 	});
 
-/* client.setProvider(
+client.setProvider(
 	sqlite.open(path.join(__dirname, `database.db`)).then(db => new commando.SQLiteProvider(db)),
-).catch(console.error); */
+).catch(console.error);
 
 client.registry
 	.registerDefaultTypes()
