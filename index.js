@@ -278,11 +278,11 @@ client
 	})
 	.on(`message`, message => {
 		if (!message.guild) return;
-		
+
 	});
 
 client.setProvider(
-	sqlite.open(path.join(__dirname, `database.db`)).then(db => new commando.SQLiteProvider(db)),
+	sqlite.open('/etc/felixai/FelixBot/database.sqlite3').then(db => new commando.SQLiteProvider(db)),
 ).catch(console.error);
 
 client.registry
