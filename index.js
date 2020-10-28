@@ -28,6 +28,7 @@ client.sendWelcomeMessage = (member) => {
 	// Debug log
 	console.log(`Sent a welcome message to ${member.user.username}`);
 };
+
 client.joinedLesson = (member, lessonKey) => {
 	// Get current time
 	const curtimems = new Date().getTime();
@@ -77,6 +78,7 @@ client.joinedLesson = (member, lessonKey) => {
 		}
 	}
 };
+
 client.leftLesson = (member, lessonKey) => {
 	// Get current lesson
 	const lesson = client.lessons.get(lessonKey);
