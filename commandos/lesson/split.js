@@ -10,7 +10,7 @@ module.exports = class SplitCommand extends commando.Command {
 			description: `Split people into random groups`,
 			examples: [ `split 2`, `split 4` ],
 			guildOnly: true,
-			userPermissions: [`MOVE_MEMBERS`],
+			userPermissions: [ `MOVE_MEMBERS` ],
 			args: [
 				{
 					key: `gsize`,
@@ -18,7 +18,7 @@ module.exports = class SplitCommand extends commando.Command {
 					label: `groupsize`,
 					type: `integer`,
 					min: 2,
-					max: 4,
+					max: 6,
 				},
 			],
 		});
