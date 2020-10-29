@@ -7,7 +7,7 @@ module.exports = class MergeCommand extends commando.Command {
 			name: `merge`,
 			group: `lesson`,
 			memberName: `merge`,
-			description: `Merges people back into one group!`,
+			description: `Merges people from all subchannels back into the main one`,
 			examples: [ `merge 20` ],
 			guildOnly: true,
 			userPermissions: [ `MOVE_MEMBERS` ],
