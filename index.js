@@ -132,12 +132,11 @@ client.endLesson = (lessonKey) => {
 	const publicembed = new MessageEmbed()
 		.setColor(`#ff0000`)
 		.setTitle(`Lesson ended!`)
+		.setAuthor(`${lesson.teacherName}`, teacher.user.avatarURL())
 		.setDescription(`${lesson.lesson.toUpperCase()} has ended!`)
 		.setThumbnail(`https://cdn.discordapp.com/attachments/371283762853445643/768906541277380628/Felix-logo-01.png`)
 		.setTimestamp()
 		.setFooter(`The lesson has ended!`);
-	if (teacher.user.avatarURL()) publicembed.setAuthor(`${lesson.teacherName}`, `${teacher.user.avatarURL()}`);
-	else (publicembed.setAuthor(`${lesson.teacherName}`));
 
 	textchan.send(publicembed);
 	const privateembed = new MessageEmbed()

@@ -62,7 +62,7 @@ module.exports = class TeachCommand extends commando.Command {
 				const embed = new MessageEmbed()
 					.setColor(`#00ff00`)
 					.setTitle(`Lesson started!`)
-					.setAuthor(`${teacherName}`, `${teacher.user.avatarURL()}`)
+					.setAuthor(`${teacherName}`, teacher.user.avatarURL())
 					.setDescription(`${lesson.toUpperCase()} has started, happy learning!`)
 					.setThumbnail('https://cdn.discordapp.com/attachments/371283762853445643/768906541277380628/Felix-logo-01.png')
 					.setTimestamp()
