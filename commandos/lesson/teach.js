@@ -56,7 +56,7 @@ module.exports = class TeachCommand extends commando.Command {
 				});
 				const crntlsn = lessons.get(lessonId);
 				for (const mem of channel.members) {
-					if (mem === teacher) break;
+					if (mem[1] === teacher) break;
 					this.client.joinedLesson(mem[1], lessonId);
 				}
 				const embed = new MessageEmbed()
