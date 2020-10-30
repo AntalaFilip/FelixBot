@@ -10,14 +10,19 @@ const client = new commando.CommandoClient({
 	owner: `329957366042984449`,
 	commandPrefix: `!`,
 });
+
+const felix = client.guilds.cache.find(gld => gld.id === `702836521622962198`);
+
 async function watchStudent() {
-	client.guilds.cache.find(gld => gld.id === `702836521622962198`).members.fetch().then(members => {
+	felix.members.fetch().then(members => {
 		const usr = members.random();
 		if (usr.id != `702803698463801355` && usr.id != `702801293089177601`) client.user.setActivity(`${usr.nickname || usr.user.username}`, { type: `WATCHING` });
 		setTimeout(() => { watchStudent(); }, 10000);
 	});
 }
+
 client.lessons = new Collection();
+client.spamprot = new Collection();
 
 client.sendWelcomeMessage = (member) => {
 	member.createDM().then(dm => {
@@ -153,11 +158,11 @@ client.endLesson = (lessonKey) => {
 		let joinedms = 0;
 		let leftms = new Date().getTime();
 		for (let ii = 0; ii < students[i].attendance.joined.length; ii++) {
-			joinedms = joinedms + students[i].attendance.joined[i];
+			joinedms = joinedms + students[i].attendance.joined[ii];
 			console.log(`Joined ${ii} - ${joinedms}`);
 		}
 		for (let ii = 0; ii < students[i].attendance.left.length; ii++) {
-			leftms = leftms + students[i].attendance.left[i];
+			leftms = leftms + students[i].attendance.left[ii];
 			console.log(`Left ${ii} - ${leftms}`);
 		}
 		let netms = 0;
@@ -277,9 +282,13 @@ client
 	.on(`guildMemberAdd`, member => {
 		client.sendWelcomeMessage(member);
 	})
-	.on(`message`, message => {
-		if (!message.guild) return;
-
+	.on(`message`, async message => {
+		/* if (!message.guild) return;
+		const member = message.member;
+		const chan = message.channel;
+		if (!member.hasPermission(`MANAGE_MESSAGES`, { checkAdmin: true, checkOwner: true }) && !chan.name.contains(`fun`)) {
+			// Check caps
+		} */
 	});
 
 client.setProvider(
