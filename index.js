@@ -11,10 +11,8 @@ const client = new commando.CommandoClient({
 	commandPrefix: `!`,
 });
 
-const felix = client.guilds.cache.find(gld => gld.id === `702836521622962198`);
-
 async function watchStudent() {
-	felix.members.fetch().then(members => {
+	client.guilds.cache.find(gld => gld.id === `702836521622962198`).members.fetch().then(members => {
 		const usr = members.random();
 		if (usr.id != `702803698463801355` && usr.id != `702801293089177601`) client.user.setActivity(`${usr.nickname || usr.user.username}`, { type: `WATCHING` });
 		setTimeout(() => { watchStudent(); }, 10000);
