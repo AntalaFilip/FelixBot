@@ -33,22 +33,20 @@ module.exports = class SplitCommand extends commando.Command {
 			const originChan = member.voice.channel;
 			const initial = originChan.name.slice(0, 2);
 			const gSize = args.gsize;
-			// const maxSize = 4;
-			// if (gSize > maxSize) return message.reply(`There can only be ${maxSize} groups or less!`);
-			// const lessons = this.client.lessons;
-			// const lesson = lessons.find(lsn => lsn.class === initial);
 			const collection = originChan.members;
+			if (collection.size <= gSize) return message.reply(`There are not enough people in this channel (${collection.size - 1}) to be split into ${gSize} groups!`).then(res => {res.delete({ timeout: 5000 }); message.delete({ timeout: 5000 });});
+			const userlist = new Array([], [], [], [], [], []);
 			let i = 1;
-			const userlist = new Array([], [], [], []);
-			for (const usr of collection) {
+			while (collection.size > 0) {
+				const usr = collection.random();
+				console.log(usr);
 				const chan = guild.channels.cache.find(channel => channel.name === `${initial}-${i}`);
-				if (usr[1].nickname == memberName && !args[1] === 'true') break;
-				usr[1].voice.setChannel(chan);
-				if (usr[1].nickname) userlist[i - 1].push(usr[1].nickname);
-				else userlist[i - 1].push(usr[1].user.username);
-				if (i < gSize) i++;
-				else i = 1;
+				usr.voice.setChannel(chan);
+				userlist[i - 1].push(usr.nickname);
+				i++;
+				if (i > gSize) i = 1;
 			}
+
 			const embed = new MessageEmbed()
 				.setColor('#0099ff')
 				.setTitle('Split')
@@ -57,11 +55,8 @@ module.exports = class SplitCommand extends commando.Command {
 				.setThumbnail('https://cdn.discordapp.com/attachments/371283762853445643/768906541277380628/Felix-logo-01.png')
 				.setFooter('Run !merge to move everyone back')
 				.setTimestamp();
-			for (let ii = 1; ii <= gSize; ii++) {
-				console.log(ii);
-				if (gSize >= ii) {
-					embed.addField(`Group ${ii}`, userlist[ii - 1], true);
-				}
+			for (let ii = 0; ii < gSize; ii++) {
+				embed.addField(`Group ${ii + 1}`, userlist[ii], true);
 			}
 			message.reply(embed);
 			// message.delete({ timeout: 5000 });
