@@ -23,39 +23,49 @@ module.exports = class TeachCommand extends commando.Command {
 	}
 
 	async run(message, args) {
-		// message.say(`${args.state.charAt(0).toUpperCase() + args.state.slice(1)}ed ${args.name.toUpperCase()}`);
+		// Get the lessons map
 		const lessons = this.client.lessons;
+		// Get the teacher (member that instantiated the command)
 		const teacher = message.member;
+		// Get the teacher's name & ID
 		const teacherName = teacher.nickname || message.author.username;
 		const teacherId = message.author.id;
+		// If the lesson is being started
 		if (args.name !== `end`) {
-			if (message.member.voice.channel) {
+			// If the teacher is in a channel
+			if (teacher.voice.channel) {
+				// Set the lesson type
 				const lesson = args.name;
-				const classId = message.member.voice.channel.name.slice(0, 2);
-				const lessonId = `${classId}-${lesson}-${teacherId}`;
-				const channel = teacher.voice.channel;
+				// Get the voice channel
+				const chan = teacher.voice.channel;
+				// Get the class ID
+				const clsid = chan.name.slice(0, 2);
+				// Make a new lesson ID
+				const lessonId = `${lesson}@${clsid}#${teacherId}`;
+				// Create a new Date
 				const date = new Date();
-				const mstime = new Date().getTime();
+				// Check if there aren't lessons running already
+				if (lessons.find(les => les.class === clsid)) return message.reply(`There is already a lesson ongoing in this class!`);
+				if (lessons.find(les => les.teacher === teacher)) return message.reply(`You are still teaching a lesson! Type !teach end to end it!`);
 
 				lessons.set(lessonId, {
 					textchannel: message.channel,
-					class: classId,
+					class: clsid,
 					lesson: lesson,
 					teacher: teacher,
 					teacherName: teacherName,
 					teacherPresent: true,
-					endMessageId: null,
 					students: [],
 					startedAt: {
 						date: `${date.getDate()}/${date.getMonth()}/${date.getFullYear()}`,
 						time: `${date.getHours()}:${date.getMinutes()}`,
-						mstime: mstime,
+						mstime: date.getTime(),
 					},
-					period: null,
-					embedmsg: null,
+					period: this.client.period,
 				});
+
 				const crntlsn = lessons.get(lessonId);
-				for (const mem of channel.members) {
+				for (const mem of chan.members) {
 					if (mem[1] === teacher) break;
 					this.client.joinedLesson(mem[1], lessonId);
 				}
@@ -73,6 +83,7 @@ module.exports = class TeachCommand extends commando.Command {
 				message.reply(`You have to be in a voice channel!`);
 			}
 		}
+		// Else if the lesson is being ended
 		else if (args.name === `end`) {
 			const key = lessons.findKey(usr => usr.teacher === teacher);
 			if (key) {
