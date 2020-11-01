@@ -15,7 +15,7 @@ module.exports = class MergeCommand extends commando.Command {
 				{
 					key: `time`,
 					prompt: `Enter merge delay (0 for instant merge)`,
-					label: `time`,
+					label: `time until merge (sec)`,
 					type: `integer`,
 				},
 			],
