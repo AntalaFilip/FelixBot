@@ -40,12 +40,15 @@ client.joinedLesson = (member, lessonKey) => {
 	const lesson = client.lessons.get(lessonKey);
 	// If the member is the teacher
 	if (member == lesson.teacher) {
+		// Check if teacher was not present to prevent DMs being sent on lesson start
+		if (!lesson.teacherPresent) {
+			// Notify teacher
+			member.createDM().then(dm => {
+				dm.send(`You have reconnected to ${lesson.lesson.toUpperCase()}@${lesson.class.charAt(0).toUpperCase() + lesson.class.slice(1)}`);
+			});
+		}
 		// Set teacher presence
 		lesson.teacherPresent = true;
-		// Notify teacher
-		member.createDM().then(dm => {
-			dm.send(`You have reconnected to ${lesson.lesson.toUpperCase()}@${lesson.class.charAt(0).toUpperCase() + lesson.class.slice(1)}`);
-		});
 		// Debug log
 		console.log(`The teacher (${lesson.teacherName}) has rejoined!`);
 	}
@@ -125,10 +128,13 @@ client.leftLesson = (member, lessonKey) => {
 };
 
 client.endLesson = (lessonKey) => {
+	// Get current lesson
 	const lesson = client.lessons.get(lessonKey);
+	// Get the students array, text channel where the lesson was started and the teacher
 	const students = lesson.students;
 	const textchan = lesson.textchannel;
 	const teacher = lesson.teacher;
+	// Create the red public embed symbolizing lesson end and send it to the text channel
 	const publicembed = new MessageEmbed()
 		.setColor(`#ff0000`)
 		.setTitle(`Lesson ended!`)
@@ -137,8 +143,8 @@ client.endLesson = (lessonKey) => {
 		.setThumbnail(`https://cdn.discordapp.com/attachments/371283762853445643/768906541277380628/Felix-logo-01.png`)
 		.setTimestamp()
 		.setFooter(`The lesson has ended!`);
-
 	textchan.send(publicembed);
+	// Create the yellow private embed, summarizing the lesson
 	const privateembed = new MessageEmbed()
 		.setColor(`#ffff00`)
 		.setTitle(`Summary of ${lesson.lesson.toUpperCase()}@${lesson.class.charAt(0).toUpperCase() + lesson.class.slice(1)}`)
@@ -146,34 +152,38 @@ client.endLesson = (lessonKey) => {
 		.setDescription(`The summary of ${lesson.lesson.toUpperCase()}@${lesson.class.charAt(0).toUpperCase() + lesson.class.slice(1)} lasting from ${lesson.startedAt.time} to ${new Date().getHours()}:${new Date().getMinutes()}`)
 		.setThumbnail(`https://cdn.discordapp.com/attachments/371283762853445643/768906541277380628/Felix-logo-01.png`)
 		.setTimestamp();
-
-	console.log(`Size: ${students.length}`);
+	// Populate the private embed - loop until all the student data has been processed
 	for (let i = 0; i < students.length; i++) {
+		// Get the current student's name
 		const name = students[i].name;
-		console.log(`##Looping (private) ${i} - ${name}##`);
-		const atten = [];
+		// Create a var with join times
 		let joinedms = 0;
+		// Create a var with leave times
 		let leftms = new Date().getTime();
+		// Loop all the join (ms) times and add them to joinedms
 		for (let ii = 0; ii < students[i].attendance.joined.length; ii++) {
 			joinedms = joinedms + students[i].attendance.joined[ii];
-			console.log(`Joined ${ii} - ${joinedms}`);
 		}
+		// Loop all the leave (ms) times and add them to leftms
 		for (let ii = 0; ii < students[i].attendance.left.length; ii++) {
 			leftms = leftms + students[i].attendance.left[ii];
-			console.log(`Left ${ii} - ${leftms}`);
 		}
+		// Create a var with the net time in lesson (ms)
 		let netms = 0;
-		console.log(`Joined: ${joinedms} Left: ${leftms}`);
 		if (joinedms > leftms) netms = joinedms - leftms;
 		else netms = leftms - joinedms;
+		// Convert the net time to minutes and floor them
 		const min = Math.floor(netms / 60000);
-		console.log(`push ${netms} (${min})`);
+		// Get the first joined time
 		const firstjoined = new Date(students[i].attendance.joined[0]);
-		atten.push(`First joined at ${firstjoined.getHours()}:${firstjoined.getMinutes()}`);
-		atten.push(`Total time: ${min} min`);
+		// Create an array with the current student's processed attendance data
+		const atten = [`First joined at ${firstjoined.getHours()}:${firstjoined.getMinutes()}`, `Total time: ${min} min`];
+		// Add the data to the embed
 		privateembed.addField(`${name}`, atten, true);
 	}
+	// Send the populated private embed to the teacher
 	teacher.createDM().then(dm => dm.send(privateembed));
+	// Delete the lesson from the map
 	client.lessons.delete(lessonKey);
 };
 
