@@ -13,6 +13,7 @@ module.exports = class OngoingLessonsCommand extends commando.Command {
 	}
 
 	run(message) {
-		message.say(`Ongoing lessons: ${this.client.lessons.size}`);
+		const lessons = this.client.lessons.keyArray();
+		message.say(`Currently ongoing lessons:\r\n${lessons}`);
 	}
 };
