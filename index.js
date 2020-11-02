@@ -340,6 +340,6 @@ client.registry
 	])
 	.registerDefaultGroups()
 	.registerDefaultCommands()
-	.registerCommandsIn(path.join(__dirname, `commandos`));
+	.registerCommandsIn(path.join(__dirname, `commands`));
 
 client.login(token);
