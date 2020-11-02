@@ -9,7 +9,7 @@ module.exports = class QuestionCommand extends commando.Command {
 			aliases: [ `q` ],
 			description: `Ask the teacher a question`,
 			examples: [ `q ako sa máš?` ],
-			ownerOnly: true,
+			guildOnly: true,
 		});
 	}
 
