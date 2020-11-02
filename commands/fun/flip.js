@@ -12,11 +12,12 @@ module.exports = class FlipCommand extends commando.Command {
 	}
 
 	run(message) {
-		const num = Math.round(Math.random());
-		if (num == 0) {
+		const random = Math.random();
+		const rounded = Math.round(random);
+		if (rounded == 0) {
 			message.say(`It's heads! (0)`);
 		}
-		else if (num == 1) {
+		else if (rounded == 1) {
 			message.say(`It's tails! (1)`);
 		}
 	}
