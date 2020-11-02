@@ -12,8 +12,9 @@ const client = new commando.CommandoClient({
 	commandPrefix: `!`,
 });
 
-
+const day = new Date().getDay();
 client.period = null;
+client.holidays = [`2/10`, `6/10`];
 client.week = `b`;
 client.lessons = new Collection();
 client.spamprot = new Collection();
