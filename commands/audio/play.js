@@ -29,7 +29,7 @@ module.exports = class AudioCommand extends commando.Command {
 					type: `integer`,
 					min: 1,
 					max: 20,
-					default: 10,
+					default: 4,
 				},
 			],
 		});
