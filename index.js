@@ -12,12 +12,6 @@ const client = new commando.CommandoClient({
 	commandPrefix: `!`,
 });
 
-Date.prototype.getWeekOfMonth = function() {
-	let firstWeekday = new Date(this.getFullYear(), this.getMonth(), 1).getDay() - 1;
-	if (firstWeekday < 0) firstWeekday = 6;
-	const offsetDate = this.getDate() + firstWeekday - 1;
-	return Math.floor(offsetDate / 7);
-};
 
 client.period = null;
 client.week = `b`;
