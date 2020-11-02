@@ -339,11 +339,11 @@ client.registry
 	.registerGroups([
 		[`lesson`, `Teaching commands`],
 		[`fun`, `Fun commands`],
-		[`dev`, `Utilites`],
+		[`dev`, `Developer commands`],
 		[`audio`, `Audio commands`],
 	])
 	.registerDefaultGroups()
-	.registerDefaultCommands()
+	.registerDefaultCommands({ eval: false, prefix: false })
 	.registerCommandsIn(path.join(__dirname, `commands`));
 
 client.login(token);
