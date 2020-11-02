@@ -1,17 +1,26 @@
-const { Collection, MessageEmbed } = require("discord.js");
+const { Collection, MessageEmbed } = require(`discord.js`);
 const commando = require(`discord.js-commando`);
 const oneLine = require(`common-tags`).oneLine;
 const path = require(`path`);
 const { open } = require(`sqlite`);
 const sqlite3 = require(`sqlite3`);
 const { token } = require(`./config.json`);
+const timetable = require(`./timetable`);
 
 const client = new commando.CommandoClient({
 	owner: `329957366042984449`,
 	commandPrefix: `!`,
 });
 
+Date.prototype.getWeekOfMonth = function() {
+	let firstWeekday = new Date(this.getFullYear(), this.getMonth(), 1).getDay() - 1;
+	if (firstWeekday < 0) firstWeekday = 6;
+	const offsetDate = this.getDate() + firstWeekday - 1;
+	return Math.floor(offsetDate / 7);
+};
+
 client.period = null;
+client.week = `b`;
 client.lessons = new Collection();
 client.spamprot = new Collection();
 
