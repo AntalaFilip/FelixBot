@@ -42,7 +42,7 @@ module.exports = class TimetableCommand extends commando.Command {
 		for (let i = 0; i < timetable.length; i++) {
 			const processed = new Array();
 			const filtered = timetable[i].filter(el => el.includes(`@${clsid}`) || el.includes(`&${clsid}`));
-			if (!filtered) filtered.push(`No lessons!`);
+			if (filtered.length == 0) processed.push(`No lessons!`);
 			filtered.forEach(el => {
 				const lesson = el.substring(1, el.indexOf(`@`));
 				const teacher = this.client.guilds.cache.find(gld => gld.id === `702836521622962198`).members.resolve(el.substring(el.indexOf(`#`) + 1, el.indexOf(`$`)));
@@ -69,5 +69,6 @@ module.exports = class TimetableCommand extends commando.Command {
 			}
 		}
 		message.embed(embed);
+		message.delete();
 	}
 };
