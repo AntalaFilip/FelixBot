@@ -49,7 +49,9 @@ module.exports = class TeachCommand extends commando.Command {
 				// Get the voice channel
 				const chan = teacher.voice.channel;
 				// Get the class ID
-				const clsid = chan.name.slice(0, 2);
+				let clsid = chan.name.slice(0, 2);
+				// Special exception for Ko&Pa lessons
+				if (chan.parentID == `770594101002764330`) clsid = `ko&pa`;
 				// Check if there aren't lessons running already
 				if (lessons.find(les => les.teacher === teacher)) return message.reply(`You are still teaching a lesson! Type !teach end to end it!`);
 				// Check if the lesson is in the timetable and set the lessonId
