@@ -83,7 +83,7 @@ module.exports = class TeachCommand extends commando.Command {
 				const crntlsn = lessons.get(lessonId);
 				// Run joinedlesson for each student already in the channel
 				for (const mem of chan.members) {
-					if (mem[1] === teacher) break;
+					if (mem[1] === teacher) continue;
 					this.client.joinedLesson(mem[1], lessonId);
 				}
 				// Create an embed and send it to the original text channel
