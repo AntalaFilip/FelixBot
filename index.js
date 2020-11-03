@@ -189,6 +189,8 @@ client.endLesson = (lessonKey) => {
 		.setDescription(`The summary of ${lesson.lesson.toUpperCase()}@${lesson.class.charAt(0).toUpperCase() + lesson.class.slice(1)} lasting from ${lesson.startedAt.time} to ${new Date().getHours()}:${new Date().getMinutes()}`)
 		.setThumbnail(`https://cdn.discordapp.com/attachments/371283762853445643/768906541277380628/Felix-logo-01.png`)
 		.setTimestamp();
+	const extraembed = new MessageEmbed()
+		.setColor(`#ffff00`);
 	// Populate the private embed - loop until all the student data has been processed
 	for (let i = 0; i < students.length; i++) {
 		// Get the current student's name
@@ -196,7 +198,10 @@ client.endLesson = (lessonKey) => {
 		// Create a var with join times
 		let joinedms = 0;
 		// Create a var with leave times
-		let leftms = new Date().getTime();
+		let leftms = 0;
+		const jlen = students[i].attendance.joined.length;
+		const llen = students[i].attendance.left.length;
+		if (jlen > llen) leftms = leftms + new Date().getTime();
 		// Loop all the join (ms) times and add them to joinedms
 		for (let ii = 0; ii < students[i].attendance.joined.length; ii++) {
 			joinedms = joinedms + students[i].attendance.joined[ii];
@@ -215,8 +220,10 @@ client.endLesson = (lessonKey) => {
 		const firstjoined = new Date(students[i].attendance.joined[0]);
 		// Create an array with the current student's processed attendance data
 		const atten = [`First joined at ${firstjoined.getHours()}:${firstjoined.getMinutes()}`, `Total time: ${min} min`];
-		// Add the data to the embed
-		privateembed.addField(`${name}`, atten, true);
+		// Add the data to the embed, if the embed's limit is hit, use the extra embed
+		if (i <= 25) privateembed.addField(name, atten, true);
+		else if (i <= 50) extraembed.addField(name, atten, true);
+		else return teacher.createDM().then(dm => dm.send(`Unfortunately, I have reached the user limit I can log for you`));
 	}
 	// Send the populated private embed to the teacher
 	teacher.createDM().then(dm => dm.send(privateembed));
