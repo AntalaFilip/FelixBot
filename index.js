@@ -221,12 +221,15 @@ client.endLesson = (lessonKey) => {
 		// Create an array with the current student's processed attendance data
 		const atten = [`First joined at ${firstjoined.getHours()}:${firstjoined.getMinutes()}`, `Total time: ${min} min`];
 		// Add the data to the embed, if the embed's limit is hit, use the extra embed
-		if (i <= 25) privateembed.addField(name, atten, true);
-		else if (i <= 50) extraembed.addField(name, atten, true);
-		else return teacher.createDM().then(dm => dm.send(`Unfortunately, I have reached the user limit I can log for you`));
+		if (i <= 25) { privateembed.addField(name, atten, true); }
+		else if (i <= 50) { extraembed.addField(name, atten, true); }
+		else { teacher.createDM().then(dm => dm.send(`Unfortunately, I have reached the user limit I can log for you`)); break; }
 	}
 	// Send the populated private embed to the teacher
-	teacher.createDM().then(dm => dm.send(privateembed));
+	teacher.createDM().then(dm => {
+		dm.send(privateembed);
+		if (extraembed.fields) dm.send(extraembed);
+	});
 	// Delete the lesson from the map
 	client.lessons.delete(lessonKey);
 };
