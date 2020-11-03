@@ -34,7 +34,7 @@ module.exports = class TimetableCommand extends commando.Command {
 			.setTitle(`Timetable for ${clsid.charAt(0).toUpperCase() + clsid.slice(1)}`)
 			.setURL(`https://felix.edupage.org/timetable/`)
 			.setAuthor(this.client.user.username, this.client.user.avatarURL())
-			.setDescription(`This is the timetable for ${clsid.charAt(0).toUpperCase() + clsid.slice(1)}, requested by ${member.nickname || member.user.username}`)
+			.setDescription(`This is the timetable for ${clsid.charAt(0).toUpperCase() + clsid.slice(1)}, requested by <@${member.id}>`)
 			.setThumbnail(`https://cdn.discordapp.com/attachments/371283762853445643/768906541277380628/Felix-logo-01.png`)
 			.setFooter(timetable[0])
 			.setTimestamp();
