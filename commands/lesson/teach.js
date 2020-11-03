@@ -9,7 +9,7 @@ module.exports = class TeachCommand extends commando.Command {
 			group: `lesson`,
 			memberName: `teach`,
 			description: `Starts or ends the specified lesson`,
-			examples: [ `teach sjl`, `teach end inf` ],
+			examples: [ `teach sjl`, `teach end`, `teach mat` ],
 			guildOnly: true,
 			userPermissions: [`MOVE_MEMBERS`, `MANAGE_CHANNELS`],
 			args: [
