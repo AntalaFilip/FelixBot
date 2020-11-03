@@ -29,12 +29,14 @@ module.exports = class TimetableCommand extends commando.Command {
 		const chan = message.channel;
 		let clsid = args.class.toLowerCase().slice(0, 2);
 		if (clsid === `he`) clsid = chan.name.slice(0, 2);
+		const role = this.client.guilds.resolve(`702836521622962198`).roles.cache.find(role => role.name.toLocaleLowerCase().includes(clsid));
+		if (!role) return message.reply(`Invalid class, try specifying a class in the command!`);
 		const embed = new MessageEmbed()
 			.setColor(`#000000`)
-			.setTitle(`Timetable for ${clsid.charAt(0).toUpperCase() + clsid.slice(1)}`)
+			.setTitle(`Timetable for ${role.name}`)
 			.setURL(`https://felix.edupage.org/timetable/`)
 			.setAuthor(this.client.user.username, this.client.user.avatarURL())
-			.setDescription(`This is the timetable for ${clsid.charAt(0).toUpperCase() + clsid.slice(1)}, requested by <@${member.id}>`)
+			.setDescription(`This is the timetable for <@&${role.id}>, requested by <@${member.id}>`)
 			.setThumbnail(`https://cdn.discordapp.com/attachments/371283762853445643/768906541277380628/Felix-logo-01.png`)
 			.setFooter(timetable[0])
 			.setTimestamp();
