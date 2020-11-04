@@ -32,8 +32,10 @@ module.exports = class MergeCommand extends commando.Command {
 
 		if (member.voice.channel) {
 			const originChan = member.voice.channel;
+			const ctg = originChan.parent;
+			const ctgf = ctg.children.filter(chan => chan.type === `voice`);
 			const initial = originChan.name.slice(0, 2);
-			const size = 4;
+			const size = ctgf.size;
 			let usrcount = 0;
 			let groupcount = 1;
 			const userlist = new Array([], [], [], []);
@@ -48,8 +50,7 @@ module.exports = class MergeCommand extends commando.Command {
 
 			const embedmsg = message.channel.send(embed);
 			setTimeout(() => {
-				while (groupcount <= size) {
-					const chan = guild.channels.cache.find(channel => channel.name === `${initial}-${groupcount}`);
+				ctgf.each(chan => {
 					for (const usr of chan.members) {
 						usr[1].voice.setChannel(originChan);
 						console.log(userlist);
@@ -63,7 +64,7 @@ module.exports = class MergeCommand extends commando.Command {
 						embedmsg.then((msg) => {msg.edit(embed);});
 					}
 					groupcount++;
-				}
+				});
 			}, timeout * 1000);
 		}
 	}
