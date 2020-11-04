@@ -167,6 +167,7 @@ client.leftLesson = (member, lessonKey) => {
 };
 
 client.startLesson = async (teacher, lessonId, vchan, tchan) => {
+	const ctg = vchan.parent;
 	const date = new Date();
 	const lesson = lessonId.substring(lessonId.indexOf(`!`) + 1, lessonId.indexOf(`@`));
 	// Add the lesson to the array
@@ -186,10 +187,13 @@ client.startLesson = async (teacher, lessonId, vchan, tchan) => {
 		period: client.period,
 	});
 	const crntlsn = client.lessons.get(lessonId);
-	// Run joinedlesson for each student already in the channel
-	for (const mem of vchan.members) {
-		if (mem[1] === teacher) continue;
-		client.joinedLesson(mem[1], lessonId);
+	// Run joinedlesson for each student already in the category
+	const ctgf = ctg.filter(chan => chan.type === `voice`);
+	for (const chan of ctgf) {
+		for (const mem of chan[1].members) {
+			if (mem[1] === teacher) continue;
+			client.joinedLesson(mem[1], lessonId);
+		}
 	}
 	// Create an embed and send it to the original text channel
 	const embed = new MessageEmbed()
