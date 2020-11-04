@@ -8,6 +8,7 @@ module.exports = class FlipCommand extends commando.Command {
 			memberName: `flip`,
 			description: `Flips a coin`,
 			examples: [ `flip` ],
+			throttling: { duration: 60, usages: 3 },
 		});
 	}
 

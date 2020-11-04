@@ -26,6 +26,7 @@ module.exports = class IAmCommand extends commando.Command {
 					oneOf: [`plameniaky`, `sovy`, `vydry`, `vážky`, `koaly`, `pandy`],
 				},
 			],
+			throttling: { duration: 60, usages: 2 },
 		});
 	}
 

@@ -21,6 +21,7 @@ module.exports = class TimetableCommand extends commando.Command {
 					default: `here`,
 				},
 			],
+			throttling: { duration: 60, usages: 2 },
 		});
 	}
 
