@@ -1,3 +1,4 @@
+const { time } = require("console");
 const { Collection, MessageEmbed } = require(`discord.js`);
 const commando = require(`discord.js-commando`);
 const oneLine = require(`common-tags`).oneLine;
@@ -12,7 +13,7 @@ const client = new commando.CommandoClient({
 	commandPrefix: `!`,
 });
 
-const day = new Date().getDay();
+let day = new Date().getDay();
 client.period = null;
 client.holidays = [`2/10`, `6/10`];
 client.week = `b`;
@@ -20,6 +21,7 @@ client.lessons = new Collection();
 client.spamprot = new Collection();
 
 const tick = async () => {
+	day = new Date().getDay();
 	updatePeriod();
 	watchStudent();
 	setTimeout(() => { tick(); }, 10000);
@@ -164,6 +166,43 @@ client.leftLesson = (member, lessonKey) => {
 	}
 };
 
+client.startLesson = async (teacher, lessonId, vchan, tchan) => {
+	const date = new Date();
+	const lesson = lessonId.substring(lessonId.indexOf(`!`) + 1, lessonId.indexOf(`@`));
+	// Add the lesson to the array
+	client.lessons.set(lessonId, {
+		textchannel: tchan,
+		class: lessonId.substring(lessonId.indexOf(`@`) + 1, lessonId.indexOf(`#`)),
+		lesson: lesson,
+		teacher: teacher,
+		teacherName: teacher.displayName,
+		teacherPresent: true,
+		students: [],
+		startedAt: {
+			date: `${date.getDate()}/${date.getMonth()}/${date.getFullYear()}`,
+			time: `${date.getHours()}:${date.getMinutes()}`,
+			mstime: date.getTime(),
+		},
+		period: client.period,
+	});
+	const crntlsn = client.lessons.get(lessonId);
+	// Run joinedlesson for each student already in the channel
+	for (const mem of vchan.members) {
+		if (mem[1] === teacher) continue;
+		client.joinedLesson(mem[1], lessonId);
+	}
+	// Create an embed and send it to the original text channel
+	const embed = new MessageEmbed()
+		.setColor(`#00ff00`)
+		.setTitle(`Lesson started!`)
+		.setAuthor(`${teacher.displayName}`, teacher.user.avatarURL())
+		.setDescription(`${lesson.toUpperCase()} has started, happy learning!`)
+		.setThumbnail('https://cdn.discordapp.com/attachments/371283762853445643/768906541277380628/Felix-logo-01.png')
+		.setTimestamp()
+		.setFooter(`End the lesson by running !teach end`);
+	crntlsn.embedmsg = await tchan.send(embed);
+};
+
 client.endLesson = (lessonKey) => {
 	// Get current lesson
 	const lesson = client.lessons.get(lessonKey);
@@ -275,8 +314,9 @@ client
 		`);
 	})
 	.on(`voiceStateUpdate`, async (oldstate, newstate) => {
+		const date = new Date();
 		const member = newstate.member;
-		const currenttime = `${new Date().getHours()}:${new Date().getMinutes()}`;
+		const currenttime = `${date.getHours()}:${date.getMinutes()}`;
 		const oldchan = oldstate.channel;
 		const newchan = newstate.channel;
 		const lessons = client.lessons;
@@ -330,6 +370,14 @@ client
 			// Is there an ongoing lesson in the new channel
 			if (lessonnew) {
 				client.joinedLesson(member, lessonnewKey);
+			}
+			else {
+				// Get the timetable for today
+				const today = timetable[day];
+				// Find a lesson in today's timetable, matching the teacher, the class he's just joined, the current period and week
+				const upcoming = today.find(les => les.includes(`@${clsidnew}#${member.id}`) && les.includes(`%${client.period}`) && les.includes(`^${client.week}`));
+				// Run the startLesson function
+				if (upcoming) client.startLesson(member, upcoming, newchan, newchan.parent.children.find(txt => txt.name.includes(upcoming.substring(upcoming.indexOf(`!`) + 1, upcoming.indexOf(`@`))) && txt.type === `text`));
 			}
 		}
 	})

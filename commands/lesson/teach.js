@@ -1,4 +1,3 @@
-const { MessageEmbed } = require("discord.js");
 const commando = require(`discord.js-commando`);
 const timetable = require(`../../timetable`);
 
@@ -17,7 +16,7 @@ module.exports = class TeachCommand extends commando.Command {
 					key: `name`,
 					prompt: `What lesson do you want to start? Use 'end' to end the current lesson`,
 					type: `string`,
-					oneOf: [`sjl`, `mat`, `anj`, `bio`, `chem`, `dej`, `fyz`, `geo`, `huv`, `inf`, `nej`, `anjp`, `obn`, `rk`, `end`],
+					oneOf: [`sjl`, `mat`, `anj`, `anjp`, `bio`, `chem`, `dej`, `fyz`, `geo`, `huv`, `inf`, `nej`, `obn`, `rk`, `end`],
 				},
 				{
 					key: `override`,
@@ -35,7 +34,6 @@ module.exports = class TeachCommand extends commando.Command {
 		// Get the teacher (member that instantiated the command)
 		const teacher = message.member;
 		// Get the teacher's name & ID
-		const teacherName = teacher.nickname || message.author.username;
 		const teacherId = message.author.id;
 		// If the lesson is being started
 		if (args.name !== `end`) {
@@ -63,39 +61,8 @@ module.exports = class TeachCommand extends commando.Command {
 					// Else, if the teacher did override, create a lessonId
 					else lessonId = `!${lesson}@${clsid}#${teacherId}*`;
 				}
-				// Add the lesson to the array
-				lessons.set(lessonId, {
-					textchannel: message.channel,
-					class: clsid,
-					lesson: lesson,
-					teacher: teacher,
-					teacherName: teacherName,
-					teacherPresent: true,
-					students: [],
-					startedAt: {
-						date: `${date.getDate()}/${date.getMonth()}/${date.getFullYear()}`,
-						time: `${date.getHours()}:${date.getMinutes()}`,
-						mstime: date.getTime(),
-					},
-					period: this.client.period,
-				});
-				// Get the set lesson
-				const crntlsn = lessons.get(lessonId);
-				// Run joinedlesson for each student already in the channel
-				for (const mem of chan.members) {
-					if (mem[1] === teacher) continue;
-					this.client.joinedLesson(mem[1], lessonId);
-				}
-				// Create an embed and send it to the original text channel
-				const embed = new MessageEmbed()
-					.setColor(`#00ff00`)
-					.setTitle(`Lesson started!`)
-					.setAuthor(`${teacherName}`, teacher.user.avatarURL())
-					.setDescription(`${lesson.toUpperCase()} has started, happy learning!`)
-					.setThumbnail('https://cdn.discordapp.com/attachments/371283762853445643/768906541277380628/Felix-logo-01.png')
-					.setTimestamp()
-					.setFooter(`End the lesson by running !teach end`);
-				crntlsn.embedmsg = await message.embed(embed);
+				// Start the lesson
+				this.client.startLesson(teacher, lessonId, chan, message.channel);
 			}
 			else {
 				message.reply(`You have to be in a voice channel!`);
