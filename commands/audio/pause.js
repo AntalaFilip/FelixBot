@@ -13,6 +13,9 @@ module.exports = class AudioCommand extends commando.Command {
 	}
 	async run(message) {
 		if (message.member.voice.channel) {
+			const lesson = this.client.lessons.find(les => les.class === message.member.voice.channel.name.slice(0, 2));
+			if (lesson && message.member != lesson.teacher) return message.reply(`Only the teacher can play audio during the lesson!`).then(res => {res.delete({ timeout: 5000 }); message.delete({ timeout: 5000 });});
+
 			const memchan = message.member.voice.channel;
 			const con = this.client.voice.connections.find(col => col.channel == memchan);
 			if (con) {

@@ -16,7 +16,7 @@ module.exports = class AudioCommand extends commando.Command {
 					key: `type`,
 					prompt: `What audio type do you want to play?`,
 					type: `string`,
-					oneOf: [ `local`, `link`, `youtube` ],
+					oneOf: [ `local`, `youtube` ],
 				},
 				{
 					key: `loc`,
@@ -42,15 +42,6 @@ module.exports = class AudioCommand extends commando.Command {
 			if (args.type === `youtube`) {
 				const connection = await message.member.voice.channel.join();
 				const dispatcher = connection.play(ytdl(args.loc, { filter: "audioonly" }), { volume: args.vol / 10 });
-				dispatcher.on(`finish`, () => {
-					message.reply(`I have finished playing!`);
-					dispatcher.destroy();
-					connection.disconnect();
-				});
-			}
-			else if (args.type === `local`) {
-				const connection = await message.member.voice.channel.join();
-				const dispatcher = connection.play(`${args.loc}`, { volume: args.vol / 10 });
 				dispatcher.on(`finish`, () => {
 					message.reply(`I have finished playing!`);
 					dispatcher.destroy();
