@@ -188,7 +188,7 @@ client.startLesson = async (teacher, lessonId, vchan, tchan) => {
 	});
 	const crntlsn = client.lessons.get(lessonId);
 	// Run joinedlesson for each student already in the category
-	const ctgf = ctg.filter(chan => chan.type === `voice`);
+	const ctgf = ctg.children.filter(chan => chan.type === `voice`);
 	for (const chan of ctgf) {
 		for (const mem of chan[1].members) {
 			if (mem[1] === teacher) continue;
