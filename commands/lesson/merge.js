@@ -17,6 +17,7 @@ module.exports = class MergeCommand extends commando.Command {
 					prompt: `Enter merge delay (0 for instant merge)`,
 					label: `delay`,
 					type: `integer`,
+					default: 10,
 				},
 			],
 		});
@@ -38,7 +39,7 @@ module.exports = class MergeCommand extends commando.Command {
 			const size = ctgf.size;
 			let usrcount = 0;
 			let groupcount = 1;
-			const userlist = new Array([], [], [], []);
+			const userlist = new Array(size);
 			const embed = new MessageEmbed()
 				.setColor(`#0099ff`)
 				.setTitle(`Merge`)
@@ -59,7 +60,7 @@ module.exports = class MergeCommand extends commando.Command {
 						usrcount++;
 					}
 					embed.setDescription(`Merged ${usrcount} users from ${size} groups into ${originChan.name}`);
-					if (userlist[groupcount - 1].length) embed.addField(`Group ${groupcount}`, userlist[groupcount - 1], true);
+					if (userlist[groupcount - 1]) embed.addField(`Group ${groupcount}`, userlist[groupcount - 1], true);
 					if (groupcount == size) {
 						embedmsg.then((msg) => {msg.edit(embed);});
 					}
