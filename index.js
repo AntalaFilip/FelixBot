@@ -1,4 +1,3 @@
-const { time } = require("console");
 const { Collection, MessageEmbed } = require(`discord.js`);
 const commando = require(`discord.js-commando`);
 const oneLine = require(`common-tags`).oneLine;
