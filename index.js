@@ -12,16 +12,15 @@ const client = new commando.CommandoClient({
 	commandPrefix: `!`,
 });
 
-let day = new Date().getUTCDay();
-let month = new Date().getUTCMonth();
+let day = new Date().getDay();
 client.period = null;
 client.holidays = [`2/10`, `6/10`];
 client.week = `b`;
+client.lessons = new Collection();
 client.spamprot = new Collection();
 
 const tick = async () => {
-	day = new Date().getUTCDay();
-	month = new Date().getUTCMonth();
+	day = new Date().getDay();
 	updatePeriod();
 	watchStudent();
 	setTimeout(() => { tick(); }, 10000);
@@ -35,8 +34,7 @@ const watchStudent = () => {
 };
 
 const updatePeriod = () => {
-	let hrs = new Date().getUTCHours();
-	if (client.holidays.find(`${day}/${month}`)) hrs = null;
+	const hrs = new Date().getUTCHours();
 	switch (hrs) {
 	case 7:
 		client.period = 0;
@@ -77,7 +75,7 @@ client.joinedLesson = (member, lessonKey) => {
 	// Get current time
 	const curtimems = new Date().getTime();
 	// Get current lesson
-	const lesson = client.provider.get(member.guild, `lessons`).get(lessonKey);
+	const lesson = client.lessons.get(lessonKey);
 	// If the member is the teacher
 	if (member == lesson.teacher) {
 		// Check if teacher was not present to prevent DMs being sent on lesson start
@@ -128,7 +126,7 @@ client.joinedLesson = (member, lessonKey) => {
 
 client.leftLesson = (member, lessonKey) => {
 	// Get current lesson
-	const lesson = client.provider.get(member.guild, `lessons`).get(lessonKey);
+	const lesson = client.lessons.get(lessonKey);
 	// If the member is the teacher
 	if (member == lesson.teacher) {
 		// Get class ID
@@ -141,13 +139,13 @@ client.leftLesson = (member, lessonKey) => {
 			// Set the five min timeout
 			setTimeout(() => {
 				// If the lesson still exists
-				if (client.provider.get(member.guild, `lessons`).get(lessonKey)) {
+				if (client.lessons.get(lessonKey)) {
 					// And if the teacher is still not present
 					if (!lesson.teacherPresent) {
 						// Notify teacher
 						dm.send(`The lesson (${lesson.lesson.toUpperCase()}@${clsid.charAt(0).toUpperCase() + clsid.slice(1)}) was ended due to you not being present for five minutes!`);
 						// End the lesson
-						client.endLesson(lessonKey, member.guild);
+						client.endLesson(lessonKey);
 					}
 				}
 			}, 300000);
@@ -172,7 +170,7 @@ client.startLesson = async (teacher, lessonId, vchan, tchan) => {
 	const date = new Date();
 	const lesson = lessonId.substring(lessonId.indexOf(`!`) + 1, lessonId.indexOf(`@`));
 	// Add the lesson to the array
-	client.provider.get(teacher.guild, `lessons`).set(lessonId, {
+	client.lessons.set(lessonId, {
 		textchannel: tchan,
 		class: lessonId.substring(lessonId.indexOf(`@`) + 1, lessonId.indexOf(`#`)),
 		lesson: lesson,
@@ -187,7 +185,7 @@ client.startLesson = async (teacher, lessonId, vchan, tchan) => {
 		},
 		period: client.period,
 	});
-	const crntlsn = client.provider.get(teacher.guild, `lessons`).get(lessonId);
+	const crntlsn = client.lessons.get(lessonId);
 	// Run joinedlesson for each student already in the category
 	const ctgf = ctg.children.filter(chan => chan.type === `voice`);
 	for (const chan of ctgf) {
@@ -208,9 +206,9 @@ client.startLesson = async (teacher, lessonId, vchan, tchan) => {
 	crntlsn.embedmsg = await tchan.send(embed);
 };
 
-client.endLesson = (lessonKey, guild) => {
+client.endLesson = (lessonKey) => {
 	// Get current lesson
-	const lesson = client.provider.get(guild, `lessons`).get(lessonKey);
+	const lesson = client.lessons.get(lessonKey);
 	// Get the students array, text channel where the lesson was started and the teacher
 	const students = lesson.students;
 	const textchan = lesson.textchannel;
@@ -275,7 +273,7 @@ client.endLesson = (lessonKey, guild) => {
 		if (extraembed.fields) dm.send(extraembed);
 	});
 	// Delete the lesson from the map
-	client.provider.get(guild, `lessons`).delete(lessonKey);
+	client.lessons.delete(lessonKey);
 };
 
 client
@@ -396,10 +394,6 @@ client.setProvider(
 		driver: sqlite3.Database,
 	}).then(db => new commando.SQLiteProvider(db)),
 ).catch(console.error);
-
-if (!client.provider.get(`702836521622962198`, `lessons`)) {
-	client.provider.set(`702836521622962198`, `lessons`, new Collection());
-}
 
 client.registry
 	.registerDefaultTypes()
