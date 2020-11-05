@@ -35,22 +35,36 @@ module.exports = class AudioCommand extends commando.Command {
 		});
 	}
 	async run(message, args) {
+		// Get the voice connections, find if there is one in this guild, if it exists, return with a reply
+		const vcon = this.client.voice.connections;
+		const vconhere = vcon.find(con => con.channel.guild.id === message.guild.id);
+		if (vconhere) return message.reply(`I am already playing in another channel! (${vconhere.channel.name})`);
+		// If the member is in a voice channel
 		if (message.member.voice.channel) {
-			const lesson = this.client.lessons.find(les => les.class === message.member.voice.channel.name.slice(0, 2));
+			const chan = message.member.voice.channel;
+			// Check if there is an ongoing lesson in this voice channel, if true, return with a reply
+			const lesson = this.client.lessons.find(les => les.class === chan.name.slice(0, 2));
 			if (lesson && message.member != lesson.teacher) return message.reply(`Only the teacher can play audio during the lesson!`).then(res => {res.delete({ timeout: 5000 }); message.delete({ timeout: 5000 });});
-
+			// If YouTube was specified
 			if (args.type === `youtube`) {
-				const connection = await message.member.voice.channel.join();
+				// Join the channel
+				const connection = await chan.join();
+				// Use ytdl to play the specified link
 				const dispatcher = connection.play(ytdl(args.loc, { filter: "audioonly" }), { volume: args.vol / 10 });
+				// When playback ends, send a message and disconnect
 				dispatcher.on(`finish`, () => {
 					message.reply(`I have finished playing!`);
 					dispatcher.destroy();
 					connection.disconnect();
 				});
 			}
+			// Else if link was specified
 			else if (args.type === `link`) {
-				const connection = await message.member.voice.channel.join();
+				// Join the channel
+				const connection = await chan.join();
+				// Play the specified link
 				const dispatcher = connection.play(`${args.loc}`, { volume: args.vol / 10 });
+				// When playback ends, send a message and disconnect
 				dispatcher.on(`finish`, () => {
 					message.reply(`I have finished playing!`);
 					dispatcher.destroy();
