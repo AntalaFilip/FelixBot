@@ -35,7 +35,6 @@ module.exports = class MergeCommand extends commando.Command {
 			const originChan = member.voice.channel;
 			const ctg = originChan.parent;
 			const ctgf = ctg.children.filter(chan => chan.type === `voice`);
-			const initial = originChan.name.slice(0, 2);
 			const size = ctgf.size;
 			let usrcount = 0;
 			let groupcount = 1;
@@ -54,9 +53,8 @@ module.exports = class MergeCommand extends commando.Command {
 				ctgf.each(chan => {
 					for (const usr of chan.members) {
 						usr[1].voice.setChannel(originChan);
+						userlist[groupcount - 1].push(usr[1].displayName);
 						console.log(userlist);
-						if (usr[1].username) userlist[groupcount - 1].push(usr[1].username);
-						else userlist[groupcount - 1].push(usr[1].user.nickname);
 						usrcount++;
 					}
 					embed.setDescription(`Merged ${usrcount} users from ${size} groups into ${originChan.name}`);
