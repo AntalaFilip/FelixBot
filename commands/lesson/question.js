@@ -23,7 +23,7 @@ module.exports = class QuestionCommand extends commando.Command {
 		// Get the chan initials
 		const clsid = chan.name.slice(0, 2);
 		// Get the lessons map and search for a lesson in this channel
-		const lessons = this.client.lessons;
+		const lessons = this.client.provider.get(message.guild, `lessons`);
 		const lesson = lessons.find(les => les.class === clsid);
 		// If the lesson was found
 		if (lesson) {

@@ -30,7 +30,7 @@ module.exports = class TeachCommand extends commando.Command {
 
 	async run(message, args) {
 		// Get the lessons map
-		const lessons = this.client.lessons;
+		const lessons = this.client.provider.get(message.guild, `lessons`);
 		// Get the teacher (member that instantiated the command)
 		const teacher = message.member;
 		// Get the teacher's name & ID
@@ -75,7 +75,7 @@ module.exports = class TeachCommand extends commando.Command {
 			// If the teacher is teaching a lesson:
 			if (key) {
 				// Run the endLesson function with that lesson
-				this.client.endLesson(key);
+				this.client.endLesson(key, message.guild);
 			}
 			// Else send a warning
 			else {

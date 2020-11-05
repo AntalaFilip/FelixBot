@@ -43,7 +43,7 @@ module.exports = class AudioCommand extends commando.Command {
 		if (message.member.voice.channel) {
 			const chan = message.member.voice.channel;
 			// Check if there is an ongoing lesson in this voice channel, if true, return with a reply
-			const lesson = this.client.lessons.find(les => les.class === chan.name.slice(0, 2));
+			const lesson = this.client.provider.get(message.guild, `lessons`).find(les => les.class === chan.name.slice(0, 2));
 			if (lesson && message.member != lesson.teacher) return message.reply(`Only the teacher can play audio during the lesson!`).then(res => {res.delete({ timeout: 5000 }); message.delete({ timeout: 5000 });});
 			// If YouTube was specified
 			if (args.type === `youtube`) {
