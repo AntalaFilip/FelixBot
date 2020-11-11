@@ -51,6 +51,7 @@ module.exports = class MergeCommand extends commando.Command {
 			const embedmsg = message.channel.send(embed);
 			setTimeout(() => {
 				ctgf.each(chan => {
+					if (chan == originChan) return;
 					for (const usr of chan.members) {
 						usr[1].voice.setChannel(originChan);
 						userlist[groupcount - 1].push(usr[1].displayName);
