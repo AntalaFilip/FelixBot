@@ -8,13 +8,13 @@ module.exports = class MergeCommand extends commando.Command {
 			group: `lesson`,
 			memberName: `merge`,
 			description: `Merges people from all subchannels back into the main one`,
-			examples: [ `merge 20` ],
+			examples: [`merge 20`],
 			guildOnly: true,
-			userPermissions: [ `MOVE_MEMBERS` ],
+			userPermissions: [`MOVE_MEMBERS`],
 			args: [
 				{
 					key: `time`,
-					prompt: `Enter merge delay (0 for instant merge)`,
+					prompt: `Enter merge delay (0 for instant merge):`,
 					label: `delay`,
 					type: `integer`,
 					default: 10,
@@ -29,7 +29,7 @@ module.exports = class MergeCommand extends commando.Command {
 		const sender = message.author;
 		const member = guild.member(sender);
 		const memberName = member.nickname;
-		const timeout = args[0] || 10;
+		const timeout = args.time || 10;
 
 		if (member.voice.channel) {
 			const originChan = member.voice.channel;
@@ -38,7 +38,10 @@ module.exports = class MergeCommand extends commando.Command {
 			const size = ctgf.size;
 			let usrcount = 0;
 			let groupcount = 1;
-			const userlist = new Array([], [], [], [], [], [], [], []);
+			const userlist = new Array();
+			for (let i = 0; i < size; i++) {
+				userlist.push(new Array());
+			}
 			const embed = new MessageEmbed()
 				.setColor(`#0099ff`)
 				.setTitle(`Merge`)
@@ -48,20 +51,21 @@ module.exports = class MergeCommand extends commando.Command {
 				.setFooter(`Run !split {size} to split people into groups`)
 				.setTimestamp();
 
-			const embedmsg = message.channel.send(embed);
+			const embedmsg = await message.channel.send(embed);
+			const newembed = embedmsg.embeds[0];
 			setTimeout(() => {
 				ctgf.each(chan => {
-					if (chan == originChan) return;
+					if (chan == originChan) return groupcount++;
 					for (const usr of chan.members) {
-						usr[1].voice.setChannel(originChan);
 						userlist[groupcount - 1].push(usr[1].displayName);
+						usr[1].voice.setChannel(originChan);
 						console.log(userlist);
 						usrcount++;
 					}
-					embed.setDescription(`Merged ${usrcount} users from ${size} groups into ${originChan.name}`);
-					if (userlist[groupcount - 1]) embed.addField(`Group ${groupcount}`, userlist[groupcount - 1], true);
+					newembed.setDescription(`Merged ${usrcount} users from ${size} groups into ${originChan.name}`);
+					if (userlist[groupcount - 1].length != 0) newembed.addField(`Group ${groupcount}`, userlist[groupcount - 1], true);
 					if (groupcount == size) {
-						embedmsg.then((msg) => {msg.edit(embed);});
+						embedmsg.edit(newembed);
 					}
 					groupcount++;
 				});
