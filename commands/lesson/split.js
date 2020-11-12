@@ -33,18 +33,22 @@ module.exports = class SplitCommand extends commando.Command {
 			const originChan = member.voice.channel;
 			const initial = originChan.name.slice(0, 2);
 			const gSize = args.gsize;
-			const collection = originChan.members;
+			let collection = originChan.members;
 			if (collection.size <= gSize) return message.reply(`There are not enough people in this channel (${collection.size - 1}) to be split into ${gSize} groups!`).then(res => {res.delete({ timeout: 5000 }); message.delete({ timeout: 5000 });});
 			const userlist = new Array([], [], [], [], [], []);
 			let i = 1;
-			while (collection.size > 0) {
+			let ii = 1;
+			while (collection.size > i) {
 				const usr = collection.random();
+				if (usr == member) continue;
 				console.log(usr);
-				const chan = guild.channels.cache.find(channel => channel.name === `${initial}-${i}`);
+				const chan = guild.channels.cache.find(channel => channel.name === `${initial}-${ii}`);
 				usr.voice.setChannel(chan);
-				userlist[i - 1].push(usr.nickname);
+				userlist[ii - 1].push(usr.displayName);
+				collection = originChan.members;
 				i++;
-				if (i > gSize) i = 1;
+				ii++;
+				if (ii > gSize) ii = 1;
 			}
 
 			const embed = new MessageEmbed()
@@ -55,8 +59,8 @@ module.exports = class SplitCommand extends commando.Command {
 				.setThumbnail('https://cdn.discordapp.com/attachments/371283762853445643/768906541277380628/Felix-logo-01.png')
 				.setFooter('Run !merge to move everyone back')
 				.setTimestamp();
-			for (let ii = 0; ii < gSize; ii++) {
-				embed.addField(`Group ${ii + 1}`, userlist[ii], true);
+			for (let iii = 0; iii < gSize; iii++) {
+				embed.addField(`Group ${iii + 1}`, userlist[iii], true);
 			}
 			message.reply(embed);
 			// message.delete({ timeout: 5000 });
