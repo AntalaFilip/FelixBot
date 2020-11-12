@@ -8,6 +8,7 @@ module.exports = class MeowCommand extends commando.Command {
 			memberName: `meow`,
 			description: `Sends a meow`,
 			examples: [ `meow` ],
+			throttling: { duration: 60, usages: 1 },
 		});
 	}
 
