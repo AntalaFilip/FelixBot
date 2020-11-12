@@ -38,7 +38,7 @@ module.exports = class MergeCommand extends commando.Command {
 			const size = ctgf.size;
 			let usrcount = 0;
 			let groupcount = 1;
-			const userlist = new Array(size);
+			const userlist = new Array([], [], [], [], [], [], [], []);
 			const embed = new MessageEmbed()
 				.setColor(`#0099ff`)
 				.setTitle(`Merge`)
