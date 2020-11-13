@@ -380,7 +380,7 @@ client
 				// Find a lesson in today's timetable, matching the teacher, the class he's just joined, the current period and week
 				const upcoming = today.find(les => les.includes(`@${clsidnew}#${member.id}`) && les.includes(`%${client.period}`) && les.includes(`^${client.week}`));
 				// Run the startLesson function
-				if (upcoming) client.startLesson(member, upcoming, newchan, newchan.parent.children.find(txt => txt.name.includes(upcoming.substring(upcoming.indexOf(`!`) + 1, upcoming.indexOf(`@`))) && txt.type === `text`));
+				if (upcoming) client.startLesson(member, upcoming, newchan, newchan.parent.children.find(txt => txt.name.substring(txt.name.indexOf("-") + 1) === upcoming.substring(upcoming.indexOf(`!`) + 1, upcoming.indexOf(`@`)) && txt.type === `text`));
 			}
 		}
 	})
