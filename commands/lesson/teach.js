@@ -51,7 +51,8 @@ module.exports = class TeachCommand extends commando.Command {
 				// Special exception for Ko&Pa lessons
 				if (chan.parentID == `770594101002764330`) clsid = `ko&pa`;
 				// Check if there aren't lessons running already
-				if (lessons.find(les => les.teacher === teacher)) return message.reply(`You are already teaching a lesson! Type !teach end to end it!`);
+				const already = lessons.find(les => les.teacher === teacher);
+				if (already) return message.reply(`You are already teaching a lesson ${already.lesson}@${already.class}! Type !teach end to end it!`);
 				// Check if the lesson is in the timetable and set the lessonId
 				let lessonId = timetable[day].find(ls => ls.includes(`!${lesson}@${clsid}#${teacherId}`) && ls.includes(`%${this.client.period}`) && ls.includes(`^${this.client.week}`));
 				// If the lesson isn't in the timetable:
