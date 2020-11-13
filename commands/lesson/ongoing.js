@@ -1,3 +1,4 @@
+const { MessageEmbed } = require("discord.js");
 const commando = require(`discord.js-commando`);
 
 module.exports = class OngoingLessonsCommand extends commando.Command {
@@ -13,7 +14,15 @@ module.exports = class OngoingLessonsCommand extends commando.Command {
 	}
 
 	run(message) {
-		const lessons = this.client.lessons.keyArray();
-		message.say(`Currently ongoing lessons:\r\n${lessons}`);
+		const lessons = this.client.lessons;
+		const embed = new MessageEmbed()
+			.setTitle(`Ongoing lessons:`)
+			.setAuthor(message.member.displayName, message.author.avatarURL())
+			.setColor(`#ffffff`)
+			.setDescription(`List of ongoing lessons:`);
+		lessons.each((les, key) => {
+			embed.addField(key, [`Teacher: ${les.teacherName}`, `Started at: ${les.startedAt.time}`]);
+		});
+		message.embed(embed);
 	}
 };
