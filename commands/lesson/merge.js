@@ -59,7 +59,6 @@ module.exports = class MergeCommand extends commando.Command {
 					for (const usr of chan.members) {
 						userlist[groupcount - 1].push(usr[1].displayName);
 						usr[1].voice.setChannel(originChan);
-						console.log(userlist);
 						usrcount++;
 					}
 					newembed.setDescription(`Merged ${usrcount} users from ${size} groups into ${originChan.name}`);
@@ -67,6 +66,7 @@ module.exports = class MergeCommand extends commando.Command {
 					if (groupcount == size) {
 						embedmsg.edit(newembed);
 					}
+					console.log(userlist);
 					groupcount++;
 				});
 			}, timeout * 1000);
