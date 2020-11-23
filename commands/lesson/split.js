@@ -42,7 +42,7 @@ module.exports = class SplitCommand extends commando.Command {
 				const usr = collection.random();
 				if (usr == member) continue;
 				console.log(usr);
-				const chan = guild.channels.cache.find(channel => channel.name === `${initial}-${ii}`);
+				const chan = guild.channels.cache.find(channel => channel.name.contains(`${initial}-${ii}`));
 				usr.voice.setChannel(chan);
 				userlist[ii - 1].push(usr.displayName);
 				collection = originChan.members;
