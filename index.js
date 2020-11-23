@@ -14,8 +14,8 @@ const client = new commando.CommandoClient({
 
 let day = new Date().getDay();
 client.period = null;
-client.holidays = [`2/10`, `6/10`];
-client.week = `b`;
+client.holidays = [];
+client.week = `a`;
 client.lessons = new Collection();
 client.spamprot = new Collection();
 
@@ -169,11 +169,14 @@ client.startLesson = async (teacher, lessonId, vchan, tchan) => {
 	const ctg = vchan.parent;
 	const date = new Date();
 	const lesson = lessonId.substring(lessonId.indexOf(`!`) + 1, lessonId.indexOf(`@`));
+	const group = lessonId.substring(lessonId.indexOf(`$`) + 1, lessonId.indexOf(`%`));
+
 	// Add the lesson to the array
 	client.lessons.set(lessonId, {
 		textchannel: tchan,
 		class: lessonId.substring(lessonId.indexOf(`@`) + 1, lessonId.indexOf(`#`)),
 		lesson: lesson,
+		group: group,
 		teacher: teacher,
 		teacherName: teacher.displayName,
 		teacherPresent: true,
@@ -282,6 +285,7 @@ client
 	.on(`debug`, console.log)
 	.on(`ready`, () => {
 		console.log(`Ready; logged in as ${client.user.username}#${client.user.discriminator} (${client.user.id})`);
+		// client.user.setActivity(``);
 		tick();
 	})
 	.on(`disconnect`, () => { console.warn(`Disconnected!`); })
