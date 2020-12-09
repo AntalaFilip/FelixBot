@@ -30,7 +30,7 @@ module.exports = class TimetableCommand extends commando.Command {
 		const chan = message.channel;
 		let clsid = args.class.toLowerCase().slice(0, 2);
 		if (clsid === `he`) clsid = chan.name.slice(0, 2);
-		const role = this.client.guilds.resolve(`702836521622962198`).roles.cache.find(r => r.name.toLocaleLowerCase().includes(clsid));
+		const role = this.client.guilds.resolve(`702836521622962198`).roles.cache.find(r => r.name.toLocaleLowerCase().startsWith(clsid));
 		if (!role) return message.reply(`Invalid class, try specifying a class in the command!`);
 		const embed = new MessageEmbed()
 			.setColor(`#000000`)
