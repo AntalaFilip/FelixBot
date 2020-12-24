@@ -34,7 +34,11 @@ module.exports = class SplitCommand extends commando.Command {
 			const initial = originChan.name.slice(0, 2);
 			const gSize = args.gsize;
 			let collection = originChan.members;
-			if (collection.size <= gSize) return message.reply(`There are not enough people in this channel (${collection.size - 1}) to be split into ${gSize} groups!`).then(res => {res.delete({ timeout: 5000 }); message.delete({ timeout: 5000 });});
+			if (collection.size <= gSize) {
+				message.reply(`There are not enough people in this channel (${collection.size - 1}) to be split into ${gSize} groups!`)
+					.then(res => {res.delete({ timeout: 5000 }); message.delete({ timeout: 5000 });});
+				return;
+			}
 			const userlist = new Array([], [], [], [], [], []);
 			let i = 1;
 			let ii = 1;

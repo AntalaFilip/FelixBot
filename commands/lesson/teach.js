@@ -24,6 +24,12 @@ module.exports = class TeachCommand extends commando.Command {
 					type: `boolean`,
 					default: false,
 				},
+				{
+					key: `teacher`,
+					prompt: `Mention the teacher:`,
+					type: `user`,
+					default: `self`,
+				},
 			],
 		});
 	}
