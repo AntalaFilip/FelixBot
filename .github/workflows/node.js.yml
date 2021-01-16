@@ -26,5 +26,5 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm ci
-    - run: npx i -g ts-node
+    - run: npm i -g ts-node
     - run: ts-node index.ts
