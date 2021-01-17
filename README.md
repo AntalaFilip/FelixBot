@@ -1,1 +1,1 @@
-# FELIX Discord bot source code
+# FELIX Discord Bot - refactor in progress, this version currently DOES NOT work.
