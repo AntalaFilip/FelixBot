@@ -1,6 +1,7 @@
-const commando = require(`discord.js-commando`);
+const { GuildMember, Snowflake } = require('discord.js');
+const { Command, CommandoClient, CommandoGuild, CommandoMessage } = require('discord.js-commando');
 
-module.exports = class OngoingLessonsCommand extends commando.Command {
+class SendWelcomeCommand extends Command {
 	constructor(client) {
 		super(client, {
 			name: `sendwelcome`,
@@ -19,12 +20,33 @@ module.exports = class OngoingLessonsCommand extends commando.Command {
 		});
 	}
 
+	/**
+	 * Runs the SendWelcome command with the specified Message and arguments
+	 * @param {CommandoMessage} message
+	 * @param {any} args
+	 */
 	run(message, args) {
 		const guild = this.client.guilds.cache.find(gld => gld.id === `702836521622962198`);
 		const member = guild.members.cache.find(mem => mem.id === args.memberid);
 		if (member) {
-			this.client.sendWelcomeMessage(member);
+			this.exec(member);
 			message.reply(`Sent welcome to ${member.user.username}`);
 		}
 	}
-};
+
+	/**
+	 * Executes the SendWelcome command with the specified member
+	 * @param {GuildMember} member
+	 */
+	exec(member) {
+		member.createDM().then(dm => {
+			dm.send(`Ahoj! Vitaj vo FELIX Discorde!`);
+			dm.send(`Prosím Ťa, napíš svoje meno, priezvisko a triedu jednému z našich administrátorov (Filip Antala, Mati Halák, Zuzka Burjanová) aby Ťa mohli zaradiť do tvojej triedy.`);
+			dm.send(`Ak sa Ti ale nechce písať administrátorovi (alebo žiaden práve nie je online), môžeš napísať meno a triedu aj mne nasledovne (prosím, používaj diakritiku):`);
+			dm.send(`iam [Meno] [Priezvisko] [Trieda]`);
+		});
+		this.client.logger.info(`Sent welcome message to: ${member.user.username}`);
+	}
+}
+
+module.exports = SendWelcomeCommand;

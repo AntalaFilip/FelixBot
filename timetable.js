@@ -1,4 +1,4 @@
-const timetable = [
+const Timetable = [
 	// Title
 	[`Timetable - FELIX 2.st - online learning`],
 	// Monday
@@ -176,4 +176,4 @@ const timetable = [
 	],
 ];
 
-module.exports = timetable;
+module.exports = Timetable;

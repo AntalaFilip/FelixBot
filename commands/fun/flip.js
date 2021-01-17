@@ -1,6 +1,6 @@
-const commando = require(`discord.js-commando`);
+const { Command, CommandoMessage } = require('discord.js-commando');
 
-module.exports = class FlipCommand extends commando.Command {
+class FlipCommand extends Command {
 	constructor(client) {
 		super(client, {
 			name: `flip`,
@@ -22,4 +22,6 @@ module.exports = class FlipCommand extends commando.Command {
 			message.say(`It's tails! (1)`);
 		}
 	}
-};
+}
+
+module.exports = FlipCommand;

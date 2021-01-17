@@ -1,13 +1,13 @@
-const commando = require(`discord.js-commando`);
+const { Command, CommandoMessage } = require('discord.js-commando');
 
-module.exports = class AvatarCommand extends commando.Command {
+class AvatarCommand extends Command {
 	constructor(client) {
 		super(client, {
 			name: `avatar`,
 			group: `dev`,
 			memberName: `avatar`,
 			description: `Gets the user's avatar`,
-			examples: [ `sendwelcome 702922217155067924` ],
+			examples: [`sendwelcome 702922217155067924`],
 			ownerOnly: true,
 			args: [
 				{
@@ -19,6 +19,11 @@ module.exports = class AvatarCommand extends commando.Command {
 		});
 	}
 
+	/**
+	 * Runs the Avatar command
+	 * @param {CommandoMessage} message The Message
+	 * @param {any} args The arguments used in the command
+	 */
 	run(message, args) {
 		const guild = this.client.guilds.cache.find(gld => gld.id === `702836521622962198`);
 		const member = guild.members.cache.find(mem => mem.id === args.memberid);
@@ -26,4 +31,6 @@ module.exports = class AvatarCommand extends commando.Command {
 			message.reply(`${member.nickname || member.user.username}'s avatar URL is: ${member.user.avatarURL()}`);
 		}
 	}
-};
+}
+
+module.exports = AvatarCommand;
