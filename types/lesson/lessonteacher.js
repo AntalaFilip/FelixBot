@@ -1,25 +1,16 @@
 const { GuildMember } = require("discord.js");
 const Lesson = require("./lesson");
+const LessonParticipant = require("./lessonparticipant");
 
-class LessonTeacher {
+class LessonTeacher extends LessonParticipant {
 	/**
 	 * Creates the teacher object
 	 * @param {GuildMember} member
 	 * @param {Lesson} lesson
 	 */
-	constructor(member, lesson) {
-		this.member = member;
-		this.lesson = lesson;
+	constructor(member) {
+		super(member);
 		this.name = member.displayName;
-		this.isPresent = true;
-	}
-
-	/**
-	 * Changes the presence of the teacher
-	 * @param {boolean} presence
-	 */
-	changePresence(presence) {
-		this.isPresent = presence;
 	}
 }
 

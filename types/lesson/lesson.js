@@ -1,8 +1,7 @@
-const { GuildMember } = require("discord.js");
-// eslint-disable-next-line no-unused-vars
+const { GuildMember, VoiceChannel } = require("discord.js");
 const { CommandoClient } = require("discord.js-commando");
-const LessonManager = require("../../util/lessonmanager");
-// eslint-disable-next-line no-unused-vars
+const { all } = require("../../api/express");
+const LessonManager = require("../../managers/lessonmanager");
 const LessonStudent = require("./lessonstudent");
 const LessonTeacher = require("./lessonteacher");
 
@@ -11,24 +10,22 @@ class Lesson {
 	/**
 	 * Creates a lesson object
 	 * @param {number} id The ID of the Lesson, generated automatically if creating a new Lesson, if present, Lesson won't get pushed to database automatically.
-	 * @param {CommandoClient} client The client that instantiated this
-	 * @param {LessonManager} manager The manager that manages this
+	 * @param {Array} allocated The allocated channels for this lesson
 	 * @param {GuildMember} teacher The lesson teacher
 	 * @param {String} lessonid The lesson ID
 	 * @param {String} classid The class ID having the lesson
 	 * @param {String} group The class group
-	 * @param {Number} period The period the lesson relates to
-	 * @param {GuildMember[] || } students The students present at the creation of the Lesson
+	 * @param {number} period The period the lesson relates to
+	 * @param {GuildMember[]} students The students present at the creation of the Lesson
 	 * @param {Date} startedAt The date when the lesson started
 	 * @param {Date} endedAt The date when the lesson ended (if creating an ended lesson)
-	 * @param {boolean} nocache Whether the Lesson should not get cached locally
 	 */
-	constructor(client, id, manager, teacher, lessonid, classid, group, period, students, startedAt, endedat, nocache) {
+	constructor(id, allocated, teacher, lessonid, classid, group, period, students, startedAt, endedAt) {
 		this.id = id;
-		this.client = client;
-		this.manager = manager;
+		this.allocated = new Array();
 		// Create a LessonTeacher from the teacher member
-		this.teacher = new LessonTeacher(teacher, this);
+		this.teacher = new LessonTeacher(teacher);
+		if (allocated) allocated.forEach(val => this.allocated.push(this.teacher.member.guild.channels.cache.find(chan => chan.id = val)));
 		// Assign the lesson ID
 		this.lessonid = lessonid.toLowerCase();
 		// Assign the class ID
@@ -38,9 +35,10 @@ class Lesson {
 		// Assign the period
 		this.period = period;
 		// Assign started at
-		if (startedAt) this.startedAt = startedAt;
+		if (startedAt) this.startedAt = new Date(startedAt);
 		else this.startedAt = new Date();
-		this.endedAt = endedat;
+		if (endedAt) this.endedAt = new Date(endedAt);
+		else this.endedAt = null;
 
 		this.students = new Array();
 		// For each member/studentdata if its ID doesn't match the teach, create a new LessonStudent and push it to the studentlist.
@@ -49,12 +47,9 @@ class Lesson {
 				if (student instanceof GuildMember) {
 					if (student.id == this.teacher.member.id) return;
 				}
-				this.students.push(new LessonStudent(student, this, true));
+				this.students.push(new LessonStudent(student));
 			}, this);
 		}
-
-		if (!id) this.id = this.client.databaseManager.pushNewLesson(this);
-		if (!nocache) this.client.lessonManager.lessons.push(this);
 	}
 
 	/**
@@ -66,18 +61,6 @@ class Lesson {
 		this.students.push(student);
 		this.update();
 		return student;
-	}
-
-	update() {
-		return this.client.databaseManager.updateLesson(this);
-	}
-
-	end() {
-		this.endedAt = new Date();
-		this.students.forEach(student => {
-			if (student.present) student.left();
-		});
-		this.manager.lessons.splice(this.manager.lessons.findIndex(this), 1);
 	}
 }
 

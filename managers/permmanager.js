@@ -1,6 +1,10 @@
+const Logger = require("../util/logger");
+
 class PermissionsManager {
 	constructor(client) {
 		this.client = client;
+		this.logger = new Logger("PermissionsManager");
+		this.logger.log('Ready!');
 	}
 
 	/**

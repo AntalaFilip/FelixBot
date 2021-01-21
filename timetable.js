@@ -34,6 +34,7 @@ const Timetable = [
 	// Tuesday
 	[
 		// Plameniaky
+		`!rk@pl#702918374707036210$all%0^a^b`,
 		`!mat@pl#702918374707036210$all%1^a^b`,
 		`!dej@pl#504184485735038977$all%2^a^b`,
 		`!obn@pl#504184485735038977$all%3^b`,
@@ -71,16 +72,15 @@ const Timetable = [
 	// Wednesday
 	[
 		// Plameniaky
-		`!rk@pl#702918374707036210$all%0^a^b`,
 		`!sjl@pl#705012475728363521$all%1^a^b`,
 		`!mat@pl#702918374707036210$all%2^a^b`,
 		`!bio@pl#707927882089103411$all%3^a^b`,
 		`!anj@pl#766327652616241172$all%3^a^b`,
 		// Sovy
 		`!rk@so#707926623630131219$all%0^a^b`,
-		`!bio@so#707926623630131219$all%1^a^b`,
+		`!mat@so#728243870885871636$all%1^a^b`,
 		`!huv@so#707934350435418133$all%2^a^b`,
-		`!mat@so#728243870885871636$all%3^a^b`,
+		`!bio@so#707926623630131219$all%3^a^b`,
 		// Vydry
 		`!sjl@vy#282616599280877569$all%2^a^b`,
 		`!huv@vy#707934350435418133$all%3^a^b`,

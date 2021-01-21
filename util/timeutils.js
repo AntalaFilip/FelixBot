@@ -3,7 +3,6 @@ const Logger = require("./logger");
 class TimeUtils {
 	constructor(client) {
 		this.client = client;
-		this.logger = new Logger("TimeUtils");
 	}
 	/**
 	 * @returns {number} returns a number representing a period

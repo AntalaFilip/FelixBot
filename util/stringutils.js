@@ -8,8 +8,6 @@ class StringUtils {
 	 */
 	constructor(client) {
 		this.client = client;
-		this.logger = new Logger("StringUtils");
-		this.logger.log(`Ready!`);
 	}
 
 

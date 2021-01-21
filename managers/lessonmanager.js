@@ -1,0 +1,246 @@
+const { CommandoClient } = require("discord.js-commando");
+const { MessageEmbed, GuildMember, VoiceChannel, CategoryChannel } = require('discord.js');
+const Logger = require("../util/logger");
+const Lesson = require("../types/lesson/lesson");
+const timetable = require("../timetable");
+const LessonParticipant = require("../types/lesson/lessonparticipant");
+const LessonStudent = require("../types/lesson/lessonstudent");
+
+class LessonManager {
+	/**
+	 * Creates a new LessonManager.
+	 * @param {CommandoClient} client
+	 */
+	constructor(client) {
+		this.client = client;
+		this.logger = new Logger("LessonManager");
+		this.lessons = client.databaseManager.getOngoingLessons();
+		this.logger.log(`Ready; there are ${this.lessons.length} lessons ongoing!`);
+	}
+
+	/**
+	 * Forces the manager to sync lessons from the database.
+	 * @returns {Lesson[]} The currently ongoing lessons; an array of Lesson object, or an empty array.
+	 */
+	forceSync() {
+		this.lessons = this.client.databaseManager.getOngoingLessons();
+		return this.lessons;
+	}
+
+	/**
+	 * Checks if a lesson should be started with the member as the teacher
+	 * @param {GuildMember} member
+	 */
+	shouldStartLesson(member) {
+		if (!this.client.permManager.isTeacher(member)) return false;
+		/* To-Do */
+	}
+
+	/**
+	 * Checks if the Lesson parameters are present in the timetable
+	 * @param {string} subject The lesson subject
+	 * @param {string} clsid The class id
+	 * @param {GuildMember} teacher The teacher
+	 * @returns Promise which resolves with either the LessonID from the timetable or null.
+	 */
+	checkTimetable(subject, clsid, teacher) {
+		return new Promise((resolve, reject) => {
+			const day = new Date().getDay();
+			const period = this.client.timeUtils.getCurrentPeriod();
+			this.client.databaseManager.getSettings().then(settings => {
+				const week = settings.week;
+				resolve(timetable[day].find(ls => ls.includes(`!${subject}@${clsid}#${teacher.id}`) && ls.includes(`%${period}`) && ls.includes(`^${week}`)));
+			}, reason => reject(reason));
+		});
+	}
+
+	/**
+	 * Caches the Lesson and allocates channels
+	 * @param {Lesson} lesson
+	 */
+	async start(lesson) {
+		this.lessons.push(lesson);
+		const settings = await this.client.databaseManager.getSettings();
+		const current = timetable[new Date().getDay()].filter(ls => ls.includes(`@${lesson.classid}`) && ls.includes(`%${lesson.period}`) && ls.includes(`^${settings.week}`));
+		const ctg = lesson.teacher.member.guild.channels.cache.find(ch => ch.name.startsWith(lesson.classid)).parent;
+		const vcs = ctg.children.filter(ch => ch.type == `voice`);
+		const toAlloc = Math.round(vcs.size / current.length);
+		this.logger.info(`Starting a lesson (${lesson.lessonid}@${lesson.classid}); allocating ${toAlloc} channels`);
+		let i = 0;
+		vcs.each(ch => {
+			if (i >= toAlloc) return;
+			if (!this.isAllocated(ch)) {
+				this.allocate(ch, lesson);
+				i++;
+			}
+		});
+		this.logger.debug(`Allocated ${i} channels for ${lesson.lessonid}@${lesson.classid}`);
+		const id = await this.client.databaseManager.pushNewLesson(lesson);
+		lesson.id = id;
+	}
+
+	/**
+	 * Ends the lesson.
+	 * @param {Lesson} lesson The Lesson that should be ended.
+	 */
+	end(lesson) {
+		lesson.endedAt = new Date();
+		lesson.students.forEach(student => {
+			if (student.present) student.left();
+		});
+		lesson.allocated.forEach(chan => {
+			const name = chan.name.slice(1, chan.name.indexOf('$') - 1);
+			chan.setName(name);
+		});
+		this.lessons.splice(this.lessons.findIndex(val => val.id == this.id), 1);
+		this.logger.info(`Ending lesson ${this.id}`);
+		this.client.databaseManager.endLesson(this);
+	}
+
+	/**
+	 * Syncs the Lesson with the database.
+	 * @param {Lesson} lesson The Lesson that should be updated.
+	 */
+	update(lesson) {
+		this.client.databaseManager.updateLesson(lesson);
+	}
+
+	/**
+	 * Allocates the specified VoiceChannel to the Lesson.
+	 * @param {VoiceChannel} channel The VoiceChannel to allocate.
+	 */
+	allocate(channel, lesson) {
+		channel.setName('~' + channel.name + ' $' + lesson.group);
+		lesson.allocated.push(channel);
+		this.update(lesson);
+	}
+
+	/**
+	 * Checks if the specified VoiceChannel is allocated or not.
+	 * @param {VoiceChannel} channel
+	 */
+	isAllocated(channel) {
+		return channel.name.includes(`~`);
+	}
+
+	/**
+	 *
+	 * @param {Lesson} lesson
+	 * @param {LessonParticipant} participant
+	 */
+	joined(lesson, participant) {
+		if (participant instanceof LessonStudent && !lesson.students.includes(participant)) lesson.students.push(participant);
+		participant.voice.connects.push(new Date());
+		participant.present = true;
+		this.update(lesson);
+	}
+
+	/**
+	 *
+	 * @param {Lesson} lesson
+	 * @param {LessonParticipant} participant
+	 */
+	left(lesson, participant) {
+		participant.voice.disconnects.push(new Date());
+		participant.present = false;
+		this.update(lesson);
+	}
+
+	/**
+	 *
+	 * @param {Lesson} lesson
+	 * @param {LessonParticipant} participant
+	 */
+	togglemute(lesson, participant) {
+		participant.voice.mutes.push(new Date());
+		this.update(lesson);
+	}
+
+	/**
+	 *
+	 * @param {Lesson} lesson
+	 * @param {LessonParticipant} participant
+	 */
+	toggledeaf(lesson, participant) {
+		participant.voice.deafs.push(new Date());
+		this.update(lesson);
+	}
+
+	/**
+	 *
+	 * @param {Lesson} lesson
+	 * @param {LessonParticipant} participant
+	 */
+	togglevideo(lesson, participant) {
+		participant.voice.video.push(new Date());
+		this.update(lesson);
+	}
+
+
+	/*
+		const embed = new MessageEmbed()
+			.setColor(`#00ff00`)
+			.setTitle(`Lesson started!`)
+			.setAuthor(`${teacher.displayName}`, teacher.user.avatarURL())
+			.setDescription(`${lesson.toUpperCase()} has started, happy learning!`)
+			.setThumbnail('https://cdn.discordapp.com/attachments/371283762853445643/768906541277380628/Felix-logo-01.png')
+			.setTimestamp()
+			.setFooter(`End the lesson by running !teach end`);
+		crntlsn.embedmsg = await tchan.send(embed);
+	} */
+
+	/*  // Create the yellow private embed, summarizing the lesson
+		const privateembed = new MessageEmbed()
+			.setColor(`#ffff00`)
+			.setTitle(`Summary of ${lesson.lesson.toUpperCase()}@${lesson.class.charAt(0).toUpperCase() + lesson.class.slice(1)}`)
+			.setAuthor(`${this.client.user.username}`, `${this.client.user.avatarURL()}`)
+			.setDescription(`The summary of ${lesson.lesson.toUpperCase()}@${lesson.class.charAt(0).toUpperCase() + lesson.class.slice(1)} lasting from ${lesson.startedAt.time} to ${new Date().getHours()}:${new Date().getMinutes()}`)
+			.setThumbnail(`https://cdn.discordapp.com/attachments/371283762853445643/768906541277380628/Felix-logo-01.png`)
+			.setTimestamp();
+		const extraembed = new MessageEmbed()
+			.setColor(`#ffff00`);
+		// Populate the private embed - loop until all the student data has been processed
+		for (let i = 0; i < students.length; i++) {
+			// Get the current student's name
+			const name = students[i].name;
+			// Create a var with join times
+			let joinedms = 0;
+			// Create a var with leave times
+			let leftms = 0;
+			const jlen = students[i].attendance.joined.length;
+			const llen = students[i].attendance.left.length;
+			if (jlen > llen) leftms = leftms + new Date().getTime();
+			// Loop all the join (ms) times and add them to joinedms
+			for (let ii = 0; ii < students[i].attendance.joined.length; ii++) {
+				joinedms = joinedms + students[i].attendance.joined[ii];
+			}
+			// Loop all the leave (ms) times and add them to leftms
+			for (let ii = 0; ii < students[i].attendance.left.length; ii++) {
+				leftms = leftms + students[i].attendance.left[ii];
+			}
+			// Create a var with the net time in lesson (ms)
+			let netms = 0;
+			if (joinedms > leftms) netms = joinedms - leftms;
+			else netms = leftms - joinedms;
+			// Convert the net time to minutes and floor them
+			const min = Math.floor(netms / 60000);
+			// Get the first joined time
+			const firstjoined = new Date(students[i].attendance.joined[0]);
+			// Create an array with the current student's processed attendance data
+			const atten = [`First joined at ${firstjoined.getHours()}:${firstjoined.getMinutes()}`, `Total time: ${min} min`];
+			// Add the data to the embed, if the embed's limit is hit, use the extra embed
+			if (i <= 25) { privateembed.addField(name, atten, true); }
+			else if (i < 50) { extraembed.addField(name, atten, true); }
+			else { teacher.createDM().then(dm => dm.send(`Unfortunately, I have reached the user limit I can log for you`)); break; }
+		}
+		// Send the populated private embed to the teacher
+		teacher.createDM().then(dm => {
+			dm.send(privateembed);
+			if (extraembed.fields.length != 0) dm.send(extraembed);
+		});
+		// Delete the lesson from the map
+		this.client.lessons.delete(lessonKey);
+	} */
+}
+
+module.exports = LessonManager;

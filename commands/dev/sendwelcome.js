@@ -43,7 +43,7 @@ class SendWelcomeCommand extends Command {
 			dm.send(`Ahoj! Vitaj vo FELIX Discorde!`);
 			dm.send(`Prosím Ťa, napíš svoje meno, priezvisko a triedu jednému z našich administrátorov (Filip Antala, Mati Halák, Zuzka Burjanová) aby Ťa mohli zaradiť do tvojej triedy.`);
 			dm.send(`Ak sa Ti ale nechce písať administrátorovi (alebo žiaden práve nie je online), môžeš napísať meno a triedu aj mne nasledovne (prosím, používaj diakritiku):`);
-			dm.send(`iam [Meno] [Priezvisko] [Trieda]`);
+			dm.send(`iam TvojeMeno TvojePriezvisko TvojaTrieda`);
 		});
 		this.client.logger.info(`Sent welcome message to: ${member.user.username}`);
 	}

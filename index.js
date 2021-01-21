@@ -3,14 +3,15 @@ const oneLine = require(`common-tags`).oneLine;
 const { join } = require('path');
 const { open } = require('sqlite');
 const { Database } = require('sqlite3');
-const LessonManager = require('./util/lessonmanager');
-const VoiceStateManager = require('./util/voicestatemanager');
-const PermissionsManager = require('./util/permmanager');
+
+const LessonManager = require('./managers/lessonmanager');
+const VoiceStateManager = require('./managers/voicestatemanager');
+const PermissionsManager = require('./managers/permmanager');
+const DatabaseManager = require('./managers/databasemanager');
 const TimeUtils = require('./util/timeutils');
+const StringUtils = require('./util/stringutils');
 const SendWelcomeCommand = require('./commands/dev/sendwelcome');
 const Logger = require('./util/logger');
-const DatabaseManager = require('./util/databasemanager');
-const StringUtils = require('./util/stringutils');
 const ExpressApp = require('./api/express');
 const { createServer } = require('http');
 require('dotenv').config();
@@ -20,21 +21,20 @@ const client = new CommandoClient({
 	commandPrefix: process.env.PREFIX,
 });
 
-
-client.databaseManager = new DatabaseManager(client);
-client.voicestateManager = new VoiceStateManager(client);
-client.permManager = new PermissionsManager(client);
+const logger = new Logger("CLIENT");
 client.timeUtils = new TimeUtils(client);
 client.stringUtils = new StringUtils(client);
 
-const logger = new Logger("CLIENT");
 
 client
 	.on(`error`, logger.error)
 	.on(`warn`, logger.warn)
-	.on(`debug`, logger.log)
+	.on(`debug`, logger.debug)
 	.once(`ready`, () => {
 		logger.log(`Ready; logged in as ${client.user.username}#${client.user.discriminator} (${client.user.id})`);
+		client.databaseManager = new DatabaseManager(client);
+		client.voicestateManager = new VoiceStateManager(client);
+		client.permManager = new PermissionsManager(client);
 		client.lessonManager = new LessonManager(client);
 		// client.user.setActivity(``);
 	})
@@ -70,7 +70,10 @@ client
 			${guild ? `in guild ${guild.name} (${guild.id})` : 'globally'}.
 		`);
 	})
-	.on(`voiceStateUpdate`, client.voicestateManager.voiceStateUpdate)
+	.on(`voiceStateUpdate`, (oldstate, newstate) => client.voicestateManager.voiceStateUpdate(oldstate, newstate))
+	.on(`channelCreate`, channel => {
+		
+	})
 	.on(`guildMemberAdd`, member => {
 		const command = new SendWelcomeCommand(client);
 		command.exec(member);

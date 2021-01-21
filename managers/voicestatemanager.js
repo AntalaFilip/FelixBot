@@ -1,8 +1,7 @@
 const { VoiceState } = require("discord.js");
 const { CommandoClient } = require("discord.js-commando");
 const LessonStudent = require("../types/lesson/lessonstudent");
-const Logger = require("./logger");
-
+const Logger = require("../util/logger");
 class VoiceStateManager {
 	/**
 	 * Creates a new VoiceState manager
@@ -11,6 +10,7 @@ class VoiceStateManager {
 	constructor(client) {
 		this.client = client;
 		this.logger = new Logger("VoiceStateManager");
+		this.logger.log('Ready!');
 	}
 
 	/**
@@ -18,28 +18,28 @@ class VoiceStateManager {
 	 * @param {VoiceState} oldstate The old VoiceState
 	 * @param {VoiceState} newstate The new VoiceState
 	 */
-	async voiceStateUpdate(oldstate, newstate) {
+	voiceStateUpdate(oldstate, newstate) {
 		const date = new Date();
 		const member = newstate.member;
-		const currenttime = `${date.getHours()}:${date.getMinutes()}`;
 		const oldchan = oldstate.channel;
 		const newchan = newstate.channel;
 		const lessons = this.client.databaseManager.getOngoingLessons();
+		const mgr = this.client.lessonManager;
 		if (newchan != oldchan) {
 			if (oldchan) {
 				if (newchan) {
-					this.logger.log(`${currenttime} - ${member.nickname || member.user.username} changed channels from ${oldchan.name} to ${newchan.name}`);
+					this.logger.log(`${member.displayName} changed channels from ${oldchan.name} to ${newchan.name}`);
 				}
 				else {
-					this.logger.log(`${currenttime} - ${member.nickname || member.user.username} left ${oldchan.name}`);
+					this.logger.log(`${member.displayName} left ${oldchan.name}`);
 				}
 			}
 			else if (newchan) {
-				this.logger.log(`${currenttime} - ${member.nickname || member.user.username} joined ${newchan.name}`);
+				this.logger.log(`${member.displayName} joined ${newchan.name}`);
 			}
 		}
 		// Does the old channel exist?
-		if (oldchan) {
+		else if (oldchan) {
 			const clsid = oldchan.name.slice(0, 2);
 			const lesson = lessons.find(les => les.classid === clsid);
 			// Is there an ongoing lesson in the old channel?
@@ -49,7 +49,7 @@ class VoiceStateManager {
 					// If the channel is not in the same category
 					if (newchan == null || newchan.name.slice(0, 2) !== clsid) {
 						const student = lesson.students.find(val => val.member.id == member.id);
-						if (student) student.left();
+						if (student) student.left(lesson);
 						else this.logger.error(`Student does not exist! This should not happen!`);
 					}
 				}
@@ -63,9 +63,8 @@ class VoiceStateManager {
 				// Is there an ongoing lesson in the new channel, and the lessons are not the same, and the channels are not the same
 				if (lessonnew && lessonnew != lesson && newchan != oldchan) {
 					const student = lessonnew.students.find(val => val.member.id == member.id);
-					if (student) student.joined();
-					else new LessonStudent(member, lesson);
-					/* join */
+					if (student) mgr.joined(lessonnew, student);
+					else mgr.addStudent(new LessonStudent(member, lessonnew));
 				}
 			}
 		}
@@ -76,16 +75,28 @@ class VoiceStateManager {
 			const lessonnew = lessons.find(les => les.classid === clsidnew);
 			// Is there an ongoing lesson in the new channel
 			if (lessonnew) {
-				/* join */
+				const student = lessonnew.students.find(val => val.member.id == member.id);
+				if (student) mgr.joined(lessonnew, student);
+				else mgr.addStudent(new LessonStudent(member, lessonnew));
 			}
-			/* else {
-				// Get the timetable for today
-				const today = timetable[new Date().getDay()];
-				// Find a lesson in today's timetable, matching the teacher, the class he's just joined, the current period and week
-				const upcoming = today.find(les => les.includes(`@${clsidnew}#${member.id}`) && les.includes(`%${this.client.timeUtils.getCurrentPeriod()}`) && les.includes(`^${this.client.databaseManager.getSettings(newchan.guild).pop().week}`));
-				// Run the startLesson function
-				if (upcoming) client.startLesson(member, upcoming, newchan, newchan.parent.children.find(txt => txt.name.substring(txt.name.indexOf("-") + 1) === upcoming.substring(upcoming.indexOf(`!`) + 1, upcoming.indexOf(`@`)) && txt.type === `text`));
-			} */
+		}
+		if (oldstate.mute != newstate.mute) {
+			const lesson = lessons.find(ls => ls.classid == newstate.channel.name.slice(0, 2));
+			if (!lesson) return;
+			const student = lesson.students.find(st => st.member.id == member.id);
+			mgr.togglemute(lesson, student);
+		}
+		if (oldstate.deaf != newstate.deaf) {
+			const lesson = lessons.find(ls => ls.classid == newstate.channel.name.slice(0, 2));
+			if (!lesson) return;
+			const student = lesson.students.find(st => st.member.id == member.id);
+			mgr.toggledeaf(lesson, student);
+		}
+		if (oldstate.selfVideo != newstate.selfVideo) {
+			const lesson = lessons.find(ls => ls.classid == newstate.channel.name.slice(0, 2));
+			if (!lesson) return;
+			const student = lesson.students.find(st => st.member.id == member.id);
+			mgr.togglevideo(lesson, student);
 		}
 	}
 }

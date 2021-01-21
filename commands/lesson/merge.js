@@ -85,7 +85,7 @@ module.exports = class MergeCommand extends commando.Command {
 					}
 					// Log the userlist
 					console.log(userlist);
-					// Increment groupcount by onme
+					// Increment groupcount by one
 					groupcount++;
 				});
 			}, timeout * 1000);

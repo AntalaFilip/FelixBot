@@ -1,4 +1,3 @@
-const fs = require('fs');
 class Logger {
 	constructor(instance) {
 		this.instance = instance;

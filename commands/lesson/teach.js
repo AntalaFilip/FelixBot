@@ -1,4 +1,4 @@
-const { Command } = require('discord.js-commando');
+const { Command, CommandoMessage } = require('discord.js-commando');
 const timetable = require('../../timetable');
 const Lesson = require('../../types/lesson/lesson');
 
@@ -36,22 +36,22 @@ class TeachCommand extends Command {
 		});
 	}
 
+	/**
+	 * Runs the Teach command with the specified Message and arguments
+	 * @param {CommandoMessage} message The Message that initiated this command
+	 * @param {Object} args The arguments supplied to this command
+	 */
 	async run(message, args) {
-		// Get the lessons map
+		// Get the lessons array
 		const lessons = this.client.lessonManager.lessons;
 		// Get the teacher (member that instantiated the command)
 		const teacher = message.member;
-		// Get the teacher's name & ID
-		const teacherId = message.author.id;
 		// If the lesson is being started
 		if (args.name !== `end`) {
-			// If the teacher is not in a channel
+			// If the teacher is not in a channel, return with a warning
 			if (!teacher.voice.channel) return message.reply(`You have to be in a voice channel to start a lesson!`);
 
-			// Create a new Date
-			const date = new Date();
-			const day = date.getDay();
-			// Set the lesson type
+			// Get the lesson id
 			const lesson = args.name;
 			// Get the voice channel
 			const chan = teacher.voice.channel;
@@ -60,36 +60,36 @@ class TeachCommand extends Command {
 			// Special exception for Ko&Pa lessons
 			if (chan.parentID == `770594101002764330`) clsid = `ko&pa`;
 			// Check if there aren't lessons running already
-			/* const already = lessons.find(les => les.teacher === teacher);
-			if (already) return message.reply(`You are already teaching a lesson ${already.lesson}@${already.class}! Type !teach end to end it!`);
-			*/
+			const already = lessons.find(les => les.teacher.member.id === teacher.id);
+			if (already) return message.reply(`You are already teaching a lesson ${already.lessonid}@${already.classid}! Type !teach end to end it!`);
 			// Check if the lesson is in the timetable and set the lessonId
-			/* let lessonId = timetable[day].find(ls => ls.includes(`!${lesson}@${clsid}#${teacherId}`) && ls.includes(`%${this.client.timeUtils.getCurrentPeriod()}`) && ls.includes(`^${this.client.databaseManager.getSettings().pop().week}`));
-			// If the lesson isn't in the timetable:
-			if (!lessonId) {
-				// And the teacher didn't override, return with a warning
-				if (!args.override) return message.reply(`this lesson is not in the timetable!\r\nAre you sure it is time for your lesson?\nIf you wish to override the timetable, add true to the end of your command!`);
-				// Else, if the teacher did override, create a lessonId
-				else lessonId = `!${lesson}@${clsid}#${teacherId}*`;
-			} */
+			const lsid = await this.client.lessonManager.checkTimetable(lesson, clsid, teacher);
+			// If the lesson isn't in the timetable and the teacher didn't override, return with a warning
+			let group = 'manual';
+			if (!lsid && !args.override) {
+				return message.reply(`this lesson is not in the timetable!\nAre you sure it is time for your lesson?\nIf you wish to override the timetable, add true to the end of your command!`);
+			}
+			else if (!args.override) {
+				group = lsid.substring(lsid.indexOf('$') + 1, lsid.indexOf('%'));
+			}
 			// Start the lesson
-			const ls = new Lesson(this.client, teacher, lesson, clsid, 'group', this.client.timeUtils.getCurrentPeriod(), chan.members.array());
-			message.reply(ls.id);
+			this.client.lessonManager.start(new Lesson(null, null, teacher, lesson, clsid, group, this.client.timeUtils.getCurrentPeriod(), Array.from(chan.members.values())));
+			message.reply(`Started!`);
 		}
 		// Else if the lesson is being ended
 		else if (args.name === `end`) {
-			/* // Find the lesson that is being ended
-			const key = lessons.findKey(usr => usr.teacher === teacher);
+			// Find the lesson that is being ended
+			const lesson = lessons.find(ls => ls.teacher.member.id === teacher.id);
 			// If the teacher is teaching a lesson:
-			if (key) {
-				// Run the endLesson function with that lesson
-				this.client.endLesson(key);
+			if (lesson) {
+				// End the lesson
+				this.client.lessonManager.end(lesson);
 			}
 			// Else send a warning
 			else {
 				message.reply(`You do not have any ongoing lessons`).then(newmsg => newmsg.delete({ timeout: 10000 }));
 				message.delete({ reason: `Invalid command` });
-			} */
+			}
 		}
 	}
 }
