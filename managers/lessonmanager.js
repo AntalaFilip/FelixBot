@@ -14,17 +14,32 @@ class LessonManager {
 	constructor(client) {
 		this.client = client;
 		this.logger = new Logger("LessonManager");
-		this.lessons = client.databaseManager.getOngoingLessons();
-		this.logger.log(`Ready; there are ${this.lessons.length} lessons ongoing!`);
+		this.lessons = null;
+		this.ready = new Promise((resolve, reject) => {
+			client.databaseManager.getOngoingLessons()
+				.then(lss => {
+					this.lessons = lss;
+					this.logger.log(`Ready; there are ${this.lessons.length} lessons ongoing!`);
+					resolve();
+				}, err => {
+					reject(err);
+					this.logger.error(`FATAL: LessonManager failed to load`);
+					throw new Error(`LessonManager failed to load!`);
+				});
+		});
 	}
 
 	/**
 	 * Forces the manager to sync lessons from the database.
-	 * @returns {Lesson[]} The currently ongoing lessons; an array of Lesson object, or an empty array.
+	 * @returns {Promise<Lesson[]>} The currently ongoing lessons; an array of Lesson object, or an empty array.
 	 */
 	forceSync() {
-		this.lessons = this.client.databaseManager.getOngoingLessons();
-		return this.lessons;
+		return new Promise((resolve, reject) => {
+			this.client.databaseManager.getOngoingLessons().then(lss => {
+				this.lessons = lss;
+				resolve(this.lessons);
+			}, err => reject(err));
+		});
 	}
 
 	/**
@@ -64,12 +79,13 @@ class LessonManager {
 		const current = timetable[new Date().getDay()].filter(ls => ls.includes(`@${lesson.classid}`) && ls.includes(`%${lesson.period}`) && ls.includes(`^${settings.week}`));
 		const ctg = lesson.teacher.member.guild.channels.cache.find(ch => ch.name.startsWith(lesson.classid)).parent;
 		const vcs = ctg.children.filter(ch => ch.type == `voice`);
+		if (current.length == 0) current.push(null);
 		const toAlloc = Math.round(vcs.size / current.length);
 		this.logger.info(`Starting a lesson (${lesson.lessonid}@${lesson.classid}); allocating ${toAlloc} channels`);
 		let i = 0;
 		vcs.each(ch => {
 			if (i >= toAlloc) return;
-			if (!this.isAllocated(ch)) {
+			if (!this.isAllocated(ch) && !ch.name.includes(`*`)) {
 				this.allocate(ch, lesson);
 				i++;
 			}
@@ -77,6 +93,18 @@ class LessonManager {
 		this.logger.debug(`Allocated ${i} channels for ${lesson.lessonid}@${lesson.classid}`);
 		const id = await this.client.databaseManager.pushNewLesson(lesson);
 		lesson.id = id;
+
+		const embed = new MessageEmbed()
+			.setAuthor(lesson.teacher.name, lesson.teacher.member.user.avatarURL())
+			.setColor(`00ff00`)
+			.setTitle(`Lesson started`)
+			.setDescription(`${lesson.lessonid.toUpperCase()} has started!`)
+			.setThumbnail('https://cdn.discordapp.com/attachments/371283762853445643/768906541277380628/Felix-logo-01.png')
+			.setTimestamp()
+			.setURL(`https://localhost:5000/app/lesson/${lesson.id}`)
+			.setFooter(`End the lesson by running !teach end`);
+		const tchan = ctg.children.find(ch => ch.name.includes(lesson.lessonid));
+		tchan.send(embed);
 	}
 
 	/**
@@ -86,15 +114,61 @@ class LessonManager {
 	end(lesson) {
 		lesson.endedAt = new Date();
 		lesson.students.forEach(student => {
-			if (student.present) student.left();
+			if (student.present) this.left(lesson, student);
 		});
 		lesson.allocated.forEach(chan => {
 			const name = chan.name.slice(1, chan.name.indexOf('$') - 1);
 			chan.setName(name);
 		});
-		this.lessons.splice(this.lessons.findIndex(val => val.id == this.id), 1);
-		this.logger.info(`Ending lesson ${this.id}`);
-		this.client.databaseManager.endLesson(this);
+		this.lessons.splice(this.lessons.findIndex(val => val.id == lesson.id), 1);
+		this.logger.info(`Ending lesson ${lesson.id}`);
+		this.client.databaseManager.endLesson(lesson);
+
+		const pembed = new MessageEmbed()
+			.setAuthor(lesson.teacher.name, lesson.teacher.member.user.avatarURL())
+			.setColor(`ff0000`)
+			.setTitle(`Lesson ended!`)
+			.setDescription(`${lesson.lessonid.toUpperCase()} has ended!`)
+			.setThumbnail('https://cdn.discordapp.com/attachments/371283762853445643/768906541277380628/Felix-logo-01.png')
+			.setTimestamp()
+			.setURL(`https://localhost:5000/app/lesson/${lesson.id}`)
+			.setFooter(`The lesson has ended!`);
+		const ctg = lesson.teacher.member.guild.channels.cache.find(ch => ch.name.startsWith(lesson.classid)).parent;
+		const tchan = ctg.children.find(ch => ch.name.includes(lesson.lessonid));
+		tchan.send(pembed);
+
+		const sumembed = new MessageEmbed()
+			.setAuthor(this.client.user.username, this.client.user.avatarURL())
+			.setColor(`ffff00`)
+			.setTitle(`Summary of ${lesson.lessonid.toUpperCase()}@${lesson.classid.toUpperCase()}`)
+			.setDescription(`The simple summary of your lesson:`)
+			.setThumbnail('https://cdn.discordapp.com/attachments/371283762853445643/768906541277380628/Felix-logo-01.png')
+			.setURL(`https://localhost:5000/app/lesson/${lesson.id}`)
+			.setFooter(`You can find the extended summary on the webpage`);
+
+		let i = 0;
+		for (const student in lesson.students) {
+			if (i >= 25) {
+				lesson.teacher.member.createDM().then(dm => dm.send(`The attendance data is only partial - check the full attendance data on the webpage!`));
+				break;
+			}
+			const conms = new Array();
+			const dconms = new Array();
+			for (const connect in student.voice.connects) {
+				conms.push(connect.getTime());
+			}
+			for (const disconnect in student.voice.disconnects) {
+				dconms.push(disconnect.getTime());
+			}
+			let netms;
+			if (conms > dconms) netms = conms - dconms;
+			else netms = dconms - conms;
+			const min = Math.floor(netms / 60000);
+			const atten = [`First joined: ${student.voice.connects[0]}`, `Total time in lesson: ${min} min`];
+			sumembed.addField(student.member.displayName, atten);
+			i++;
+		}
+		lesson.teacher.member.createDM().then(dm => dm.send(sumembed));
 	}
 
 	/**
@@ -120,7 +194,7 @@ class LessonManager {
 	 * @param {VoiceChannel} channel
 	 */
 	isAllocated(channel) {
-		return channel.name.includes(`~`);
+		return channel.name.startsWith(`~`);
 	}
 
 	/**
@@ -150,9 +224,10 @@ class LessonManager {
 	 *
 	 * @param {Lesson} lesson
 	 * @param {LessonParticipant} participant
+	 * @param {boolean} state
 	 */
-	togglemute(lesson, participant) {
-		participant.voice.mutes.push(new Date());
+	togglemute(lesson, participant, state) {
+		participant.voice.mutes.push([new Date(), state]);
 		this.update(lesson);
 	}
 
@@ -160,9 +235,10 @@ class LessonManager {
 	 *
 	 * @param {Lesson} lesson
 	 * @param {LessonParticipant} participant
+	 * @param {boolean} state
 	 */
-	toggledeaf(lesson, participant) {
-		participant.voice.deafs.push(new Date());
+	toggledeaf(lesson, participant, state) {
+		participant.voice.deafs.push([new Date(), state]);
 		this.update(lesson);
 	}
 
@@ -170,9 +246,10 @@ class LessonManager {
 	 *
 	 * @param {Lesson} lesson
 	 * @param {LessonParticipant} participant
+	 * @param {boolean} state
 	 */
-	togglevideo(lesson, participant) {
-		participant.voice.video.push(new Date());
+	togglevideo(lesson, participant, state) {
+		participant.voice.video.push([new Date(), state]);
 		this.update(lesson);
 	}
 
@@ -207,19 +284,8 @@ class LessonManager {
 			let joinedms = 0;
 			// Create a var with leave times
 			let leftms = 0;
-			const jlen = students[i].attendance.joined.length;
-			const llen = students[i].attendance.left.length;
-			if (jlen > llen) leftms = leftms + new Date().getTime();
-			// Loop all the join (ms) times and add them to joinedms
-			for (let ii = 0; ii < students[i].attendance.joined.length; ii++) {
-				joinedms = joinedms + students[i].attendance.joined[ii];
-			}
-			// Loop all the leave (ms) times and add them to leftms
-			for (let ii = 0; ii < students[i].attendance.left.length; ii++) {
-				leftms = leftms + students[i].attendance.left[ii];
-			}
 			// Create a var with the net time in lesson (ms)
-			let netms = 0;
+			let netms;
 			if (joinedms > leftms) netms = joinedms - leftms;
 			else netms = leftms - joinedms;
 			// Convert the net time to minutes and floor them

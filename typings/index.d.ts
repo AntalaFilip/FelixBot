@@ -6,3 +6,13 @@ declare class Lesson {
 	readonly id: number;
 	
 }
+
+export class LessonParticipant {
+	readonly member: GuildMember;
+	readonly created: Date;
+	readonly name: string;
+	readonly voice: {
+		connects: Array<Date>;
+		disconnects: Array<Date>;
+	}
+}

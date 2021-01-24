@@ -3,9 +3,9 @@ const { GuildMember } = require("discord.js");
 class LessonParticipant {
 	/**
 	 * Creates a LessonParticipant object
-	 * @param {GuildMember | Object} member The member or object to create a LessonParticipant object from
+	 * @param {GuildMember | Object} participant The member or object to create a LessonParticipant object from
 	 */
-	constructor(member) {
+	constructor(participant) {
 		this.present = true;
 		this.voice = {
 			connects: new Array(),
@@ -15,17 +15,16 @@ class LessonParticipant {
 			video: new Array(),
 		};
 
-		if (member instanceof GuildMember) {
-			this.member = member;
-			this.name = member.displayName;
+		if (participant instanceof GuildMember) {
+			this.member = participant;
+			this.name = participant.displayName;
 			this.created = new Date();
-			this.voice.connects.push(new Date());
 		}
 		else {
-			this.member = member.participant;
-			this.name = member.participant.displayName;
-			this.created = member.created;
-			this.voice = member.voice;
+			this.member = participant.member;
+			this.name = participant.member.displayName;
+			this.created = participant.created;
+			this.voice = participant.voice;
 		}
 	}
 }

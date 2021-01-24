@@ -59,7 +59,7 @@ module.exports = class AudioCommand extends commando.Command {
 				});
 			}
 			// Else if link was specified
-			else if (args.type === `link`) {
+			else if (args.type === `local`) {
 				// Join the channel
 				const connection = await chan.join();
 				// Play the specified link

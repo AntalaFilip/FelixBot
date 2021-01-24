@@ -25,7 +25,7 @@ class Lesson {
 		this.allocated = new Array();
 		// Create a LessonTeacher from the teacher member
 		this.teacher = new LessonTeacher(teacher);
-		if (allocated) allocated.forEach(val => this.allocated.push(this.teacher.member.guild.channels.cache.find(chan => chan.id = val)));
+		if (allocated) allocated.forEach(val => this.allocated.push(this.teacher.member.guild.channels.cache.find(chan => chan.id == val)));
 		// Assign the lesson ID
 		this.lessonid = lessonid.toLowerCase();
 		// Assign the class ID

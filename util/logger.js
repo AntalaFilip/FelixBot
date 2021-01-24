@@ -4,27 +4,27 @@ class Logger {
 	}
 
 	log(toLog) {
-		const log = `[${new Date().toTimeString()}] [${this.instance || 'SYSTEM'}/INFO]: ${toLog}`;
+		const log = `[${new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')}] [${this.instance || 'SYSTEM'}/INFO]: ${toLog}`;
 		console.log(log);
 	}
 
 	info(toLog) {
-		const log = `[${new Date().toTimeString()}] [${this.instance || 'SYSTEM'}/INFO]: ${toLog}`;
+		const log = `[${new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')}] [${this.instance || 'SYSTEM'}/INFO]: ${toLog}`;
 		console.info(log);
 	}
 
 	warn(toLog) {
-		const log = `[${new Date().toTimeString()}] [${this.instance || 'SYSTEM'}/WARN]: ${toLog}`;
+		const log = `[${new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')}] [${this.instance || 'SYSTEM'}/WARN]: ${toLog}`;
 		console.warn(log);
 	}
 
 	error(toLog) {
-		const log = `[${new Date().toTimeString()}] [${this.instance || 'SYSTEM'}/ERROR]: ${toLog}`;
+		const log = `[${new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')}] [${this.instance || 'SYSTEM'}/ERROR]: ${toLog}`;
 		console.error(log);
 	}
 
 	debug(toLog) {
-		const log = `[${new Date().toTimeString()}] [${this.instance || 'SYSTEM'}/DEBUG]: ${toLog}`;
+		const log = `[${new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')}] [${this.instance || 'SYSTEM'}/DEBUG]: ${toLog}`;
 		console.debug(log);
 	}
 }

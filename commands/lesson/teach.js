@@ -74,7 +74,7 @@ class TeachCommand extends Command {
 			}
 			// Start the lesson
 			this.client.lessonManager.start(new Lesson(null, null, teacher, lesson, clsid, group, this.client.timeUtils.getCurrentPeriod(), Array.from(chan.members.values())));
-			message.reply(`Started!`);
+			message.reply(`Starting, check the subject channel for confirmation`);
 		}
 		// Else if the lesson is being ended
 		else if (args.name === `end`) {

@@ -10,7 +10,6 @@ class LessonTeacher extends LessonParticipant {
 	 */
 	constructor(member) {
 		super(member);
-		this.name = member.displayName;
 	}
 }
 

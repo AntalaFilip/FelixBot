@@ -46,21 +46,40 @@ class DatabaseManager {
 	/**
 	 * Fetches all ongoing lessons in the database, parses them into Lesson objects, and returns them as an array.
 	 * @param {CommandoGuild} guild
-	 * @returns {Lesson[]} Array of Lesson objects, or an empty array, if no lessons are ongoing.
+	 * @returns {Promise<Lesson[]>} Array of Lesson objects, or an empty array, if no lessons are ongoing.
 	 */
 	getOngoingLessons(guild) {
-		if (!guild) guild = this.client.guilds.cache.find(g => g.id == `702836521622962198`);
-		const array = new Array();
-		db.query(`SELECT * FROM lessons WHERE endedat IS NULL`, (err, res) => {
-			if (err) throw err;
+		return new Promise((resolve, reject) => {
+			if (!guild) guild = this.client.guilds.cache.find(g => g.id == `702836521622962198`);
+			const array = new Array();
+			db.query(`SELECT * FROM lessons WHERE endedat IS NULL`, (err, res) => {
+				if (err) return reject(err);
 
-			res.forEach(raw => {
-				const val = this.parseDatabaseResult(raw);
-				const ls = new Lesson(val.id, val.allocated, guild.members.cache.find(t => t.id == val.teacher), val.lesson, val.classname, val.group, val.period, val.students, val.startedat, null);
-				array.push(ls);
+				res.forEach(raw => {
+					const val = this.parseDatabaseResult(raw);
+					const ls = new Lesson(val.id, val.allocated, guild.members.cache.find(t => t.id == val.teacher), val.lesson, val.classname.slice(0, 2), val.group, val.period, val.students, val.startedat, null);
+					array.push(ls);
+				});
+				resolve(array);
 			});
 		});
-		return array;
+	}
+
+	getAllLessons(guild) {
+		return new Promise((resolve, reject) => {
+			if (!guild) guild = this.client.guilds.cache.find(g => g.id == `702836521622962198`);
+			const array = new Array();
+			db.query(`SELECT * FROM lessons`, (err, res) => {
+				if (err) return reject(err);
+
+				res.forEach(raw => {
+					const val = this.parseDatabaseResult(raw);
+					const ls = new Lesson(val.id, val.allocated, guild.members.cache.find(t => t.id == val.teacher), val.lesson, val.classname.slice(0, 2), val.group, val.period, val.students, new Date(val.startedat), new Date(val.endedat));
+					array.push(ls);
+				});
+				resolve(array);
+			});
+		});
 	}
 
 	/**

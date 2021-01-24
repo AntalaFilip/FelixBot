@@ -13,7 +13,7 @@ const StringUtils = require('./util/stringutils');
 const SendWelcomeCommand = require('./commands/dev/sendwelcome');
 const Logger = require('./util/logger');
 const ExpressApp = require('./api/express');
-const { createServer } = require('http');
+const http = require('http');
 require('dotenv').config();
 
 const client = new CommandoClient({
@@ -24,7 +24,7 @@ const client = new CommandoClient({
 const logger = new Logger("CLIENT");
 client.timeUtils = new TimeUtils(client);
 client.stringUtils = new StringUtils(client);
-
+global.apilogger = new Logger("API");
 
 client
 	.on(`error`, logger.error)
@@ -36,7 +36,8 @@ client
 		client.voicestateManager = new VoiceStateManager(client);
 		client.permManager = new PermissionsManager(client);
 		client.lessonManager = new LessonManager(client);
-		// client.user.setActivity(``);
+		http.createServer(ExpressApp).listen(process.env.PORT, () => logger.log(`HTTP Server ready!`));
+		client.user.setActivity(`Testing ongoing!`);
 	})
 	.on(`disconnect`, () => { logger.warn(`Disconnected!`); })
 	.on(`reconnecting`, () => { logger.warn(`Reconnecting...`); })
@@ -98,5 +99,5 @@ client.registry
 	.registerDefaultCommands({ eval: false, prefix: false })
 	.registerCommandsIn(join(__dirname, `commands`));
 
+global.client = client;
 client.login(process.env.TOKEN);
-createServer(ExpressApp).listen(process.env.PORT);
