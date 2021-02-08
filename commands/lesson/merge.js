@@ -83,8 +83,6 @@ module.exports = class MergeCommand extends commando.Command {
 					if (groupcount == size) {
 						embedmsg.edit(newembed);
 					}
-					// Log the userlist
-					console.log(userlist);
 					// Increment groupcount by onme
 					groupcount++;
 				});
