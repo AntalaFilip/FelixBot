@@ -1,1 +1,2 @@
-# FELIX Discord Bot - refactor in progress, this version currently DOES NOT work.
+# FelixBot
+A Discord bot to help teachers with lesson management. Currently being refactored, and this version is NOT production ready.
