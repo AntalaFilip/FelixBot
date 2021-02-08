@@ -8,13 +8,16 @@ router.get('/', (req, res) => {
 	res.setHeader(`WWW-Authenticate`, `Bearer realm="Discord API", "UTF-8"`);
 	if (!token) return res.status(401).send();
 	authorize(token)
-		.then(result => {
-			res.send(result);
-		}, err => {
-			if (err == false) res.status(401).send();
-			else if (err.status) res.status(err.status).send();
-			else res.status(500).send();
-		});
+		.then(
+			result => {
+				res.send(result);
+			},
+			err => {
+				if (err === false) res.status(401).send();
+				else if (err.status) res.status(err.status).send();
+				else res.status(500).send();
+			},
+		);
 });
 
 function authorize(token) {

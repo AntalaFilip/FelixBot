@@ -1,6 +1,6 @@
 const commando = require(`discord.js-commando`);
 
-module.exports = class AudioCommand extends commando.Command {
+module.exports = class AudioVolumeCommand extends commando.Command {
 	constructor(client) {
 		super(client, {
 			name: `volume`,
@@ -23,7 +23,7 @@ module.exports = class AudioCommand extends commando.Command {
 	}
 	async run(message, args) {
 		if (message.member.voice.channel) {
-			const lesson = this.client.lessons.find(les => les.class === message.member.voice.channel.name.slice(0, 2));
+			const lesson = /* this.client.lessons.find(les => les.class === message.member.voice.channel.name.slice(0, 2)); */ null;
 			if (lesson && message.member != lesson.teacher) return message.reply(`Only the teacher can play audio during the lesson!`).then(res => {res.delete({ timeout: 5000 }); message.delete({ timeout: 5000 });});
 
 			const memchan = message.member.voice.channel;

@@ -56,7 +56,7 @@ class TeachCommand extends Command {
 			// Get the voice channel
 			const chan = teacher.voice.channel;
 			// Get the class ID
-			let clsid = chan.name.slice(0, 2);
+			let clsid = global.stringUtils.getChanName(chan).slice(0, 2);
 			// Special exception for Ko&Pa lessons
 			if (chan.parentID == `770594101002764330`) clsid = `ko&pa`;
 			// Check if there aren't lessons running already
@@ -73,7 +73,7 @@ class TeachCommand extends Command {
 				group = lsid.substring(lsid.indexOf('$') + 1, lsid.indexOf('%'));
 			}
 			// Start the lesson
-			this.client.lessonManager.start(new Lesson(null, null, teacher, lesson, clsid, group, this.client.timeUtils.getCurrentPeriod(), Array.from(chan.members.values())));
+			const started = await this.client.lessonManager.start(new Lesson(null, null, teacher, lesson, clsid, group, this.client.timeUtils.getCurrentPeriod(), Array.from(chan.members.values())));
 			message.reply(`Starting, check the subject channel for confirmation`);
 		}
 		// Else if the lesson is being ended

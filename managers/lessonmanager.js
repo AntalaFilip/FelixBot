@@ -74,6 +74,7 @@ class LessonManager {
 	 * @param {Lesson} lesson
 	 */
 	async start(lesson) {
+		if (lesson instanceof Lesson == false) return new Error(`Something went wrong; the lesson is not a Lesson!`);
 		this.lessons.push(lesson);
 		const settings = await this.client.databaseManager.getSettings();
 		const current = timetable[new Date().getDay()].filter(ls => ls.includes(`@${lesson.classid}`) && ls.includes(`%${lesson.period}`) && ls.includes(`^${settings.week}`));

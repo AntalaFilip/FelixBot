@@ -7,6 +7,7 @@
     "@discordjs/opus": "^0.3.3",
     "axios": "^0.21.1",
     "common-tags": "^1.8.0",
+    "cors": "^2.8.5",
     "discord.js": "^12.3.1",
     "discord.js-commando": "git+https://github.com/discordjs/Commando.git",
     "dotenv": "^8.2.0",

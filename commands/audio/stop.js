@@ -1,6 +1,6 @@
 const commando = require(`discord.js-commando`);
 
-module.exports = class AudioCommand extends commando.Command {
+module.exports = class StopAudioCommand extends commando.Command {
 	constructor(client) {
 		super(client, {
 			name: `stop`,

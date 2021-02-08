@@ -22,8 +22,8 @@ const client = new CommandoClient({
 });
 
 const logger = new Logger("CLIENT");
-client.timeUtils = new TimeUtils(client);
-client.stringUtils = new StringUtils(client);
+global.timeUtils = new TimeUtils(client);
+global.stringUtils = new StringUtils(client);
 global.apilogger = new Logger("API");
 
 client
@@ -36,7 +36,7 @@ client
 		client.voicestateManager = new VoiceStateManager(client);
 		client.permManager = new PermissionsManager(client);
 		client.lessonManager = new LessonManager(client);
-		http.createServer(ExpressApp).listen(process.env.PORT, () => logger.log(`HTTP Server ready!`));
+		http.createServer(ExpressApp).listen(process.env.PORT, () => logger.log(`HTTP Server ready on ${process.env.PORT}!`));
 		client.user.setActivity(`Testing ongoing!`);
 	})
 	.on(`disconnect`, () => { logger.warn(`Disconnected!`); })

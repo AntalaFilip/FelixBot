@@ -4,8 +4,10 @@ const app = express();
 const lessonHandler = require('./lessonhandler');
 const authHandler = require('./auth').router;
 const authorizer = require('./auth').reqauth;
+const cors = require('cors');
 
 app.use(authorizer);
+app.use(cors({ origin: '*' }));
 
 app.use('/lessons', lessonHandler);
 
