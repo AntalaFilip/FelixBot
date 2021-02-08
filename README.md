@@ -1,1 +1,2 @@
-# FELIX Discord bot source code
+# FelixBot
+A Discord bot to help teachers with lesson management. Currently being refactored.
