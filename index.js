@@ -22,8 +22,6 @@ const client = new CommandoClient({
 });
 
 const logger = new Logger("CLIENT");
-global.timeUtils = new TimeUtils(client);
-global.stringUtils = new StringUtils(client);
 global.apilogger = new Logger("API");
 global.client = client;
 
