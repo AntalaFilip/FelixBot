@@ -73,8 +73,17 @@ class TeachCommand extends Command {
 				group = lsid.substring(lsid.indexOf('$') + 1, lsid.indexOf('%'));
 			}
 			// Start the lesson
-			const started = await this.client.lessonManager.start(new Lesson(null, null, teacher, lesson, clsid, group, this.client.timeUtils.getCurrentPeriod(), Array.from(chan.members.values())));
-			message.reply(`Starting, check the subject channel for confirmation`);
+			this.client.lessonManager.start(new Lesson(null, null, teacher, lesson, clsid, group, this.client.timeUtils.getCurrentPeriod(), Array.from(chan.members.values())))
+				.then(() => {
+					message.reply(`The lesson has started; check the subject channel for confirmation`)
+						.then(msg => {
+							msg.delete({ timeout: 5000 });
+							message.delete(5000);
+						});
+				})
+				.catch(err => {
+					throw new Error(`An error has occurred: \`${err}\``);
+				});
 		}
 		// Else if the lesson is being ended
 		else if (args.name === `end`) {
