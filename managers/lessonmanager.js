@@ -136,8 +136,6 @@ class LessonManager {
 
 		await this.client.databaseManager.endLesson(lesson);
 		this.lessons.splice(this.lessons.findIndex(val => val.id == lesson.id), 1);
-		this.logger.info(`Ending lesson ${lesson.id}`);
-		this.client.databaseManager.endLesson(lesson);
 
 		const pubembed = new MessageEmbed()
 			.setAuthor(lesson.teacher.name, lesson.teacher.member.user.avatarURL())
