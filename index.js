@@ -25,6 +25,7 @@ const logger = new Logger("CLIENT");
 global.timeUtils = new TimeUtils(client);
 global.stringUtils = new StringUtils(client);
 global.apilogger = new Logger("API");
+global.client = client;
 
 client
 	.on(`error`, logger.error)
@@ -99,5 +100,4 @@ client.registry
 	.registerDefaultCommands({ eval: false, prefix: false })
 	.registerCommandsIn(join(__dirname, `commands`));
 
-global.client = client;
 client.login(process.env.TOKEN);
