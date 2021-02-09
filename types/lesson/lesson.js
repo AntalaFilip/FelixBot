@@ -51,17 +51,6 @@ class Lesson {
 			}, this);
 		}
 	}
-
-	/**
-	 * Adds the given student to the lesson
-	 * @param {LessonStudent} student The student to add to the Lesson
-	 */
-	addStudent(student) {
-		if (this.students.includes(student)) return student;
-		this.students.push(student);
-		this.update();
-		return student;
-	}
 }
 
 module.exports = Lesson;
