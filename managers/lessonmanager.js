@@ -126,7 +126,7 @@ class LessonManager {
 		this.logger.info(`Ending lesson ${lesson.id}`);
 		this.client.databaseManager.endLesson(lesson);
 
-		const pembed = new MessageEmbed()
+		const pubembed = new MessageEmbed()
 			.setAuthor(lesson.teacher.name, lesson.teacher.member.user.avatarURL())
 			.setColor(`ff0000`)
 			.setTitle(`Lesson ended!`)
@@ -137,7 +137,7 @@ class LessonManager {
 			.setFooter(`The lesson has ended!`);
 		const ctg = lesson.teacher.member.guild.channels.cache.find(ch => ch.name.startsWith(lesson.classid)).parent;
 		const tchan = ctg.children.find(ch => ch.name.includes(lesson.lessonid));
-		tchan.send(pembed);
+		tchan.send(pubembed);
 
 		const sumembed = new MessageEmbed()
 			.setAuthor(this.client.user.username, this.client.user.avatarURL())
