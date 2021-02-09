@@ -106,6 +106,7 @@ class LessonManager {
 			.setFooter(`End the lesson by running !teach end`);
 		const tchan = ctg.children.find(ch => ch.name.includes(lesson.lessonid));
 		tchan.send(embed);
+		return embed;
 	}
 
 	/**
