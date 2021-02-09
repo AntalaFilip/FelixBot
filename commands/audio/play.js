@@ -32,11 +32,16 @@ module.exports = class AudioCommand extends commando.Command {
 					max: 20,
 					default: 4,
 				},
+				{
+					key: `seek`,
+					type: `number`,
+					default: 0,
+				},
 			],
 		});
 	}
 	/**
-	 * 
+	 *
 	 * @param {Message} message
 	 * @param {*} args
 	 */
@@ -56,7 +61,7 @@ module.exports = class AudioCommand extends commando.Command {
 				// Join the channel
 				const connection = await chan.join();
 				// Use ytdl to play the specified link
-				const dispatcher = connection.play(ytdl(args.loc, { filter: "audioonly" }), { volume: args.vol / 10 });
+				const dispatcher = connection.play(ytdl(args.loc, { filter: "audioonly" }), { volume: args.vol / 10, seek: args.seek });
 				// When playback ends, send a message and disconnect
 				dispatcher.on(`finish`, () => {
 					message.reply(`I have finished playing!`);
@@ -69,7 +74,7 @@ module.exports = class AudioCommand extends commando.Command {
 				// Join the channel
 				const connection = await chan.join();
 				// Play the specified link
-				const dispatcher = connection.play(`${args.loc}`, { volume: args.vol / 10 });
+				const dispatcher = connection.play(`${args.loc}`, { volume: args.vol / 10, seek: args.seek });
 				// When playback ends, send a message and disconnect
 				dispatcher.on(`finish`, () => {
 					message.reply(`I have finished playing!`);
