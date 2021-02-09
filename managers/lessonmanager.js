@@ -118,14 +118,14 @@ class LessonManager {
 		this.logger.info(`Ending lesson ${lesson.id}`);
 
 		try {
-		lesson.endedAt = new Date();
-		lesson.students.forEach(student => {
-			if (student.present) this.left(lesson, student);
-		});
-		lesson.allocated.forEach(chan => {
-			const name = chan.name.slice(1, chan.name.indexOf('$') - 1);
-			chan.setName(name);
-		});
+			lesson.endedAt = new Date();
+			lesson.students.forEach(student => {
+				if (student.present) this.left(lesson, student);
+			});
+			lesson.allocated.forEach(chan => {
+				const name = chan.name.slice(1, chan.name.indexOf('$') - 1);
+				chan.setName(name);
+			});
 		}
 		catch (e) {
 			const err = new Error(`Failed to set lesson properties; ${e}`);
@@ -160,17 +160,17 @@ class LessonManager {
 			.setFooter(`You can find the extended summary on the webpage`);
 
 		let i = 0;
-		for (const student in lesson.students) {
+		for (const student of lesson.students) {
 			if (i >= 25) {
 				lesson.teacher.member.createDM().then(dm => dm.send(`The attendance data is only partial - check the full attendance data on the webpage!`));
 				break;
 			}
 			const conms = new Array();
 			const dconms = new Array();
-			for (const connect in student.voice.connects) {
+			for (const connect of student.voice.connects) {
 				conms.push(connect.getTime());
 			}
-			for (const disconnect in student.voice.disconnects) {
+			for (const disconnect of student.voice.disconnects) {
 				dconms.push(disconnect.getTime());
 			}
 			let netms;
