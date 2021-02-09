@@ -1,5 +1,4 @@
 const { GuildMember } = require("discord.js");
-const { set } = require("../api/express");
 const Logger = require("../util/logger");
 
 class PermissionsManager {
@@ -35,12 +34,13 @@ class PermissionsManager {
 	isClassTeacher(member) {
 		return new Promise((resolve, reject) => {
 			if (!this.isTeacher(member)) resolve(null);
-			this.client.databaseManager.getSettings().then(settings => {
-				const classes = settings.classes;
-				const role = member.roles.cache.find(rl => classes.includes(rl.name.toLowerCase()));
-				if (role) resolve({ name: role.name.toLowerCase(), role: role });
-				else resolve(false);
-			}, err => reject(err));
+			this.client.databaseManager.getSettings()
+				.then(settings => {
+					const classes = settings.classes;
+					const role = member.roles.cache.find(rl => classes.includes(rl.name.toLowerCase()));
+					if (role) resolve({ name: role.name.toLowerCase(), role: role });
+					else resolve(false);
+				}, err => reject(err));
 		});
 	}
 
