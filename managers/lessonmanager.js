@@ -113,7 +113,11 @@ class LessonManager {
 	 * Ends the lesson.
 	 * @param {Lesson} lesson The Lesson that should be ended.
 	 */
-	end(lesson) {
+	async end(lesson) {
+		if (lesson instanceof Lesson == false) throw new Error(`Something went wrong; the lesson is not a Lesson!`);
+		this.logger.info(`Ending lesson ${lesson.id}`);
+
+		try {
 		lesson.endedAt = new Date();
 		lesson.students.forEach(student => {
 			if (student.present) this.left(lesson, student);
@@ -122,6 +126,15 @@ class LessonManager {
 			const name = chan.name.slice(1, chan.name.indexOf('$') - 1);
 			chan.setName(name);
 		});
+		}
+		catch (e) {
+			const err = new Error(`Failed to set lesson properties; ${e}`);
+			this.logger.error(err);
+			lesson.endedAt = null;
+			throw err;
+		}
+
+		await this.client.databaseManager.endLesson(lesson);
 		this.lessons.splice(this.lessons.findIndex(val => val.id == lesson.id), 1);
 		this.logger.info(`Ending lesson ${lesson.id}`);
 		this.client.databaseManager.endLesson(lesson);
