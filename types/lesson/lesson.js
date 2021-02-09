@@ -1,7 +1,4 @@
-const { GuildMember, VoiceChannel } = require("discord.js");
-const { CommandoClient } = require("discord.js-commando");
-const { all } = require("../../api/express");
-const LessonManager = require("../../managers/lessonmanager");
+const { GuildMember } = require("discord.js");
 const LessonStudent = require("./lessonstudent");
 const LessonTeacher = require("./lessonteacher");
 
