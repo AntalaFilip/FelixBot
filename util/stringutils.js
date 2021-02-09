@@ -1,3 +1,5 @@
+const { GuildChannel } = require("discord.js");
+
 const StringUtils = {
 	resolveClass(classid) {
 		return new Promise((resolve, reject) => {
@@ -9,6 +11,10 @@ const StringUtils = {
 		});
 	},
 
+	/**
+	 * Gets the channel idname
+	 * @param {GuildChannel} channel
+	 */
 	getChanName(channel) {
 		if (this.client.lessonManager.isAllocated(channel)) return channel.name.slice(1, 3);
 		else return channel.name.slice(0, 2);
