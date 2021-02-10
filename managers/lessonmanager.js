@@ -85,7 +85,10 @@ class LessonManager {
 		const vcs = ctg.children.filter(ch => ch.type == `voice` && !ch.name.includes('*'));
 		if (current.length == 0) current.push(null);
 		const toAlloc = Math.round(vcs.size / current.length);
-		this.logger.info(`Starting a lesson (${lesson.lessonid}@${lesson.classid}); allocating ${toAlloc} channels`);
+		this.logger.info(`Starting a lesson (${lesson.lessonid}@${lesson.classid}); will allocating ${toAlloc} channels`);
+		const id = await this.client.databaseManager.pushNewLesson(lesson);
+		lesson.id = id;
+
 		let i = 0;
 		vcs.each(ch => {
 			if (i >= toAlloc) return;
@@ -95,8 +98,6 @@ class LessonManager {
 			}
 		});
 		this.logger.debug(`Allocated ${i} channels for ${lesson.lessonid}@${lesson.classid}`);
-		const id = await this.client.databaseManager.pushNewLesson(lesson);
-		lesson.id = id;
 
 		const embed = new MessageEmbed()
 			.setAuthor(lesson.teacher.name, lesson.teacher.member.user.avatarURL())
@@ -108,7 +109,7 @@ class LessonManager {
 			.setURL(`https://localhost:5000/app/lesson/${lesson.id}`)
 			.setFooter(`End the lesson by reacting with the checkered flag`);
 		const tchan = ctg.children.find(ch => ch.name.includes(lesson.lessonid));
-		const pubmsg = tchan.send(embed);
+		const pubmsg = await tchan.send(embed);
 		lesson.emit(`start`);
 		reactions.addFunctionalReaction(`end`, pubmsg, lesson.teacher.member.user, lesson);
 		reactions.addFunctionalReaction([`merge`, `split`], pubmsg, lesson.teacher.member.user, lesson);
@@ -131,7 +132,7 @@ class LessonManager {
 			});
 			lesson.allocated.forEach(chan => {
 				const name = chan.name.slice(1, chan.name.indexOf('$') - 1);
-				chan.setName(name);
+				if (this.isAllocated(chan)) chan.setName(name);
 			});
 		}
 		catch (e) {
