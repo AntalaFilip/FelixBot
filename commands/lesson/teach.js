@@ -1,6 +1,8 @@
 const { Command, CommandoMessage } = require('discord.js-commando');
 const timetable = require('../../timetable');
 const Lesson = require('../../types/lesson/lesson');
+const str = require('../../util/stringutils');
+const time = require('../../util/timeutils');
 
 class TeachCommand extends Command {
 	constructor(client) {
@@ -56,7 +58,7 @@ class TeachCommand extends Command {
 			// Get the voice channel
 			const chan = teacher.voice.channel;
 			// Get the class ID
-			let clsid = global.stringUtils.getChanName(chan).slice(0, 2);
+			let clsid = str.getChanName(chan).slice(0, 2);
 			// Special exception for Ko&Pa lessons
 			if (chan.parentID == `770594101002764330`) clsid = `ko&pa`;
 			// Check if there aren't lessons running already
@@ -73,7 +75,7 @@ class TeachCommand extends Command {
 				group = lsid.substring(lsid.indexOf('$') + 1, lsid.indexOf('%'));
 			}
 			// Start the lesson
-			this.client.lessonManager.start(new Lesson(null, null, teacher, lesson, clsid, group, this.client.timeUtils.getCurrentPeriod(), Array.from(chan.members.values())))
+			this.client.lessonManager.start(new Lesson(null, null, teacher, lesson, clsid, group, time.getCurrentPeriod(), Array.from(chan.members.values())))
 				.then(() => {
 					message.reply(`The lesson has started; check the subject channel for confirmation`)
 						.then(msg => {
