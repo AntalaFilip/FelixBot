@@ -14,7 +14,7 @@ module.exports = class OngoingLessonsCommand extends Command {
 	}
 
 	run(message) {
-		const lessons = this.client.databaseManager.getOngoingLessons();
+		const lessons = this.client.lessonManager.lessons;
 		const embed = new MessageEmbed()
 			.setTitle(`Ongoing lessons:`)
 			.setAuthor(message.member.displayName, message.author.avatarURL())
