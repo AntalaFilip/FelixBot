@@ -22,15 +22,7 @@ client.spamprot = new Collection();
 const tick = async () => {
 	day = new Date().getDay();
 	updatePeriod();
-	watchStudent();
 	setTimeout(() => { tick(); }, 10000);
-};
-
-const watchStudent = () => {
-	client.guilds.cache.find(gld => gld.id === `702836521622962198`).members.fetch().then(members => {
-		const usr = members.random();
-		if (usr.id != `702803698463801355` && usr.id != `702801293089177601`) client.user.setActivity(`${usr.nickname || usr.user.username}`, { type: `WATCHING` });
-	});
 };
 
 const updatePeriod = () => {
@@ -285,7 +277,7 @@ client
 	.on(`debug`, console.log)
 	.on(`ready`, () => {
 		console.log(`Ready; logged in as ${client.user.username}#${client.user.discriminator} (${client.user.id})`);
-		// client.user.setActivity(``);
+		client.user.setActivity(`How to be a good bot`);
 		tick();
 	})
 	.on(`disconnect`, () => { console.warn(`Disconnected!`); })
