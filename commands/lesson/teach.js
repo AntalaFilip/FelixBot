@@ -81,7 +81,7 @@ class TeachCommand extends Command {
 					message.reply(`The lesson has started; check the subject channel for confirmation`)
 						.then(msg => {
 							msg.delete({ timeout: 5000 });
-							message.delete(5000);
+							message.delete({ timeout: 5000 });
 						});
 				})
 				.catch(err => {
