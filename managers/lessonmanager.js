@@ -147,7 +147,7 @@ class LessonManager {
 		this.lessons.splice(this.lessons.findIndex(val => val.id == lesson.id), 1);
 
 		const pubembed = new MessageEmbed()
-			.setAuthor(username, username == lesson.teacher.name ? lesson.teacher.member.user.avatarURL() : null)
+			.setAuthor(username, username == lesson.teacher.name ? lesson.teacher.member.user.avatarURL() : this.client.user.avatarURL())
 			.setColor(`ff0000`)
 			.setTitle(`Lesson ended!`)
 			.setDescription(`${lesson.lessonid.toUpperCase()} has ended!`)
