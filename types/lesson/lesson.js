@@ -1,9 +1,9 @@
 const { GuildMember } = require("discord.js");
 const LessonStudent = require("./lessonstudent");
 const LessonTeacher = require("./lessonteacher");
+const EventEmitter = require('events');
 
-
-class Lesson {
+class Lesson extends EventEmitter {
 	/**
 	 * Creates a lesson object
 	 * @param {number} id The ID of the Lesson, generated automatically if creating a new Lesson, if present, Lesson won't get pushed to database automatically.
@@ -18,6 +18,7 @@ class Lesson {
 	 * @param {Date} endedAt The date when the lesson ended (if creating an ended lesson)
 	 */
 	constructor(id, allocated, teacher, lessonid, classid, group, period, students, startedAt, endedAt) {
+		super();
 		this.id = id;
 		this.allocated = new Array();
 		// Create a LessonTeacher from the teacher member
