@@ -94,7 +94,7 @@ class TeachCommand extends Command {
 			// If the teacher is teaching a lesson:
 			if (lesson) {
 				// End the lesson
-				this.client.lessonManager.end(lesson);
+				this.client.lessonManager.end(lesson, message.member.displayName);
 			}
 			// Else send a warning
 			else {

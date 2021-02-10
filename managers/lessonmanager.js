@@ -112,10 +112,11 @@ class LessonManager {
 	/**
 	 * Ends the lesson.
 	 * @param {Lesson} lesson The Lesson that should be ended.
+	 * @param {string} username the name of the user that is ending the lesson
 	 */
-	async end(lesson) {
+	async end(lesson, username = `SYSTEM`) {
 		if (lesson instanceof Lesson == false) throw new Error(`Something went wrong; the lesson is not a Lesson!`);
-		this.logger.info(`Ending lesson ${lesson.id}`);
+		this.logger.info(`Ending lesson ${lesson.id}; executed by ${username}`);
 
 		try {
 			lesson.endedAt = new Date();
@@ -138,7 +139,7 @@ class LessonManager {
 		this.lessons.splice(this.lessons.findIndex(val => val.id == lesson.id), 1);
 
 		const pubembed = new MessageEmbed()
-			.setAuthor(lesson.teacher.name, lesson.teacher.member.user.avatarURL())
+			.setAuthor(username, username == lesson.teacher.name ? lesson.teacher.member.user.avatarURL() : null)
 			.setColor(`ff0000`)
 			.setTitle(`Lesson ended!`)
 			.setDescription(`${lesson.lessonid.toUpperCase()} has ended!`)
