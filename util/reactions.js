@@ -27,12 +27,12 @@ const reactionUtils = {
 		// If no functional emojis have been found from the functionname, throw a new error, that should not happen.
 		if (!emoji) throw new Error();
 		// Create a Reaction collector on the passes message
-		const collector = message.createReactionCollector();
+		const collector = message.createReactionCollector((reaction, user) => emoji.includes(reaction.emoji.name));
 		// When the collector gets a reaction
 		collector.on(`collect`, async (reaction, user) => {
-			if (reaction.me) return;
+			if (user.id == global.client.user.id) return;
 			// If the emoji is inluded in the emoji list and the User is authorized to add the reaction
-			if (emoji.includes(reaction.emoji.toString()) && !authorized || authorized.includes(user)) {
+			if (!authorized || authorized.includes(user)) {
 				// Run the function for that reaction
 				try {
 					await this.runFunction(reaction, lesson);
