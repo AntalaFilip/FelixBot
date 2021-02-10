@@ -3,6 +3,8 @@ const { MessageEmbed, GuildMember, VoiceChannel, CategoryChannel } = require('di
 const Logger = require("../util/logger");
 const Lesson = require("../types/lesson/lesson");
 const timetable = require("../timetable");
+const reactions = require("../util/reactions");
+const time = require('../util/timeutils');
 const LessonParticipant = require("../types/lesson/lessonparticipant");
 const LessonStudent = require("../types/lesson/lessonstudent");
 
@@ -61,11 +63,12 @@ class LessonManager {
 	checkTimetable(subject, clsid, teacher) {
 		return new Promise((resolve, reject) => {
 			const day = new Date().getDay();
-			const period = this.client.timeUtils.getCurrentPeriod();
-			this.client.databaseManager.getSettings().then(settings => {
-				const week = settings.week;
-				resolve(timetable[day].find(ls => ls.includes(`!${subject}@${clsid}#${teacher.id}`) && ls.includes(`%${period}`) && ls.includes(`^${week}`)));
-			}, reason => reject(reason));
+			const period = time.getCurrentPeriod();
+			this.client.databaseManager.getSettings()
+				.then(settings => {
+					const week = settings.week;
+					resolve(timetable[day].find(ls => ls.includes(`!${subject}@${clsid}#${teacher.id}`) && ls.includes(`%${period}`) && ls.includes(`^${week}`)));
+				}, reason => reject(reason));
 		});
 	}
 
@@ -103,9 +106,12 @@ class LessonManager {
 			.setThumbnail('https://cdn.discordapp.com/attachments/371283762853445643/768906541277380628/Felix-logo-01.png')
 			.setTimestamp()
 			.setURL(`https://localhost:5000/app/lesson/${lesson.id}`)
-			.setFooter(`End the lesson by running !teach end`);
+			.setFooter(`End the lesson by reacting with the checkered flag`);
 		const tchan = ctg.children.find(ch => ch.name.includes(lesson.lessonid));
-		tchan.send(embed);
+		const pubmsg = tchan.send(embed);
+		lesson.emit(`start`);
+		reactions.addFunctionalReaction(`end`, pubmsg, lesson.teacher.member.user, lesson);
+		reactions.addFunctionalReaction([`merge`, `split`], pubmsg, lesson.teacher.member.user, lesson);
 		return embed;
 	}
 
@@ -183,6 +189,7 @@ class LessonManager {
 			i++;
 		}
 		lesson.teacher.member.createDM().then(dm => dm.send(sumembed));
+		lesson.emit(`end`);
 	}
 
 	/**
@@ -201,6 +208,7 @@ class LessonManager {
 	allocate(channel, lesson) {
 		channel.setName('~' + channel.name + ' $' + lesson.group, `Allocated by ${lesson.teacher.name}`);
 		lesson.allocated.push(channel);
+		lesson.emit(`allocate`, channel);
 		this.update(lesson);
 	}
 
@@ -221,6 +229,7 @@ class LessonManager {
 		if (participant instanceof LessonStudent && !lesson.students.includes(participant)) lesson.students.push(participant);
 		participant.voice.connects.push(new Date());
 		participant.present = true;
+		lesson.emit(`joined`, participant);
 		this.update(lesson);
 	}
 
@@ -232,6 +241,7 @@ class LessonManager {
 	left(lesson, participant) {
 		participant.voice.disconnects.push(new Date());
 		participant.present = false;
+		lesson.emit(`left`, participant);
 		this.update(lesson);
 	}
 
