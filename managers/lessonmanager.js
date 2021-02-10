@@ -165,15 +165,15 @@ class LessonManager {
 				lesson.teacher.member.createDM().then(dm => dm.send(`The attendance data is only partial - check the full attendance data on the webpage!`));
 				break;
 			}
-			const conms = new Array();
-			const dconms = new Array();
+			let conms = 0;
+			let dconms = 0;
 			for (const connect of student.voice.connects) {
-				conms.push(connect.getTime());
+				conms += connect.getTime();
 			}
 			for (const disconnect of student.voice.disconnects) {
-				dconms.push(disconnect.getTime());
+				dconms += disconnect.getTime();
 			}
-			let netms;
+			let netms = 0;
 			if (conms > dconms) netms = conms - dconms;
 			else netms = dconms - conms;
 			const min = Math.floor(netms / 60000);
