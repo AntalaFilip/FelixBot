@@ -86,7 +86,7 @@ class LessonManager {
 		const vcs = ctg.children.filter(ch => ch.type == `voice` && !ch.name.includes('*'));
 		if (current.length == 0) current.push(null);
 		const toAlloc = Math.round(vcs.size / current.length);
-		this.logger.info(`Starting a lesson (${lesson.lessonid}@${lesson.classid}); will allocating ${toAlloc} channels`);
+		this.logger.info(`Starting a lesson (${lesson.lessonid}@${lesson.classid}); will allocate ${toAlloc} channels`);
 		const id = await this.client.databaseManager.pushNewLesson(lesson);
 		lesson.id = id;
 
