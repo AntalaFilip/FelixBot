@@ -5,6 +5,7 @@ const Lesson = require("../types/lesson/lesson");
 const timetable = require("../timetable");
 const reactions = require("../util/reactions");
 const time = require('../util/timeutils');
+const str = require('../util/stringutils');
 const LessonParticipant = require("../types/lesson/lessonparticipant");
 const LessonStudent = require("../types/lesson/lessonstudent");
 
@@ -185,7 +186,7 @@ class LessonManager {
 			if (conms > dconms) netms = conms - dconms;
 			else netms = dconms - conms;
 			const min = Math.floor(netms / 60000);
-			const atten = [`First joined: ${student.voice.connects[0]}`, `Total time in lesson: ${min} min`];
+			const atten = [`First joined: ${str.dateToString(student.voice.connects[0])}`, `Total time in lesson: ${min} min`];
 			sumembed.addField(student.member.displayName, atten);
 			i++;
 		}
