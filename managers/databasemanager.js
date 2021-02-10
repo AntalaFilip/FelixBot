@@ -109,7 +109,7 @@ class DatabaseManager {
 	 */
 	updateLesson(lesson) {
 		return new Promise((resolve, reject) => {
-			this.logger.debug(`Updating lesson: ${lesson}`);
+			this.logger.debug(`Updating lesson: ${lesson.id}`);
 			const allocated = new Array();
 			lesson.allocated.forEach(chan => allocated.push(chan.id));
 			db.query(`UPDATE lessons SET students = '${JSON.stringify(lesson.students)}', allocated = '${JSON.stringify(allocated)}' WHERE id = ${lesson.id}`, err => {
@@ -126,7 +126,7 @@ class DatabaseManager {
 	 */
 	endLesson(lesson) {
 		return new Promise((resolve, reject) => {
-			this.logger.debug(`Ending lesson: ${lesson}`);
+			this.logger.debug(`Ending lesson: ${lesson.id}`);
 			this.updateLesson(lesson);
 			db.query(`UPDATE lessons SET endedat = "${str.dateToString(lesson.endedAt)}" WHERE id = ${lesson.id}`, err => {
 				if (err) reject(new Error(`Error while inserting into database, is 'endedAt' set? - ${err}`));
@@ -142,7 +142,7 @@ class DatabaseManager {
 	 */
 	pushNewLesson(lesson) {
 		return new Promise((resolve, reject) => {
-			this.logger.debug(`Inserting new lesson: ${lesson}`);
+			this.logger.debug(`Inserting new lesson: ${lesson.lessonid + '@' + lesson.classid}`);
 			str.resolveClass(lesson.classid).then((classname) => {
 				const studentJson = JSON.stringify(lesson.students);
 				const allocated = new Array();
