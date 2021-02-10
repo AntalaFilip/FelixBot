@@ -6,7 +6,7 @@ const reactionUtils = {
 	 * Adds a functional reaction to the message
 	 * @param {string | string[]} functionname
 	 * @param {Message} message
-	 * @param {User | User[]} authorized The members authorized to react
+	 * @param {User[]} authorized The members authorized to react
 	 * @param {Lesson} lesson
 	 */
 	async addFunctionalReaction(functionname, message, authorized = null, lesson = null) {
