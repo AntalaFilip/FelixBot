@@ -35,7 +35,7 @@ const reactionUtils = {
 			if (!authorized || authorized.includes(user)) {
 				// Run the function for that reaction
 				try {
-					await this.runFunction(reaction, lesson);
+					await this.runFunction(reaction, user, lesson);
 				}
 				catch (err) {
 					message.channel.send(`Caught error while executing action: ${err}`);
@@ -71,12 +71,13 @@ const reactionUtils = {
 	/**
 	 *
 	 * @param {MessageReaction} reaction
+	 * @param {User} user
 	 * @param {Lesson} lesson
 	 */
-	async runFunction(reaction, lesson = null) {
+	async runFunction(reaction, user, lesson = null) {
 		switch(reaction.emoji.toString()) {
 		case `🏁`: {
-			if (lesson) return await global.client.lessonManager.end(lesson);
+			if (lesson) return await global.client.lessonManager.end(lesson, lesson.teacher.member.guild.member(user).displayName);
 			else throw new Error(`No lesson was passed!`);
 		}
 		case `↩`: {
