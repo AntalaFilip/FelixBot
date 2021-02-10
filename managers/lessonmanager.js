@@ -133,7 +133,7 @@ class LessonManager {
 			});
 			lesson.allocated.forEach(chan => {
 				const name = chan.name.slice(1, chan.name.indexOf('$') - 1);
-				if (this.isAllocated(chan)) chan.setName(name);
+				if (this.isAllocated(chan)) chan.setName(name, `Lesson ended by: ${username}`);
 			});
 		}
 		catch (e) {
