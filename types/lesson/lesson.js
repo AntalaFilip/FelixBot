@@ -1,4 +1,4 @@
-const { GuildMember } = require("discord.js");
+const { GuildMember, VoiceChannel } = require("discord.js");
 const LessonStudent = require("./lessonstudent");
 const LessonTeacher = require("./lessonteacher");
 const EventEmitter = require('events');
@@ -20,6 +20,9 @@ class Lesson extends EventEmitter {
 	constructor(id, allocated, teacher, lessonid, classid, group, period, students, startedAt, endedAt) {
 		super();
 		this.id = id;
+		/**
+		 * @type {VoiceChannel[]}
+		 */
 		this.allocated = new Array();
 		// Create a LessonTeacher from the teacher member
 		this.teacher = new LessonTeacher(teacher);
@@ -38,6 +41,9 @@ class Lesson extends EventEmitter {
 		if (endedAt) this.endedAt = new Date(endedAt);
 		else this.endedAt = null;
 
+		/**
+		 * @type {LessonStudent[]}
+		 */
 		this.students = new Array();
 		// For each member/studentdata if its ID doesn't match the teach, create a new LessonStudent and push it to the studentlist.
 		if (students) {

@@ -3,10 +3,14 @@ const { GuildMember } = require("discord.js");
 class LessonParticipant {
 	/**
 	 * Creates a LessonParticipant object
-	 * @param {GuildMember | Object} participant The member or object to create a LessonParticipant object from
+	 * @param {GuildMember | {member: GuildMember, created: Date, voice: {connects: Array<Date>, disconnects: Array<Date>, mutes: Array, deafs: Array, video: Array}}} participant The member or object to create a LessonParticipant object from
 	 */
 	constructor(participant) {
 		this.present = true;
+
+		/**
+		 * @type {{connects: Array<Date>, disconnects: Array<Date>, mutes: Array, deafs: Array, video: Array}}
+		 */
 		this.voice = {
 			connects: new Array(),
 			disconnects: new Array(),
@@ -14,6 +18,11 @@ class LessonParticipant {
 			deafs: new Array(),
 			video: new Array(),
 		};
+
+		/**
+		 * @type {GuildMember}
+		 */
+		this.member;
 
 		if (participant instanceof GuildMember) {
 			this.member = participant;
