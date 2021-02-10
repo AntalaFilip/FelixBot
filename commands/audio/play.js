@@ -34,7 +34,8 @@ module.exports = class AudioCommand extends commando.Command {
 				},
 				{
 					key: `seek`,
-					type: `number`,
+					prompt: `Specify time to start at`,
+					type: `integer`,
 					default: 0,
 				},
 			],
