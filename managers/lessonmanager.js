@@ -278,61 +278,6 @@ class LessonManager {
 		participant.voice.video.push([new Date(), state]);
 		this.update(lesson);
 	}
-
-
-	/*
-		const embed = new MessageEmbed()
-			.setColor(`#00ff00`)
-			.setTitle(`Lesson started!`)
-			.setAuthor(`${teacher.displayName}`, teacher.user.avatarURL())
-			.setDescription(`${lesson.toUpperCase()} has started, happy learning!`)
-			.setThumbnail('https://cdn.discordapp.com/attachments/371283762853445643/768906541277380628/Felix-logo-01.png')
-			.setTimestamp()
-			.setFooter(`End the lesson by running !teach end`);
-		crntlsn.embedmsg = await tchan.send(embed);
-	} */
-
-	/*  // Create the yellow private embed, summarizing the lesson
-		const privateembed = new MessageEmbed()
-			.setColor(`#ffff00`)
-			.setTitle(`Summary of ${lesson.lesson.toUpperCase()}@${lesson.class.charAt(0).toUpperCase() + lesson.class.slice(1)}`)
-			.setAuthor(`${this.client.user.username}`, `${this.client.user.avatarURL()}`)
-			.setDescription(`The summary of ${lesson.lesson.toUpperCase()}@${lesson.class.charAt(0).toUpperCase() + lesson.class.slice(1)} lasting from ${lesson.startedAt.time} to ${new Date().getHours()}:${new Date().getMinutes()}`)
-			.setThumbnail(`https://cdn.discordapp.com/attachments/371283762853445643/768906541277380628/Felix-logo-01.png`)
-			.setTimestamp();
-		const extraembed = new MessageEmbed()
-			.setColor(`#ffff00`);
-		// Populate the private embed - loop until all the student data has been processed
-		for (let i = 0; i < students.length; i++) {
-			// Get the current student's name
-			const name = students[i].name;
-			// Create a var with join times
-			let joinedms = 0;
-			// Create a var with leave times
-			let leftms = 0;
-			// Create a var with the net time in lesson (ms)
-			let netms;
-			if (joinedms > leftms) netms = joinedms - leftms;
-			else netms = leftms - joinedms;
-			// Convert the net time to minutes and floor them
-			const min = Math.floor(netms / 60000);
-			// Get the first joined time
-			const firstjoined = new Date(students[i].attendance.joined[0]);
-			// Create an array with the current student's processed attendance data
-			const atten = [`First joined at ${firstjoined.getHours()}:${firstjoined.getMinutes()}`, `Total time: ${min} min`];
-			// Add the data to the embed, if the embed's limit is hit, use the extra embed
-			if (i <= 25) { privateembed.addField(name, atten, true); }
-			else if (i < 50) { extraembed.addField(name, atten, true); }
-			else { teacher.createDM().then(dm => dm.send(`Unfortunately, I have reached the user limit I can log for you`)); break; }
-		}
-		// Send the populated private embed to the teacher
-		teacher.createDM().then(dm => {
-			dm.send(privateembed);
-			if (extraembed.fields.length != 0) dm.send(extraembed);
-		});
-		// Delete the lesson from the map
-		this.client.lessons.delete(lessonKey);
-	} */
 }
 
 module.exports = LessonManager;
