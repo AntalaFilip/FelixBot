@@ -195,9 +195,10 @@ class LessonManager {
 	/**
 	 * Allocates the specified VoiceChannel to the Lesson.
 	 * @param {VoiceChannel} channel The VoiceChannel to allocate.
+	 * @param {Lesson} lesson The Lesson to allocate the VoiceChannel to.
 	 */
 	allocate(channel, lesson) {
-		channel.setName('~' + channel.name + ' $' + lesson.group);
+		channel.setName('~' + channel.name + ' $' + lesson.group, `Allocated by ${lesson.teacher.name}`);
 		lesson.allocated.push(channel);
 		this.update(lesson);
 	}
