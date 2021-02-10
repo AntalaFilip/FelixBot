@@ -1,6 +1,7 @@
 const { Command, CommandoMessage } = require('discord.js-commando');
 const timetable = require('../../timetable');
 const Lesson = require('../../types/lesson/lesson');
+const Logger = require('../../util/logger');
 const str = require('../../util/stringutils');
 const time = require('../../util/timeutils');
 
@@ -84,7 +85,9 @@ class TeachCommand extends Command {
 						});
 				})
 				.catch(err => {
-					throw new Error(`An error has occurred: \`${err}\``);
+					const e = new Error(`An error has occurred: \`${err}\``);
+					message.channel.send(e);
+					new Logger(`TeachCommand`).error(e);
 				});
 		}
 		// Else if the lesson is being ended
