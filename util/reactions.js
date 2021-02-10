@@ -39,7 +39,7 @@ const reactionUtils = {
 				}
 				catch (err) {
 					message.channel.send(`Caught error while executing action: ${err}`);
-					global.client.logger.error(`Failed to execute FunctionalReaction; ${err}`);
+					global.client.emit(`error`, `Failed to execute FunctionalReaction; ${err}`);
 				}
 				reaction.users.remove(user);
 			}
@@ -59,7 +59,12 @@ const reactionUtils = {
 
 		// Add the desired reactions
 		emoji.forEach(em => {
+			try {
 			message.react(em);
+			}
+			catch (e) {
+				global.client.emit(`error`, new Error(`Failed to react to message with emoji ${em}; ${e}`));
+			}
 		});
 	},
 
