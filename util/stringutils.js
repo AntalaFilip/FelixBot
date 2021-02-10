@@ -3,7 +3,7 @@ const { GuildChannel } = require("discord.js");
 const StringUtils = {
 	resolveClass(classid) {
 		return new Promise((resolve, reject) => {
-			this.client.databaseManager.getSettings().then(sett => {
+			global.client.databaseManager.getSettings().then(sett => {
 				const resolved = sett.classes.find(val => val.includes(classid));
 				if (resolved) resolve(resolved);
 				else reject('This class does not exist!');
@@ -16,7 +16,7 @@ const StringUtils = {
 	 * @param {GuildChannel} channel
 	 */
 	getChanName(channel) {
-		if (this.client.lessonManager.isAllocated(channel)) return channel.name.slice(1, 3);
+		if (global.client.lessonManager.isAllocated(channel)) return channel.name.slice(1, 3);
 		else return channel.name.slice(0, 2);
 	},
 
