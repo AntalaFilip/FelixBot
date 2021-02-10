@@ -90,13 +90,13 @@ class VoiceStateManager {
 		if (oldstate.selfDeaf != newstate.selfDeaf) {
 			const lesson = lessons.find(ls => ls.classid == str.getChanName(newstate.channel));
 			if (!lesson) return;
-			const participant = lesson.students.find(st => st.member.id == member.id) || lesson.teacher.member.id == member.id ? lesson.teacher.member : null;
+			const participant = lesson.students.find(st => st.member.id == member.id) || lesson.teacher.member.id == member.id ? lesson.teacher : null;
 			if (participant) mgr.toggledeaf(lesson, participant, newstate.serverDeaf);
 		}
 		if (oldstate.selfVideo != newstate.selfVideo) {
 			const lesson = lessons.find(ls => ls.classid == str.getChanName(newstate.channel));
 			if (!lesson) return;
-			const participant = lesson.students.find(st => st.member.id == member.id) || lesson.teacher.member.id == member.id ? lesson.teacher.member : null;
+			const participant = lesson.students.find(st => st.member.id == member.id) || lesson.teacher.member.id == member.id ? lesson.teacher : null;
 			if (participant) mgr.togglevideo(lesson, participant, newstate.selfVideo);
 		}
 	}
