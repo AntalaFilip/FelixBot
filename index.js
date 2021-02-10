@@ -75,8 +75,7 @@ client
 		
 	})
 	.on(`guildMemberAdd`, member => {
-		const command = new SendWelcomeCommand(client);
-		command.exec(member);
+		new SendWelcomeCommand(client).exec(member);
 	});
 
 client.setProvider(
