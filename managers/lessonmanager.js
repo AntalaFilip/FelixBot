@@ -112,8 +112,8 @@ class LessonManager {
 		const tchan = ctg.children.find(ch => ch.name.includes(lesson.lessonid));
 		const pubmsg = await tchan.send(embed);
 		lesson.emit(`start`);
-		reactions.addFunctionalReaction(`end`, pubmsg, lesson.teacher.member.user, lesson);
-		reactions.addFunctionalReaction([`merge`, `split`], pubmsg, lesson.teacher.member.user, lesson);
+		reactions.addFunctionalReaction(`end`, pubmsg, [lesson.teacher.member.user], lesson);
+		reactions.addFunctionalReaction([`merge`, `split`], pubmsg, [lesson.teacher.member.user], lesson);
 		return embed;
 	}
 
