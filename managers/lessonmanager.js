@@ -41,7 +41,8 @@ class LessonManager {
 	 */
 	forceSync() {
 		return new Promise((resolve, reject) => {
-			this.client.databaseManager.getOngoingLessons().then(lss => {
+			this.client.databaseManager.getOngoingLessons()
+				.then(lss => {
 				this.lessons = lss;
 				resolve(this.lessons);
 			}, err => reject(err));
