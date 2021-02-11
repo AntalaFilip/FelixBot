@@ -17,7 +17,10 @@ class LessonManager {
 	constructor(client) {
 		this.client = client;
 		this.logger = new Logger("LessonManager");
-		this.lessons = null;
+		/**
+		 * @type {Lesson[]}
+		 */
+		this.lessons = [];
 		this.ready = new Promise((resolve, reject) => {
 			client.databaseManager.getOngoingLessons()
 				.then(lss => {
