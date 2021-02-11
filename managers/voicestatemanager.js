@@ -25,6 +25,7 @@ class VoiceStateManager {
 		const oldchan = oldstate.channel;
 		const newchan = newstate.channel;
 		const mgr = this.client.lessonManager;
+		await mgr.ready;
 		const lessons = mgr.lessons;
 		if (newchan != oldchan) {
 			if (oldchan) {
