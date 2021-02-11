@@ -1,4 +1,8 @@
 class Logger {
+	/**
+	 *
+	 * @param {string} instance
+	 */
 	constructor(instance) {
 		this.instance = instance;
 	}
