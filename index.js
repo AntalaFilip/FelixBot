@@ -3,6 +3,7 @@ const oneLine = require(`common-tags`).oneLine;
 const { join } = require('path');
 const { open } = require('sqlite');
 const { Database } = require('sqlite3');
+const readline = require(`readline`);
 
 const LessonManager = require('./managers/lessonmanager');
 const VoiceStateManager = require('./managers/voicestatemanager');
@@ -21,9 +22,19 @@ const client = new CommandoClient({
 	commandPrefix: process.env.PREFIX,
 });
 
+const rl = readline.createInterface({
+	input: process.stdin,
+	output: process.stdout,
+});
+
+
 const logger = new Logger("CLIENT");
 global.apilogger = new Logger("API");
 global.client = client;
+
+rl.on(`line`, str => {
+	logger.debug(`INPUT: ` + str);
+});
 
 client
 	.on(`error`, logger.error)
