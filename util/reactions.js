@@ -94,6 +94,11 @@ const reactionUtils = {
 		case `end`: return `🏁`;
 		case `merge`: return `↩`;
 		case `split`: return `🔀`;
+		case `playpause`: return `⏯`;
+		case `play`: return `▶`;
+		case `pause`: return `⏸`;
+		case `stop`: return `⏹`;
+		case `record`: return `⏺`;
 		default: return null;
 		}
 	},
