@@ -3,11 +3,12 @@ const { GuildChannel } = require("discord.js");
 const StringUtils = {
 	resolveClass(classid) {
 		return new Promise((resolve, reject) => {
-			global.client.databaseManager.getSettings().then(sett => {
-				const resolved = sett.classes.find(val => val.includes(classid));
-				if (resolved) resolve(resolved);
-				else reject('This class does not exist!');
-			});
+			global.client.databaseManager.getSettings()
+				.then(sett => {
+					const resolved = sett.classes.find(val => val.includes(classid));
+					if (resolved) resolve(resolved);
+					else reject('This class does not exist!');
+				});
 		});
 	},
 
