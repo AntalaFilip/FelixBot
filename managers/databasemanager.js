@@ -47,7 +47,7 @@ class DatabaseManager {
 	/**
 	 * Fetches all ongoing lessons in the database, parses them into Lesson objects, and returns them as an array.
 	 * @param {CommandoGuild} guild
-	 * @returns {Promise<Lesson[]>} Promise with an array of Lesson objects, or an empty array, if no lessons are ongoing.
+	 * @returns {Promise<Lesson[] | Array>} Promise with an array of Lesson objects, or an empty array, if no lessons are ongoing.
 	 */
 	getOngoingLessons(guild) {
 		return new Promise((resolve, reject) => {
