@@ -1,4 +1,5 @@
 const { CommandoClient, FriendlyError, SQLiteProvider } = require('discord.js-commando');
+const { VoiceChannel } = require('discord.js');
 const oneLine = require(`common-tags`).oneLine;
 const { join } = require('path');
 const { open } = require('sqlite');
@@ -15,6 +16,7 @@ const SendWelcomeCommand = require('./commands/dev/sendwelcome');
 const Logger = require('./util/logger');
 const ExpressApp = require('./api/express');
 const http = require('http');
+const Lesson = require('./types/lesson/lesson');
 require('dotenv').config();
 
 const client = new CommandoClient({
@@ -29,6 +31,7 @@ const rl = readline.createInterface({
 
 
 const logger = new Logger("CLIENT");
+global.clientlogger = logger;
 global.apilogger = new Logger("API");
 global.client = client;
 
@@ -83,9 +86,16 @@ client
 	})
 	.on(`voiceStateUpdate`, (oldstate, newstate) => client.voicestateManager.voiceStateUpdate(oldstate, newstate))
 	.on(`channelCreate`, channel => {
-		
+		logger.debug(`A ${channel.type} channel (${channel.id}) was created!`);
+		if (channel instanceof VoiceChannel) {
+			const lesson = client.lessonManager.lessons.find(ls => ls.classid == channel.parent.name.slice(0, 2));
+			if (lesson instanceof Lesson && !client.lessonManager.isAllocated(channel) && !channel.name.includes('*')) {
+				client.lessonManager.allocate(channel, lesson);
+			}
+		}
 	})
 	.on(`guildMemberAdd`, member => {
+		// When a new member joins, execute the SendWelcomeCommand
 		new SendWelcomeCommand(client).exec(member);
 	});
 
@@ -100,7 +110,7 @@ client.registry
 	.registerDefaultTypes()
 	.registerGroups([
 		[`lesson`, `Teaching commands`],
-		[`fun`, `Fun commands`],
+		[`random`, `Random commands`],
 		[`dev`, `Developer commands`],
 		[`audio`, `Audio commands`],
 	])
