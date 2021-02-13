@@ -51,7 +51,9 @@ class Lesson extends EventEmitter {
 				if (student instanceof GuildMember) {
 					if (student.id == this.teacher.member.id) return;
 				}
-				this.students.push(new LessonStudent(student));
+				const st = new LessonStudent(student);
+				st.voice.connects.push(new Date());
+				this.students.push(st);
 			}, this);
 		}
 	}
