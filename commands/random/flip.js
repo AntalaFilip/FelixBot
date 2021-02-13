@@ -4,7 +4,7 @@ class FlipCommand extends Command {
 	constructor(client) {
 		super(client, {
 			name: `flip`,
-			group: `fun`,
+			group: `random`,
 			memberName: `flip`,
 			description: `Flips a coin`,
 			examples: [ `flip` ],
