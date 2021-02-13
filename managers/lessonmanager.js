@@ -43,9 +43,9 @@ class LessonManager {
 		return new Promise((resolve, reject) => {
 			this.client.databaseManager.getOngoingLessons()
 				.then(lss => {
-				this.lessons = lss;
-				resolve(this.lessons);
-			}, err => reject(err));
+					this.lessons = lss;
+					resolve(this.lessons);
+				}, err => reject(err));
 		});
 	}
 
