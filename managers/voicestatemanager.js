@@ -66,7 +66,7 @@ class VoiceStateManager {
 				if (lessonnew && lessonnew != lesson && newchan != oldchan) {
 					const student = lessonnew.students.find(val => val.member.id == member.id);
 					if (student) mgr.joined(lessonnew, student);
-					else mgr.joined(lessonnew, new LessonStudent(member, lessonnew));
+					else mgr.joined(lessonnew, new LessonStudent(member));
 				}
 			}
 		}
@@ -79,7 +79,7 @@ class VoiceStateManager {
 			if (lessonnew) {
 				const student = lessonnew.students.find(val => val.member.id == member.id);
 				if (student) mgr.joined(lessonnew, student);
-				else mgr.joined(lessonnew, new LessonStudent(member, lessonnew));
+				else mgr.joined(lessonnew, new LessonStudent(member));
 			}
 		}
 		if (oldstate.selfMute != newstate.selfMute) {
