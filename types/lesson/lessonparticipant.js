@@ -28,6 +28,7 @@ class LessonParticipant {
 			this.member = participant;
 			this.name = participant.displayName;
 			this.created = new Date();
+			this.voice.connects.push(new Date());
 		}
 		else {
 			this.member = participant.member;
