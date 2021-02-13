@@ -83,7 +83,7 @@ class LessonManager {
 	 * @param {string} subject The lesson subject
 	 * @param {string} clsid The class id
 	 * @param {GuildMember} teacher The teacher
-	 * @returns Promise which resolves with either the LessonID from the timetable or null.
+	 * @returns {Promise<string | null>} Promise which resolves with either the LessonID from the timetable or null.
 	 */
 	checkTimetable(subject, clsid, teacher) {
 		return new Promise((resolve, reject) => {
