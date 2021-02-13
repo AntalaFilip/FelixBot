@@ -59,6 +59,16 @@ class LessonManager {
 	}
 
 	/**
+	 * Checks if a member is part of a lesson
+	 * @param {GuildMember} member
+	 */
+	isInLesson(member) {
+		const lesson = this.lessons.find(ls => ls.teacher.member == member || ls.students.find(st => st.member == member));
+		if (lesson) return lesson;
+		else return false;
+	}
+
+	/**
 	 * Checks if the Lesson parameters are present in the timetable
 	 * @param {string} subject The lesson subject
 	 * @param {string} clsid The class id
