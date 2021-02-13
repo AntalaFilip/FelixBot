@@ -2,6 +2,10 @@ const { GuildMember, Snowflake } = require('discord.js');
 const { Command, CommandoClient, CommandoGuild, CommandoMessage } = require('discord.js-commando');
 
 class SendWelcomeCommand extends Command {
+	/**
+	 *
+	 * @param {CommandoClient} client
+	 */
 	constructor(client) {
 		super(client, {
 			name: `sendwelcome`,
@@ -26,11 +30,11 @@ class SendWelcomeCommand extends Command {
 	 * @param {any} args
 	 */
 	run(message, args) {
-		const guild = this.client.guilds.cache.find(gld => gld.id === `702836521622962198`);
+		const guild = message.guild;
 		const member = guild.members.cache.find(mem => mem.id === args.memberid);
 		if (member) {
 			this.exec(member);
-			message.reply(`Sent welcome to ${member.user.username}`);
+			message.reply(`Sent welcome to ${member.displayName}`);
 		}
 	}
 
@@ -45,7 +49,7 @@ class SendWelcomeCommand extends Command {
 			dm.send(`Ak sa Ti ale nechce písať administrátorovi (alebo žiaden práve nie je online), môžeš napísať meno a triedu aj mne nasledovne (prosím, používaj diakritiku):`);
 			dm.send(`iam TvojeMeno TvojePriezvisko TvojaTrieda`);
 		});
-		this.client.logger.info(`Sent welcome message to: ${member.user.username}`);
+		global.clientlogger.info(`Sent welcome message to: ${member.displayName}`);
 	}
 }
 
