@@ -60,7 +60,7 @@ const reactionUtils = {
 		// Add the desired reactions
 		emoji.forEach(em => {
 			try {
-			message.react(em);
+				message.react(em);
 			}
 			catch (e) {
 				global.client.emit(`error`, new Error(`Failed to react to message with emoji ${em}; ${e}`));
