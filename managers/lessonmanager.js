@@ -192,6 +192,7 @@ class LessonManager {
 			.setURL(`https://localhost:5000/app/lesson/${lesson.id}`)
 			.setFooter(`You can find the extended summary on the webpage`);
 
+		lesson.emit(`end`);
 		let i = 0;
 		for (const student of lesson.students) {
 			if (i >= 25) {
@@ -215,7 +216,6 @@ class LessonManager {
 			i++;
 		}
 		lesson.teacher.member.createDM().then(dm => dm.send(sumembed));
-		lesson.emit(`end`);
 	}
 
 	/**
