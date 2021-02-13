@@ -91,3 +91,5 @@ class MergeCommand extends Command {
 		return embed;
 	}
 }
+
+module.exports = MergeCommand;
