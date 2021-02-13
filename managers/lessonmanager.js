@@ -8,6 +8,7 @@ const time = require('../util/timeutils');
 const str = require('../util/stringutils');
 const LessonParticipant = require("../types/lesson/lessonparticipant");
 const LessonStudent = require("../types/lesson/lessonstudent");
+const { lessonShouldEnd } = require("../util/timeutils");
 
 class LessonManager {
 	/**
@@ -32,6 +33,15 @@ class LessonManager {
 					this.logger.error(`FATAL: LessonManager failed to load`);
 					throw new Error(`LessonManager failed to load!`);
 				});
+		});
+	}
+
+	async tick() {
+		const gld = this.client.guilds.cache.find(g => g.id === `702836521622962198`);
+		gld.voiceStates.cache.forEach(async vs => {
+			if(await this.shouldStartLesson(vs.member)) {
+				// Start the lesson
+			}
 		});
 	}
 
