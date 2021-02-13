@@ -121,7 +121,6 @@ class DatabaseManager {
 
 	/**
 	 * Executes an update query for endedAt which essentially ends the lesson in the database.
-	 * ONLY USE THIS WITH Lesson.end();
 	 * @param {Lesson} lesson The lesson that should be ended.
 	 */
 	endLesson(lesson) {
