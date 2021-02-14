@@ -115,7 +115,7 @@ client.registry
 		[`audio`, `Audio commands`],
 	])
 	.registerDefaultGroups()
-	.registerDefaultCommands({ eval: false, prefix: false })
+	.registerDefaultCommands({ prefix: false })
 	.registerCommandsIn(join(__dirname, `commands`));
 
 client.login(process.env.TOKEN);
