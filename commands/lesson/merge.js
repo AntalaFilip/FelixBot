@@ -1,6 +1,6 @@
 const { GuildMember, VoiceChannel, TextChannel, MessageEmbed } = require("discord.js");
 const { Command, CommandoClient, CommandoMessage } = require("discord.js-commando");
-const Lesson = require("../../types/lesson/lesson");
+const MergeAudit = require("../../types/audit/mergeaudit");
 
 const reactions = require('../../util/reactions');
 
@@ -40,12 +40,14 @@ class MergeCommand extends Command {
 		const to = message.member.voice.channel;
 		if (!to) return message.reply(`You have to be in a voice channel`);
 		const lesson = this.client.lessonManager.isInLesson(message.member);
-		let from = to.parent.children.filter(ch => ch.type == `voice`);
+		let from = to.parent.children.filter(ch => ch.type == `voice` && ch.id != to.id);
 		if (lesson) from = lesson.allocated;
+		if (from.size == 0) return message.reply(`I didn't find any channels to merge from!`);
+		const embedmsg = await message.channel.send(`Merging...`);
 		setTimeout(() => {
-			this.exec(member, to, lesson.allocated)
+			this.exec(member, to, from)
 				.then(embed => {
-					message.channel.send(embed)
+					embedmsg.edit(embed)
 						.then(msg => {
 							if (lesson) reactions.addFunctionalReaction(`end`, msg, [lesson.teacher.member.user], lesson);
 							reactions.addFunctionalReaction([`split`], msg, [lesson ? lesson.teacher.member.user : member]);
@@ -57,17 +59,17 @@ class MergeCommand extends Command {
 	/**
 	 *
 	 * @param {GuildMember} initiator
-	 * @param {VoiceChannel} targetchan
+	 * @param {VoiceChannel} to
 	 * @param {VoiceChannel[]} from
 	 */
-	async exec(initiator, targetchan, from) {
+	async exec(initiator, to, from) {
 		const list = new Map();
 		let i = 0;
 		from.forEach(chan => {
 			const users = [];
 			for (const usr of chan.members) {
 				try {
-					usr[1].voice.setChannel(targetchan, `Merged; ${initiator.displayName}`);
+					usr[1].voice.setChannel(to, `Merged; ${initiator.displayName}`);
 					users.push(usr[1].displayName);
 					i++;
 				}
@@ -75,7 +77,7 @@ class MergeCommand extends Command {
 					global.clientlogger.error(e);
 				}
 			}
-			list.set(chan.name, users);
+			if (users.length != 0) list.set(chan.id, users);
 		});
 		const embed = new MessageEmbed()
 			.setColor(`#0099ff`)
@@ -86,9 +88,10 @@ class MergeCommand extends Command {
 			.setFooter(``)
 			.setTimestamp();
 		list.forEach((val, key) => {
-			embed.addField(key, val, true);
+			embed.addField(to.guild.channels.resolve(key).name, val, true);
 		});
-		return embed;
+		this.client.auditManager.newAudit(new MergeAudit(initiator, to, from, list));
+		return [list, embed];
 	}
 }
 
