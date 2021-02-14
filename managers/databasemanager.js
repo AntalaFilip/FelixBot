@@ -142,15 +142,17 @@ class DatabaseManager {
 	pushNewLesson(lesson) {
 		return new Promise((resolve, reject) => {
 			this.logger.debug(`Inserting new lesson: ${lesson.lessonid + '@' + lesson.classid}`);
-			str.resolveClass(lesson.classid).then((classname) => {
-				const studentJson = JSON.stringify(lesson.students);
-				const allocated = new Array();
-				lesson.allocated.forEach(chan => allocated.push(chan.id));
-				db.query(`INSERT INTO lessons (teacher, lesson, classname, \`group\`, period, startedat, students, allocated) VALUES ("${lesson.teacher.member.id}", "${lesson.lessonid}", "${classname}", "${lesson.group}", "${lesson.period}", "${str.dateToString(new Date(lesson.startedAt))}", '${studentJson}', '${JSON.stringify(allocated)}')`, (err, res) => {
-					if (err) reject(new Error(`SQL error ${err}`));
-					resolve(res.insertId);
+			str.resolveClass(lesson.classid)
+				.then((classname) => {
+					const studentJson = JSON.stringify(lesson.students);
+					const allocated = new Array();
+					lesson.allocated.forEach(chan => allocated.push(chan.id));
+					db.query(`INSERT INTO lessons (teacher, lesson, classname, \`group\`, period, startedat, students, allocated) VALUES ("${lesson.teacher.member.id}", "${lesson.lessonid}", "${classname}", "${lesson.group}", "${lesson.period}", "${str.dateToString(new Date(lesson.startedAt))}", '${studentJson}', '${JSON.stringify(allocated)}')`,
+						(err, res) => {
+							if (err) reject(new Error(`SQL error ${err}`));
+							resolve(res.insertId);
+						});
 				});
-			});
 		});
 	}
 }
