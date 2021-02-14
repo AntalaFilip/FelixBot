@@ -15,6 +15,7 @@ const Logger = require('./util/logger');
 const ExpressApp = require('./api/express');
 const http = require('http');
 const Lesson = require('./types/lesson/lesson');
+const AuditManager = require('./managers/auditmanager');
 require('dotenv').config();
 
 const client = new CommandoClient({
@@ -47,6 +48,7 @@ client
 		client.voicestateManager = new VoiceStateManager(client);
 		client.permManager = new PermissionsManager(client);
 		client.lessonManager = new LessonManager(client);
+		client.auditManager = new AuditManager(client);
 		http.createServer(ExpressApp).listen(process.env.PORT, () => logger.log(`HTTP Server ready on ${process.env.PORT}!`));
 		client.user.setActivity(`Testing ongoing!`);
 	})

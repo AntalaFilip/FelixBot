@@ -1,6 +1,9 @@
+const { GuildMember } = require('discord.js');
 const { CommandoClient, CommandoGuild } = require('discord.js-commando');
-const { json } = require('express');
 const { createConnection } = require('mysql');
+const Audit = require('../types/audit/audit');
+const MergeAudit = require('../types/audit/mergeaudit');
+const SplitAudit = require('../types/audit/splitaudit');
 const Lesson = require('../types/lesson/lesson');
 const Logger = require('../util/logger');
 const str = require('../util/stringutils');
@@ -152,6 +155,61 @@ class DatabaseManager {
 							if (err) reject(new Error(`SQL error ${err}`));
 							resolve(res.insertId);
 						});
+				});
+		});
+	}
+
+	/**
+	 * Inserts an audit event to the Database
+	 * @param {'merge' | 'split' | 'general'} action The identificator of the event
+	 * @param {GuildMember} member The member executing the event
+	 * @param {string} eventdata The JSONified event data
+	 * @param {Date?} timestamp
+	 * @returns {Promise<number>}
+	 */
+	insertAudit(action, member, eventdata, timestamp = null) {
+		return new Promise((resolve, reject) => {
+			this.logger.debug(`Inserting new audit event: ${action}`);
+			db.query(`INSERT INTO audit (user, guild, action, data, timestamp) VALUES ("${member.id}", "${member.guild.id}", "${action}", '${eventdata}' ${timestamp ? ', "' + str.dateToString(timestamp) + '"' : 'CURRENT_TIMESTAMP'})`,
+				(err, res) => {
+					if (err) return reject(new Error(`SQL error ${err}`));
+					resolve(res.insertId);
+				});
+		});
+	}
+
+	getAllAudits() {
+		return new Promise((resolve, reject) => {
+			this.logger.debug(`Fetching audits from database`);
+			db.query(`SELECT * FROM audit`,
+				(err, res) => {
+					if (err) reject(new Error(`SQL error ${err}`));
+					const arr = [];
+					res.forEach(raw => {
+						const parsed = this.parseDatabaseResult(raw);
+						const user = this.client.guilds.cache.find(g => g.id == parsed.guild).members.cache.find(u => u.id == parsed.user);
+						let to;
+						let from;
+						let audit;
+						switch(parsed.action) {
+						case 'merge':
+							from = [];
+							parsed.data.from.forEach(id => from.push(user.guild.channels.resolve(id)));
+							to = user.guild.channels.resolve(parsed.data.to);
+							audit = new MergeAudit(user, to, from, parsed.data.list, parsed.timestamp, parsed.id);
+							break;
+						case 'split':
+							to = [];
+							parsed.data.to.forEach(id => to.push(user.guild.channels.resolve(id)));
+							from = user.guild.channels.resolve(parsed.data.from);
+							audit = new SplitAudit(user, from, to, parsed.data.list, parsed.timestamp, parsed.id);
+							break;
+						default:
+							audit = new Audit(user, parsed.data, parsed.timestamp, parsed.id);
+						}
+						arr.push(audit);
+					});
+					resolve(arr);
 				});
 		});
 	}
