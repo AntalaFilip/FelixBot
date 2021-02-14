@@ -28,9 +28,10 @@ class LessonManager {
 					this.lessons = lss;
 					this.logger.log(`Ready; there are ${this.lessons.length} lessons ongoing!`);
 					resolve();
-				}, err => {
-					reject(err);
+				})
+				.catch(err => {
 					this.logger.error(`FATAL: LessonManager failed to load`);
+					reject(err);
 					throw new Error(`LessonManager failed to load!`);
 				});
 		});
