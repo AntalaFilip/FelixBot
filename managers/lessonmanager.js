@@ -104,7 +104,6 @@ class LessonManager {
 	 */
 	async start(lesson) {
 		if (lesson instanceof Lesson == false) throw new Error(`Something went wrong; the lesson is not a Lesson!`);
-		this.lessons.push(lesson);
 		const settings = await this.client.databaseManager.getSettings();
 		const current = timetable[new Date().getDay()].filter(ls => ls.includes(`@${lesson.classid}`) && ls.includes(`%${lesson.period}`) && ls.includes(`^${settings.week}`));
 		const ctg = lesson.teacher.member.guild.channels.cache.find(ch => ch.name.startsWith(lesson.classid)).parent;
@@ -112,8 +111,10 @@ class LessonManager {
 		if (current.length == 0) current.push(null);
 		const toAlloc = Math.round(vcs.size / current.length);
 		this.logger.info(`Starting a lesson (${lesson.lessonid}@${lesson.classid}); will allocate ${toAlloc} channels`);
+		this.lessons.push(lesson);
 		const id = await this.client.databaseManager.pushNewLesson(lesson);
 		lesson.id = id;
+		this.logger.debug(`Database returned ID ${id} for ${lesson.lessonid}@${lesson.classid}`);
 
 		let i = 0;
 		vcs.each(ch => {
@@ -123,7 +124,7 @@ class LessonManager {
 				i++;
 			}
 		});
-		this.logger.debug(`Allocated ${i} channels for ${lesson.lessonid}@${lesson.classid}`);
+		this.logger.debug(`Allocated ${i} channels for ${lesson.id}`);
 
 		const embed = new MessageEmbed()
 			.setAuthor(lesson.teacher.name, lesson.teacher.member.user.avatarURL())
