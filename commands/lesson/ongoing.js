@@ -21,7 +21,7 @@ module.exports = class OngoingLessonsCommand extends Command {
 			.setColor(`#ffffff`)
 			.setDescription(`List of ongoing lessons:`);
 		lessons.forEach(les => {
-			embed.addField(`${les.lessonid}@${les.classid}`, [`Teacher: ${les.teacher.name}`, `Started at: \`${les.startedAt.getHours()}:${les.startedAt.getMinutes()}\``]);
+			embed.addField(`${les.lessonid}@${les.classid}`, [`Teacher: ${les.teacher.name}`, `Started at: \`${les.startedAt.toLocaleTimeString()}\``]);
 		});
 		message.embed(embed);
 	}
