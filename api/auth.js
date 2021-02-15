@@ -13,7 +13,7 @@ router.get('/', (req, res) => {
 				res.send(result);
 			},
 			err => {
-				if (err === false) res.status(401).send();
+				if (err === false) res.status(401).send({ message: `You are not a member of the Felix Discord server!`, join: `https://discord.gg/kKh8BeS` });
 				else if (err.status) res.status(err.status).send();
 				else res.status(500).send();
 			},
@@ -30,6 +30,7 @@ function authorize(token) {
 				global.client.permManager.isClassTeacher(member)
 					.then(classteacher => {
 						resolve({
+							user: member.user,
 							member: member,
 							admin: member.hasPermission(`ADMINISTRATOR`),
 							isTeacher: global.client.permManager.isTeacher(member),
