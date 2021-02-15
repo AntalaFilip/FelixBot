@@ -8,7 +8,7 @@ const time = require('../util/timeutils');
 const str = require('../util/stringutils');
 const LessonParticipant = require("../types/lesson/lessonparticipant");
 const LessonStudent = require("../types/lesson/lessonstudent");
-const { lessonShouldEnd } = require("../util/timeutils");
+const LessonTeacher = require("../types/lesson/lessonteacher");
 
 class LessonManager {
 	/**
@@ -64,9 +64,14 @@ class LessonManager {
 	 * Checks if a lesson should be started with the member as the teacher
 	 * @param {GuildMember} member
 	 */
-	async shouldStartLesson(member) {
+	async shouldStartLesson(member, chan) {
 		if (!this.client.permManager.isTeacher(member)) return false;
-		/* To-Do */
+		if (this.isAllocated(chan)) return false;
+
+		const sett = await this.client.databaseManager.getSettings();
+		const lsid = timetable[new Date().getDay()].find(ls => ls.includes(`@${str.getChanName(chan)}#${member.id}`) && ls.includes(`%${time.getCurrentPeriod()}`) && ls.includes(`^${sett.week}`));
+		if (lsid) return lsid;
+		else return false;
 	}
 
 	/**
@@ -254,7 +259,8 @@ class LessonManager {
 	 * @param {LessonParticipant} participant
 	 */
 	joined(lesson, participant) {
-		if (participant instanceof LessonStudent && !lesson.students.includes(participant)) lesson.students.push(participant);
+		if (participant instanceof LessonTeacher) participant.member.createDM().then(dm => dm.send(`You have reconnected!`));
+		else if (participant instanceof LessonStudent && !lesson.students.includes(participant)) lesson.students.push(participant);
 		participant.voice.connects.push(new Date());
 		participant.present = true;
 		lesson.emit(`joined`, participant);
@@ -267,6 +273,25 @@ class LessonManager {
 	 * @param {LessonParticipant} participant
 	 */
 	left(lesson, participant) {
+		if (participant instanceof LessonTeacher) {
+			if (time.lessonShouldEnd()) {
+				this.end(lesson);
+			}
+			else {
+				participant.member.createDM()
+					.then(dm => {
+						dm.send(`You have disconnected from an ongoing lesson (${lesson.lessonid}@${lesson.classid})!`);
+						dm.send(`Your lesson is going to end automatically in five minutes`);
+						dm.send(`Please, either reconnect, or end your lesson with \`!teach end\``);
+						setTimeout(() => {
+							if (!lesson.endedAt && !lesson.teacher.present) {
+								dm.send(`Your lesson has ended due to you not being present for five minutes, this in **not** the intended way to end the lesson!`);
+								this.end(lesson);
+							}
+						}, 300000);
+					});
+			}
+		}
 		participant.voice.disconnects.push(new Date());
 		participant.present = false;
 		lesson.emit(`left`, participant);

@@ -1,8 +1,12 @@
-const { VoiceState } = require("discord.js");
+const { VoiceState, GuildMember } = require("discord.js");
 const { CommandoClient } = require("discord.js-commando");
+const Lesson = require("../types/lesson/lesson");
 const LessonStudent = require("../types/lesson/lessonstudent");
+const LessonTeacher = require("../types/lesson/lessonteacher");
 const Logger = require("../util/logger");
 const str = require("../util/stringutils");
+const time = require("../util/timeutils");
+
 class VoiceStateManager {
 	/**
 	 * Creates a new VoiceState manager
@@ -20,7 +24,6 @@ class VoiceStateManager {
 	 * @param {VoiceState} newstate The new VoiceState
 	 */
 	async voiceStateUpdate(oldstate, newstate) {
-		const date = new Date();
 		const member = newstate.member;
 		const oldchan = oldstate.channel;
 		const newchan = newstate.channel;
@@ -29,21 +32,18 @@ class VoiceStateManager {
 		const lessons = mgr.lessons;
 		if (newchan != oldchan) {
 			if (oldchan) {
-				if (newchan) {
-					this.logger.log(`${member.displayName} changed channels from ${oldchan.name} to ${newchan.name}`);
-				}
-				else {
-					this.logger.log(`${member.displayName} left ${oldchan.name}`);
-				}
+				if (newchan) this.logger.log(`${member.displayName} changed channels from ${oldchan.name} to ${newchan.name}`);
+				else this.logger.log(`${member.displayName} left ${oldchan.name}`);
 			}
 			else if (newchan) {
 				this.logger.log(`${member.displayName} joined ${newchan.name}`);
 			}
 		}
+
 		// Does the old channel exist?
 		if (oldchan) {
 			const clsid = str.getChanName(oldchan);
-			const lesson = lessons.find(les => les.classid === clsid);
+			const lesson = lessons.find(les => les.allocated.includes(oldchan));
 			// Is there an ongoing lesson in the old channel?
 			if (lesson) {
 				// Does the old channel not match the new channel
@@ -52,7 +52,8 @@ class VoiceStateManager {
 					if (newchan == null || str.getChanName(newchan) !== clsid) {
 						const student = lesson.students.find(val => val.member.id == member.id);
 						if (student) mgr.left(lesson, student);
-						else this.logger.error(`Student does not exist! This should not happen!`);
+						else if (lesson.teacher.member.id == member.id) mgr.left(lesson, lesson.teacher);
+						else this.logger.error(`Participant does not exist! This should not happen!`);
 					}
 				}
 			}
@@ -66,7 +67,11 @@ class VoiceStateManager {
 				if (lessonnew && lessonnew != lesson && newchan != oldchan) {
 					const student = lessonnew.students.find(val => val.member.id == member.id);
 					if (student) mgr.joined(lessonnew, student);
+					else if (lesson.teacher.member.id == member.id) mgr.joined(lessonnew, lessonnew.teacher);
 					else mgr.joined(lessonnew, new LessonStudent(member));
+				}
+				else if (!lessonnew) {
+					this.handleTeacherJoin(newstate);
 				}
 			}
 		}
@@ -79,26 +84,65 @@ class VoiceStateManager {
 			if (lessonnew) {
 				const student = lessonnew.students.find(val => val.member.id == member.id);
 				if (student) mgr.joined(lessonnew, student);
+				else if (lessonnew.teacher.member.id === member.id) mgr.joined(lessonnew, lessonnew.teacher);
 				else mgr.joined(lessonnew, new LessonStudent(member));
 			}
+			else {
+				this.handleTeacherJoin(newstate);
+			}
 		}
+
+		this.handleMute(oldstate, newstate);
+		this.handleDeafen(oldstate, newstate);
+		this.handleVideo(oldstate, newstate);
+	}
+
+	/**
+	 * @param {VoiceState} state
+	 */
+	handleTeacherJoin(state) {
+		this.client.lessonManager.shouldStartLesson(state.member, state.channel)
+			.then(should => {
+				if (should) {
+					this.client.lessonManager.start(new Lesson(null, null, state.member, should.substring(should.indexOf('!') + 1, should.indexOf('@')), str.getChanName(state.channel), should.substring(should.indexOf('$') + 1, should.indexOf('%')), time.getCurrentPeriod(), Array.from(state.channel.members.values())));
+				}
+			});
+	}
+
+	/**
+	 * @param {VoiceState} oldstate
+	 * @param {VoiceState} newstate
+	 */
+	handleMute(oldstate, newstate) {
 		if (oldstate.selfMute != newstate.selfMute) {
-			const lesson = lessons.find(ls => ls.classid == str.getChanName(newstate.channel));
+			const lesson = this.client.lessonManager.lessons.find(ls => ls.classid == str.getChanName(newstate.channel));
 			if (!lesson) return;
-			const participant = lesson.students.find(st => st.member.id == member.id) || lesson.teacher.member.id == member.id ? lesson.teacher : null;
-			if (participant) mgr.togglemute(lesson, participant, newstate.selfMute);
+			const participant = lesson.students.find(st => st.member.id == newstate.member.id) || lesson.teacher.member.id == newstate.member.id ? lesson.teacher : null;
+			if (participant) this.client.lessonManager.togglemute(lesson, participant, newstate.selfMute);
 		}
+	}
+	/**
+	 * @param {VoiceState} oldstate
+	 * @param {VoiceState} newstate
+	 */
+	handleDeafen(oldstate, newstate) {
 		if (oldstate.selfDeaf != newstate.selfDeaf) {
-			const lesson = lessons.find(ls => ls.classid == str.getChanName(newstate.channel));
+			const lesson = this.client.lessonManager.lessons.find(ls => ls.classid == str.getChanName(newstate.channel));
 			if (!lesson) return;
-			const participant = lesson.students.find(st => st.member.id == member.id) || lesson.teacher.member.id == member.id ? lesson.teacher : null;
-			if (participant) mgr.toggledeaf(lesson, participant, newstate.serverDeaf);
+			const participant = lesson.students.find(st => st.member.id == newstate.member.id) || lesson.teacher.member.id == newstate.member.id ? lesson.teacher : null;
+			if (participant) this.client.lessonManager.toggledeaf(lesson, participant, newstate.serverDeaf);
 		}
+	}
+	/**
+	 * @param {VoiceState} oldstate
+	 * @param {VoiceState} newstate
+	 */
+	handleVideo(oldstate, newstate) {
 		if (oldstate.selfVideo != newstate.selfVideo) {
-			const lesson = lessons.find(ls => ls.classid == str.getChanName(newstate.channel));
+			const lesson = this.client.lessonManager.lessons.find(ls => ls.classid == str.getChanName(newstate.channel));
 			if (!lesson) return;
-			const participant = lesson.students.find(st => st.member.id == member.id) || lesson.teacher.member.id == member.id ? lesson.teacher : null;
-			if (participant) mgr.togglevideo(lesson, participant, newstate.selfVideo);
+			const participant = lesson.students.find(st => st.member.id == newstate.member.id) || lesson.teacher.member.id == newstate.member.id ? lesson.teacher : null;
+			if (participant) this.client.lessonManager.togglevideo(lesson, participant, newstate.selfVideo);
 		}
 	}
 }
