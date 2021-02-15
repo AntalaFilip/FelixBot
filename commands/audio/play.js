@@ -1,6 +1,7 @@
 const { Message } = require("discord.js");
 const commando = require(`discord.js-commando`);
 const ytdl = require(`ytdl-core`);
+const str = require('../../util/stringutils');
 
 module.exports = class AudioCommand extends commando.Command {
 	constructor(client) {
@@ -55,7 +56,7 @@ module.exports = class AudioCommand extends commando.Command {
 		if (message.member.voice.channel) {
 			const chan = message.member.voice.channel;
 			// Check if there is an ongoing lesson in this voice channel, if true, return with a reply
-			const lesson = this.client.lessonManager.lessons.find(les => les.class === this.client.stringUtils.getChanName(chan).slice(0, 2));
+			const lesson = this.client.lessonManager.lessons.find(les => les.class === str.getChanName(chan).slice(0, 2));
 			if (lesson && message.member != lesson.teacher.member) return message.reply(`Only the teacher can play audio during the lesson!`).then(res => {res.delete({ timeout: 5000 }); message.delete({ timeout: 5000 });});
 			// If YouTube was specified
 			if (args.type === `youtube`) {
