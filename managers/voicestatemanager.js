@@ -67,7 +67,7 @@ class VoiceStateManager {
 				if (lessonnew && lessonnew != lesson && newchan != oldchan) {
 					const student = lessonnew.students.find(val => val.member.id == member.id);
 					if (student) mgr.joined(lessonnew, student);
-					else if (lesson.teacher.member.id == member.id) mgr.joined(lessonnew, lessonnew.teacher);
+					else if (lessonnew.teacher.member.id == member.id) mgr.joined(lessonnew, lessonnew.teacher);
 					else mgr.joined(lessonnew, new LessonStudent(member));
 				}
 				else if (!lessonnew) {
