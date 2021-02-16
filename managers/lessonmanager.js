@@ -26,6 +26,7 @@ class LessonManager {
 			client.databaseManager.getOngoingLessons()
 				.then(lss => {
 					this.lessons = lss;
+					this.tick();
 					this.logger.log(`Ready; there are ${this.lessons.length} lessons ongoing!`);
 					resolve();
 				})
@@ -39,9 +40,12 @@ class LessonManager {
 
 	async tick() {
 		const gld = this.client.guilds.cache.find(g => g.id === `702836521622962198`);
-		gld.voiceStates.cache.forEach(async vs => {
-			this.client.voiceManager.handleShouldStartLesson(vs);
-		});
+		if (time.getCurrentPeriod() != null) {
+			gld.voiceStates.cache.forEach(async vs => {
+				this.client.voiceManager.handleShouldStartLesson(vs);
+			});
+		}
+		setTimeout(() => this.tick(), 10000);
 	}
 
 	/**
