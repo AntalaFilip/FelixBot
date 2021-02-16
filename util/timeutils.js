@@ -5,9 +5,9 @@ const TimeUtils = {
 	getCurrentPeriod() {
 		const date = new Date();
 
-		if (date.getHours() <= 8 || date.getHours() >= 14) return null;
+		if (date.getUTCHours() <= 7 || date.getHours() >= 13) return null;
 
-		return date.getHours() - 8;
+		return date.getHours() - 7;
 	},
 
 	lessonShouldEnd() {
