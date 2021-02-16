@@ -1,11 +1,14 @@
 const { GuildChannel } = require("discord.js");
 
 const StringUtils = {
+	/**
+	 * @param {string} classid
+	 */
 	resolveClass(classid) {
 		return new Promise((resolve, reject) => {
 			global.client.databaseManager.getSettings()
 				.then(sett => {
-					const resolved = sett.classes.find(val => val.includes(classid));
+					const resolved = sett.classes.find(val => val.startsWith(classid.toLowerCase()));
 					if (resolved) resolve(resolved);
 					else reject('This class does not exist!');
 				});
