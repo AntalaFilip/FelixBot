@@ -5,7 +5,7 @@ const TimeUtils = {
 	getCurrentPeriod() {
 		const date = new Date();
 
-		if (date.getUTCHours() <= 7 || date.getHours() >= 13) return null;
+		if (date.getUTCHours() < 7 || date.getHours() > 13) return null;
 
 		return date.getHours() - 7;
 	},
