@@ -26,6 +26,7 @@ class Lesson extends EventEmitter {
 		this.allocated = new Array();
 		// Create a LessonTeacher from the teacher member
 		this.teacher = new LessonTeacher(teacher);
+		if (!this.teacher.member.voice.channel || !this.teacher.member.voice.channel.name.includes(classid)) this.teacher.present = false;
 		if (allocated) allocated.forEach(val => this.allocated.push(this.teacher.member.guild.channels.cache.find(chan => chan.id == val)));
 		// Assign the lesson ID
 		this.lessonid = lessonid.toLowerCase();
