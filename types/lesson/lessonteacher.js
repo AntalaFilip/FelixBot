@@ -6,7 +6,6 @@ class LessonTeacher extends LessonParticipant {
 	/**
 	 * Creates the teacher object
 	 * @param {GuildMember} member
-	 * @param {Lesson} lesson
 	 */
 	constructor(member) {
 		super(member);
