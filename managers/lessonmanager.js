@@ -26,6 +26,21 @@ class LessonManager {
 			client.databaseManager.getOngoingLessons()
 				.then(lss => {
 					this.lessons = lss;
+					this.lessons.forEach(ls => {
+						if (ls.teacher.present == false) {
+							let timeout = 150000;
+							if (time.getCurrentPeriod == null) timeout = 0;
+							setTimeout(() => {
+								if (ls.teacher.present == false && !ls.endedAt) {
+									ls.teacher.member.createDM()
+										.then(dm => {
+											dm.send(`Your lesson has ended due to you not being present for five minutes, this in **not** the intended way to end the lesson!`);
+											this.end(ls);
+										});
+								}
+							}, timeout);
+						}
+					});
 					this.tick();
 					this.logger.log(`Ready; there are ${this.lessons.length} lessons ongoing!`);
 					resolve();
