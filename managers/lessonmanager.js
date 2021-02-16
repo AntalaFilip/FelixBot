@@ -64,6 +64,7 @@ class LessonManager {
 	 */
 	async shouldStartLesson(member, chan) {
 		if (!this.client.permManager.isTeacher(member)) return false;
+		if (this.lessons.find(l => l.teacher.member.id == member.id)) return false;
 		if (this.isAllocated(chan)) return false;
 
 		const sett = await this.client.databaseManager.getSettings();
