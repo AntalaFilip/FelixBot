@@ -40,9 +40,7 @@ class LessonManager {
 	async tick() {
 		const gld = this.client.guilds.cache.find(g => g.id === `702836521622962198`);
 		gld.voiceStates.cache.forEach(async vs => {
-			if(await this.shouldStartLesson(vs.member)) {
-				// Start the lesson
-			}
+			this.client.voiceManager.handleShouldStartLesson(vs);
 		});
 	}
 

@@ -7,7 +7,7 @@ const { Database } = require('sqlite3');
 const readline = require(`readline`);
 
 const LessonManager = require('./managers/lessonmanager');
-const VoiceStateManager = require('./managers/voicestatemanager');
+const VoiceManager = require('./managers/voicemanager');
 const PermissionsManager = require('./managers/permmanager');
 const DatabaseManager = require('./managers/databasemanager');
 const SendWelcomeCommand = require('./commands/dev/sendwelcome');
@@ -45,17 +45,17 @@ client
 	.once(`ready`, () => {
 		logger.log(`Ready; logged in as ${client.user.username}#${client.user.discriminator} (${client.user.id})`);
 		client.databaseManager = new DatabaseManager(client);
-		client.voicestateManager = new VoiceStateManager(client);
+		client.voiceManager = new VoiceManager(client);
 		client.permManager = new PermissionsManager(client);
 		client.lessonManager = new LessonManager(client);
 		client.auditManager = new AuditManager(client);
 		http.createServer(ExpressApp).listen(process.env.PORT, () => logger.log(`HTTP Server ready on ${process.env.PORT}!`));
-		client.user.setActivity(`Testing ongoing!`);
+		client.user.setActivity(`Squashing bugs!`);
 	})
 	.on(`disconnect`, () => { logger.warn(`Disconnected!`); })
 	.on(`reconnecting`, () => { logger.warn(`Reconnecting...`); })
 	.on(`commandError`, (cmd, err) => {
-		if(err instanceof FriendlyError) return;
+		if (err instanceof FriendlyError) return;
 		logger.error(`Error in ${cmd.groupID}:${cmd.memberName} ` + err);
 	})
 	.on('commandBlocked', (msg, reason) => {
@@ -84,7 +84,7 @@ client
 			${guild ? `in guild ${guild.name} (${guild.id})` : 'globally'}.
 		`);
 	})
-	.on(`voiceStateUpdate`, (oldstate, newstate) => client.voicestateManager.voiceStateUpdate(oldstate, newstate))
+	.on(`voiceStateUpdate`, (oldstate, newstate) => client.voiceManager.voiceStateUpdate(oldstate, newstate))
 	.on(`channelCreate`, channel => {
 		logger.debug(`A ${channel.type} channel (${channel.id}) was created!`);
 		if (channel instanceof VoiceChannel) {

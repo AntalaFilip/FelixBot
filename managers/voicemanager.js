@@ -71,7 +71,7 @@ class VoiceStateManager {
 					else mgr.joined(lessonnew, new LessonStudent(member));
 				}
 				else if (!lessonnew) {
-					this.handleTeacherJoin(newstate);
+					this.handleShouldStartLesson(newstate);
 				}
 			}
 		}
@@ -88,7 +88,7 @@ class VoiceStateManager {
 				else mgr.joined(lessonnew, new LessonStudent(member));
 			}
 			else {
-				this.handleTeacherJoin(newstate);
+				this.handleShouldStartLesson(newstate);
 			}
 		}
 
@@ -100,7 +100,7 @@ class VoiceStateManager {
 	/**
 	 * @param {VoiceState} state
 	 */
-	handleTeacherJoin(state) {
+	handleShouldStartLesson(state) {
 		this.client.lessonManager.shouldStartLesson(state.member, state.channel)
 			.then(should => {
 				if (should) {
