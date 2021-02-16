@@ -32,8 +32,7 @@ class SplitCommand extends Command {
 	 * @param {*} args
 	 */
 	async run(message, args) {
-			
-		}
+		
 	}
 
 	/**
