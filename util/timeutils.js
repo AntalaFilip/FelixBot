@@ -5,15 +5,16 @@ const TimeUtils = {
 	getCurrentPeriod() {
 		const date = new Date();
 
-		if (date.getUTCHours() < 7 || date.getHours() > 13) return null;
+		if (date.getUTCHours() < 7 || date.getUTCHours() > 13) return null;
+		if (date.getUTCMinutes() > 45) return null;
 
-		return date.getHours() - 7;
+		return date.getUTCHours() - 7;
 	},
 
 	lessonShouldEnd() {
 		const date = new Date();
 
-		if (date.getMinutes() >= 45) return true;
+		if (date.getUTCMinutes() >= 45) return true;
 
 		return false;
 	},
