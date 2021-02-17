@@ -1,4 +1,4 @@
-const { GuildMember } = require('discord.js');
+const { GuildMember, Guild } = require('discord.js');
 const { CommandoClient, CommandoGuild } = require('discord.js-commando');
 const { createConnection } = require('mysql');
 const Audit = require('../types/audit/audit');
@@ -69,9 +69,8 @@ class DatabaseManager {
 		});
 	}
 
-	getAllLessons(guild) {
+	getAllLessons(guild = this.client.guilds.cache.find(g => g.id == `702836521622962198`)) {
 		return new Promise((resolve, reject) => {
-			if (!guild) guild = this.client.guilds.cache.find(g => g.id == `702836521622962198`);
 			const array = new Array();
 			db.query(`SELECT * FROM lessons`, (err, res) => {
 				if (err) return reject(err);
@@ -82,6 +81,22 @@ class DatabaseManager {
 					array.push(ls);
 				});
 				resolve(array);
+			});
+		});
+	}
+
+	/**
+	 * @param {Guild} guild
+	 * @param {number} id
+	 */
+	getLesson(guild = this.client.guilds.cache.find(g => g.id == `702836521622962198`), id) {
+		return new Promise((resolve, reject) => {
+			db.query(`SELECT * FROM lessons WHERE id = ${id}`, (err, res) => {
+				if (err) return reject(err);
+
+				const val = this.parseDatabaseResult(res.pop());
+				const ls = new Lesson(val.id, val.allocated, guild.members.cache.find(t => t.id == val.teacher), val.lesson, val.classname.slice(0, 2), val.group, val.period, val.students, new Date(val.startedat), new Date(val.endedat));
+				resolve(ls);
 			});
 		});
 	}
