@@ -112,7 +112,7 @@ class DatabaseManager {
 	 */
 	updateLesson(lesson) {
 		return new Promise((resolve, reject) => {
-			this.logger.debug(`Updating lesson: ${lesson.id}`);
+			if (process.env.NODE_ENV === 'development') this.logger.debug(`Updating lesson: ${lesson.id}`);
 			const allocated = new Array();
 			lesson.allocated.forEach(chan => allocated.push(chan.id));
 			db.query(`UPDATE lessons SET students = '${JSON.stringify(lesson.students)}', allocated = '${JSON.stringify(allocated)}' WHERE id = ${lesson.id}`, err => {

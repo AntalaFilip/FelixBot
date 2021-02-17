@@ -29,7 +29,7 @@ class Logger {
 
 	debug(toLog) {
 		const log = `[${new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')}] [${this.instance || 'SYSTEM'}/DEBUG]: ${toLog}`;
-		if (process.env.NODE_ENV != `production`) console.debug(log);
+		console.debug(log);
 	}
 }
 
