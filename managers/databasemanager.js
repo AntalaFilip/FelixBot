@@ -153,7 +153,7 @@ class DatabaseManager {
 					db.query(`INSERT INTO lessons (teacher, lesson, classname, \`group\`, period, startedat, students, allocated) VALUES ("${lesson.teacher.member.id}", "${lesson.lessonid}", "${classname}", "${lesson.group}", "${lesson.period}", "${str.dateToString(new Date(lesson.startedAt))}", '${studentJson}', '${JSON.stringify(allocated)}')`,
 						(err, res) => {
 							if (err) reject(new Error(`SQL error ${err}`));
-							resolve(res.insertId);
+							else resolve(res.insertId);
 						});
 				});
 		});
