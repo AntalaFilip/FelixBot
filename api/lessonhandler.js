@@ -42,6 +42,15 @@ router.get('/', (req, res) => {
 	}
 });
 
+router.get('/:id', (req, res) => {
+	global.client.databaseManager.getLesson(undefined, req.params['id'])
+		.then(ls => {
+			if (!ls) return res.status(404).send();
+			if (!req.authorized.isTeacher && !req.authorized.admin) return res.status(403).send();
+			res.send({ lesson: ls });
+		});
+});
+
 router.post('/:id', (req, res) => {
 	res.status(500).send();
 });
