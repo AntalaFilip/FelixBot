@@ -157,7 +157,7 @@ class LessonManager {
 			.setDescription(`${lesson.lessonid.toUpperCase()} has started!`)
 			.setThumbnail('https://cdn.discordapp.com/attachments/371283762853445643/768906541277380628/Felix-logo-01.png')
 			.setTimestamp()
-			.setURL(`https://localhost:5000/app/lesson/${lesson.id}`)
+			.setURL(`https://felixdiscord.felixmuzikal.sk/app/lesson/${lesson.id}`)
 			.setFooter(`End the lesson by reacting with the checkered flag`);
 		const tchan = ctg.children.find(ch => ch.name.includes(lesson.lessonid));
 		const pubmsg = await tchan.send(embed);
@@ -203,7 +203,7 @@ class LessonManager {
 			.setDescription(`${lesson.lessonid.toUpperCase()} has ended!`)
 			.setThumbnail('https://cdn.discordapp.com/attachments/371283762853445643/768906541277380628/Felix-logo-01.png')
 			.setTimestamp()
-			.setURL(`https://localhost:5000/app/lesson/${lesson.id}`)
+			.setURL(`https://felixdiscord.felixmuzikal.sk/app/lesson/${lesson.id}`)
 			.setFooter(`The lesson has ended!`);
 		const ctg = lesson.teacher.member.guild.channels.cache.find(ch => ch.name.startsWith(lesson.classid)).parent;
 		const tchan = ctg.children.find(ch => ch.name.includes(lesson.lessonid));
@@ -215,7 +215,7 @@ class LessonManager {
 			.setTitle(`Summary of ${lesson.lessonid.toUpperCase()}@${lesson.classid.toUpperCase()}`)
 			.setDescription(`The simple summary of your lesson:`)
 			.setThumbnail('https://cdn.discordapp.com/attachments/371283762853445643/768906541277380628/Felix-logo-01.png')
-			.setURL(`https://localhost:5000/app/lesson/${lesson.id}`)
+			.setURL(`https://felixdiscord.felixmuzikal.sk/app/lesson/${lesson.id}`)
 			.setFooter(`You can find the extended summary on the webpage`);
 
 		lesson.emit(`end`);
