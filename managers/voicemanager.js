@@ -7,14 +7,14 @@ const Logger = require("../util/logger");
 const str = require("../util/stringutils");
 const time = require("../util/timeutils");
 
-class VoiceStateManager {
+class VoiceManager {
 	/**
 	 * Creates a new VoiceState manager
 	 * @param {CommandoClient} client The client that instantiated this
 	 */
 	constructor(client) {
 		this.client = client;
-		this.logger = new Logger("VoiceStateManager");
+		this.logger = new Logger("VoiceManager");
 		this.logger.log('Ready!');
 	}
 
@@ -148,4 +148,4 @@ class VoiceStateManager {
 	}
 }
 
-module.exports = VoiceStateManager;
+module.exports = VoiceManager;
