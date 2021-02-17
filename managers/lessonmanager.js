@@ -80,6 +80,7 @@ class LessonManager {
 	/**
 	 * Checks if a lesson should be started with the member as the teacher
 	 * @param {GuildMember} member
+	 * @param {VoiceChannel} chan
 	 */
 	async shouldStartLesson(member, chan) {
 		if (!this.client.permManager.isTeacher(member)) return false;
