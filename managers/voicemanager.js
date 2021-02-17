@@ -101,6 +101,7 @@ class VoiceStateManager {
 	 * @param {VoiceState} state
 	 */
 	handleShouldStartLesson(state) {
+		if (!state.channel) return;
 		this.client.lessonManager.shouldStartLesson(state.member, state.channel)
 			.then(should => {
 				if (should) {
