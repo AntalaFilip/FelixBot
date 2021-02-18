@@ -11,7 +11,7 @@ router.get('/', (req, res) => {
 	if (query.ongoing == `true`) {
 		global.client.databaseManager.getOngoingLessons()
 			.then(lss => {
-				if (query.class) lss.filter(l => l.classid == query.class);
+				if (query.class) lss = lss.filter(l => l.classid == query.class);
 				let lessons;
 				if (req.authorized.isTeacher) {
 					if (classt) lessons = lss.filter(ls => classt.name.includes(ls.classid));
@@ -27,7 +27,7 @@ router.get('/', (req, res) => {
 	else {
 		global.client.databaseManager.getAllLessons()
 			.then(lss => {
-				if (query.class) lss.filter(l => l.classid == query.class);
+				if (query.class) lss = lss.filter(l => l.classid == query.class);
 				let lessons;
 				if (req.authorized.isTeacher) {
 					if (classt) lessons = lss.filter(ls => classt.name.includes(ls.classid));
