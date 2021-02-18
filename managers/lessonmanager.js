@@ -149,6 +149,11 @@ class LessonManager {
 			}
 		});
 		this.logger.debug(`Allocated ${i} channels for ${lesson.id}`);
+		lesson.allocated.forEach(ch => {
+			ch.members.forEach(mem => {
+				if (!lesson.students.find(st => st.member == mem)) this.joined(lesson, new LessonStudent(mem));
+			});
+		});
 
 		const embed = new MessageEmbed()
 			.setAuthor(lesson.teacher.name, lesson.teacher.member.user.avatarURL())
@@ -237,6 +242,7 @@ class LessonManager {
 			if (conms > dconms) netms = conms - dconms;
 			else netms = dconms - conms;
 			const min = Math.floor(netms / 60000);
+			student.voice.total = min;
 			const atten = [`First joined: ${str.dateToString(student.voice.connects[0])}`, `Total time in lesson: ${min} min`];
 			sumembed.addField(student.member.displayName, atten);
 			i++;
