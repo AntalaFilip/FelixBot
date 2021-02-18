@@ -3,6 +3,7 @@ const { Command, CommandoClient, CommandoMessage } = require("discord.js-command
 const MergeAudit = require("../../types/audit/mergeaudit");
 
 const reactions = require('../../util/reactions');
+const { getChanName } = require("../../util/stringutils");
 
 class MergeCommand extends Command {
 	/**
@@ -47,7 +48,7 @@ class MergeCommand extends Command {
 		setTimeout(() => {
 			this.exec(member, to, from)
 				.then(embed => {
-					embedmsg.edit(embed)
+					embedmsg.edit(embed[1])
 						.then(msg => {
 							if (lesson) reactions.addFunctionalReaction(`end`, msg, [lesson.teacher.member.user], lesson);
 							reactions.addFunctionalReaction([`split`], msg, [lesson ? lesson.teacher.member.user : member]);
@@ -88,7 +89,7 @@ class MergeCommand extends Command {
 			.setFooter(``)
 			.setTimestamp();
 		list.forEach((val, key) => {
-			embed.addField(to.guild.channels.resolve(key).name, val, true);
+			embed.addField(getChanName(to.guild.channels.resolve(key)), val, true);
 		});
 		this.client.auditManager.newAudit(new MergeAudit(initiator, to, from, list));
 		return [list, embed];
