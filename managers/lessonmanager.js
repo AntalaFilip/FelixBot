@@ -97,8 +97,14 @@ class LessonManager {
 	 * Checks if a member is part of a lesson
 	 * @param {GuildMember} member
 	 */
+	isTeachingLesson(member) {
+		const lesson = this.lessons.find(ls => ls.teacher.member == member);
+		if (lesson) return lesson;
+		else return false;
+	}
+
 	isInLesson(member) {
-		const lesson = this.lessons.find(ls => ls.teacher.member == member || ls.students.find(st => st.member == member));
+		const lesson = this.lessons.find(ls => ls.students.find(st => st.member == member));
 		if (lesson) return lesson;
 		else return false;
 	}

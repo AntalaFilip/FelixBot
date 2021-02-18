@@ -40,7 +40,8 @@ class MergeCommand extends Command {
 		const member = message.member;
 		const to = message.member.voice.channel;
 		if (!to) return message.reply(`You have to be in a voice channel`);
-		const lesson = this.client.lessonManager.isInLesson(message.member);
+		let lesson = this.client.lessonManager.isTeachingLesson(message.member);
+		if (!lesson) lesson = this.client.lessonManager.isInLesson(message.member);
 		let from = to.parent.children.filter(ch => ch.type == `voice` && ch.id != to.id);
 		if (lesson) from = lesson.allocated;
 		if (from.size == 0) return message.reply(`I didn't find any channels to merge from!`);
