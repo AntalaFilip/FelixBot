@@ -3,22 +3,23 @@ const { GuildMember } = require("discord.js");
 class LessonParticipant {
 	/**
 	 * Creates a LessonParticipant object
-	 * @param {GuildMember | {member: GuildMember, created: Date, voice: {connects: Array<Date>, disconnects: Array<Date>, mutes: Array, deafs: Array, video: Array}}} participant The member or object to create a LessonParticipant object from
+	 * @param {GuildMember | {member: GuildMember, created: Date, voice: {connects: Array<Date>, disconnects: Array<Date>, mutes: Array, deafs: Array, video: Array, total: number | null}}} participant The member or object to create a LessonParticipant object from
 	 */
 	constructor(participant) {
-		this.present = true;
 
 		/**
-		 * @type {{connects: Array<Date>, disconnects: Array<Date>, mutes: Array, deafs: Array, video: Array}}
+		 * @type {{connects: Array<Date>, disconnects: Array<Date>, mutes: Array, deafs: Array, video: Array, total: number | null}}
 		 */
 		this.voice = {
-			connects: new Array(),
-			disconnects: new Array(),
-			mutes: new Array(),
-			deafs: new Array(),
-			video: new Array(),
+			connects: [],
+			disconnects: [],
+			mutes: [],
+			deafs: [],
+			video: [],
+			total: null,
 		};
 
+		this.present = true;
 		/**
 		 * @type {GuildMember}
 		 */
@@ -26,12 +27,12 @@ class LessonParticipant {
 
 		if (participant instanceof GuildMember) {
 			this.member = participant;
-			this.name = participant.displayName;
+			this.name = participant.displayName.startsWith('.') ? participant.displayName.slice(1) : participant.displayName;
 			this.created = new Date();
 		}
 		else {
 			this.member = participant.member;
-			this.name = participant.member.displayName;
+			this.name = participant.member.displayName.startsWith('.') ? participant.member.displayName.slice(1) : participant.member.displayName;
 			this.created = participant.created;
 			this.voice = participant.voice;
 		}
