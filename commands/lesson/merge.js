@@ -90,7 +90,7 @@ class MergeCommand extends Command {
 			.setFooter(``)
 			.setTimestamp();
 		list.forEach((val, key) => {
-			embed.addField(getChanName(to.guild.channels.resolve(key)), val, true);
+			embed.addField(to.guild.channels.resolve(key).name, val, true);
 		});
 		this.client.auditManager.newAudit(new MergeAudit(initiator, to, from, list));
 		return [list, embed];
