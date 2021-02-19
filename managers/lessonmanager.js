@@ -166,7 +166,7 @@ class LessonManager {
 		this.logger.debug(`Allocated ${i} channels for ${lesson.id}`);
 		lesson.allocated.forEach(ch => {
 			ch.members.forEach(mem => {
-				if (!lesson.students.find(st => st.member == mem)) this.joined(lesson, new LessonStudent(mem));
+				if (!lesson.students.find(st => st.member == mem) && mem.id != lesson.teacher.member.id) this.joined(lesson, new LessonStudent(mem));
 			});
 		});
 
