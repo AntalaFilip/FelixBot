@@ -60,6 +60,13 @@ class LessonManager {
 				this.client.voiceManager.handleShouldStartLesson(vs);
 			});
 		}
+		else if (time.getCurrentPeriod() == null) {
+			this.lessons.forEach(ls => {
+				if (!ls.teacher.present) {
+					this.end(ls);
+				}
+			});
+		}
 		setTimeout(() => this.tick(), 10000);
 	}
 
