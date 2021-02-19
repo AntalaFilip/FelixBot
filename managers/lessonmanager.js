@@ -145,6 +145,8 @@ class LessonManager {
 		const current = timetable[new Date().getDay()].filter(ls => ls.includes(`@${lesson.classid}`) && ls.includes(`%${lesson.period}`) && ls.includes(`^${settings.week}`));
 		const ctg = lesson.teacher.member.guild.channels.cache.find(ch => ch.name.startsWith(lesson.classid)).parent;
 		const vcs = ctg.children.filter(ch => ch.type == `voice` && !ch.name.includes('*')).sort((c1, c2) => c1.position - c2.position);
+		const les = this.lessons.find(ls => ls.classid == lesson.classid && ls != lesson);
+		if (les.period != lesson.period) await this.end(les);
 		if (current.length == 0) current.push(null);
 		const toAlloc = Math.round(vcs.size / current.length);
 		this.logger.info(`Starting a lesson (${lesson.lessonid}@${lesson.classid}); will allocate ${toAlloc} channels`);
