@@ -9,7 +9,7 @@ const RateLimit = require('express-rate-limit');
 
 const authLimiter = new RateLimit({
 	windowMs: 60 * 1000,
-	max: 2,
+	max: 5,
 });
 
 app.use(authorizer);
