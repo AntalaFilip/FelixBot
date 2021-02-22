@@ -1,6 +1,7 @@
-const commando = require(`discord.js-commando`);
+const { GuildMember, Role } = require('discord.js');
+const { Command, CommandoMessage } = require('discord.js-commando');
 
-module.exports = class IAmCommand extends commando.Command {
+class IAmCommand extends Command {
 	constructor(client) {
 		super(client, {
 			name: `iam`,
@@ -30,6 +31,11 @@ module.exports = class IAmCommand extends commando.Command {
 		});
 	}
 
+	/**
+	 * Runs the IAm command with the specified Message and arguments
+	 * @param {CommandoMessage} message
+	 * @param {{fname: string, lname: string, cls: string}} args
+	 */
 	run(message, args) {
 		const user = message.author;
 		const guild = this.client.guilds.cache.find(gld => gld.id === `702836521622962198`);
@@ -37,12 +43,28 @@ module.exports = class IAmCommand extends commando.Command {
 		if (message.guild) return message.delete();
 		if (member.roles.cache.size > 1) return message.reply(`Prepáč, ale už máš pridelenú triedu.`);
 		if (member) {
-			member.setNickname(`${args.fname.charAt(0).toUpperCase() + args.fname.slice(1)} ${args.lname.charAt(0).toUpperCase() + args.lname.slice(1)}`)
-				.then(mem => {
-					mem.roles.add(guild.roles.cache.find(role => role.name === args.cls))
-						.then(() => message.reply(`Ďakujem! Úspešne som Ti priradil triedu! Teraz si bež užívať FELIX Discord! :D`))
-						.catch(() => message.reply(`Prepáč, niečo sa pokazilo. Predsa len napíš niektorému administrátorovi`));
-				}).catch(() => message.reply(`Prepáč, niečo sa pokazilo. Predsa len napíš niektorému administrátorovi`));
+			const fname = args.fname.charAt(0).toUpperCase() + args.fname.slice(1).toLowerCase();
+			const lname = args.lname.charAt(0).toUpperCase() + args.fname.slice(1).toLowerCase();
+			const role = guild.roles.cache.find(val => val.name === args.cls);
+
+			this.exec(member, fname + ' ' + lname, role)
+				.then(message.reply(`Ďakujem! Úspešne som Ti priradil triedu! Teraz si bež užívať FELIX Discord! :D`))
+				.catch(message.reply(`Prepáč, niečo sa pokazilo. Predsa len napíš niektorému administrátorovi`));
 		}
 	}
-};
+
+	/**
+	 * Executes the IAm command on the member
+	 * @param {GuildMember} member The member to execute the action on
+	 * @param {String} name The name to set to the member
+	 * @param {Role} role The role to set to the member
+	 */
+	async exec(member, name, role) {
+		const setnick = await member.setNickname(name);
+		const roles = await member.roles.add(role);
+		if (setnick && roles) return Promise.resolve();
+		Promise.reject();
+	}
+}
+
+module.exports = IAmCommand;

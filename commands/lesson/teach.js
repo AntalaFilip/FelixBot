@@ -1,14 +1,19 @@
-const commando = require(`discord.js-commando`);
-const timetable = require(`../../timetable`);
+const { Command, CommandoMessage } = require('discord.js-commando');
+const timetable = require('../../timetable');
+const Lesson = require('../../types/lesson/lesson');
+const Logger = require('../../util/logger');
+const str = require('../../util/stringutils');
+const time = require('../../util/timeutils');
 
-module.exports = class TeachCommand extends commando.Command {
+class TeachCommand extends Command {
 	constructor(client) {
 		super(client, {
 			name: `teach`,
 			group: `lesson`,
 			memberName: `teach`,
 			description: `Starts or ends the specified lesson`,
-			examples: [ `teach sjl`, `teach end`, `teach mat` ],
+			aliases: [`lesson`],
+			examples: [`teach sjl`, `teach end`, `teach mat`],
 			guildOnly: true,
 			userPermissions: [`MOVE_MEMBERS`, `MANAGE_CHANNELS`],
 			args: [
@@ -34,55 +39,65 @@ module.exports = class TeachCommand extends commando.Command {
 		});
 	}
 
+	/**
+	 * Runs the Teach command with the specified Message and arguments
+	 * @param {CommandoMessage} message The Message that initiated this command
+	 * @param {Object} args The arguments supplied to this command
+	 */
 	async run(message, args) {
-		// Get the lessons map
-		const lessons = this.client.lessons;
+		// Get the lessons array
+		const lessons = this.client.lessonManager.lessons;
 		// Get the teacher (member that instantiated the command)
 		const teacher = message.member;
-		// Get the teacher's name & ID
-		const teacherId = message.author.id;
 		// If the lesson is being started
 		if (args.name !== `end`) {
-			// If the teacher is in a channel
-			if (teacher.voice.channel) {
-				// Create a new Date
-				const date = new Date();
-				const day = date.getDay();
-				// Set the lesson type
-				const lesson = args.name;
-				// Get the voice channel
-				const chan = teacher.voice.channel;
-				// Get the class ID
-				let clsid = chan.name.slice(0, 2);
-				// Special exception for Ko&Pa lessons
-				if (chan.parentID == `770594101002764330`) clsid = `ko&pa`;
-				// Check if there aren't lessons running already
-				const already = lessons.find(les => les.teacher === teacher);
-				if (already) return message.reply(`You are already teaching a lesson ${already.lesson}@${already.class}! Type !teach end to end it!`);
-				// Check if the lesson is in the timetable and set the lessonId
-				let lessonId = timetable[day].find(ls => ls.includes(`!${lesson}@${clsid}#${teacherId}`) && ls.includes(`%${this.client.period}`) && ls.includes(`^${this.client.week}`));
-				// If the lesson isn't in the timetable:
-				if (!lessonId) {
-					// And the teacher didn't override, return with a warning
-					if (!args.override) return message.reply(`this lesson is not in the timetable!\r\nAre you sure it is time for your lesson?\r\nIf you wish to override the timetable, add true to the end of your command!`);
-					// Else, if the teacher did override, create a lessonId
-					else lessonId = `!${lesson}@${clsid}#${teacherId}*`;
-				}
-				// Start the lesson
-				this.client.startLesson(teacher, lessonId, chan, message.channel);
+			// If the teacher is not in a channel, return with a warning
+			if (!teacher.voice.channel) return message.reply(`You have to be in a voice channel to start a lesson!`);
+
+			// Get the lesson id
+			const lesson = args.name;
+			// Get the voice channel
+			const chan = teacher.voice.channel;
+			// Get the class ID
+			let clsid = str.getChanName(chan).slice(0, 2);
+			// Special exception for Ko&Pa lessons
+			if (chan.parentID == `770594101002764330`) clsid = `ko&pa`;
+			// Check if there aren't lessons running already
+			const already = lessons.find(les => les.teacher.member.id === teacher.id);
+			if (already) return message.reply(`You are already teaching a lesson ${already.lessonid}@${already.classid}! Type !teach end to end it!`);
+			// Check if the lesson is in the timetable and set the lessonId
+			const lsid = await this.client.lessonManager.checkTimetable(lesson, clsid, teacher);
+			// If the lesson isn't in the timetable and the teacher didn't override, return with a warning
+			let group = 'manual';
+			if (!lsid && !args.override) {
+				return message.reply(`this lesson is not in the timetable!\nAre you sure it is time for your lesson?\nIf you wish to override the timetable, add true to the end of your command!`);
 			}
-			else {
-				message.reply(`You have to be in a voice channel!`);
+			else if (!args.override) {
+				group = lsid.substring(lsid.indexOf('$') + 1, lsid.indexOf('%'));
 			}
+			// Start the lesson
+			this.client.lessonManager.start(new Lesson(null, null, teacher, lesson, clsid, group, time.getCurrentPeriod(), Array.from(chan.members.values())))
+				.then(() => {
+					message.reply(`The lesson has started; check the subject channel for confirmation`)
+						.then(msg => {
+							msg.delete({ timeout: 5000 });
+							message.delete({ timeout: 5000 });
+						});
+				})
+				.catch(err => {
+					const e = new Error(`An error has occurred: \`${err}\``);
+					message.channel.send(e);
+					new Logger(`TeachCommand`).error(e);
+				});
 		}
 		// Else if the lesson is being ended
 		else if (args.name === `end`) {
 			// Find the lesson that is being ended
-			const key = lessons.findKey(usr => usr.teacher === teacher);
+			const lesson = lessons.find(ls => ls.teacher.member.id === teacher.id);
 			// If the teacher is teaching a lesson:
-			if (key) {
-				// Run the endLesson function with that lesson
-				this.client.endLesson(key);
+			if (lesson) {
+				// End the lesson
+				this.client.lessonManager.end(lesson, message.member.displayName);
 			}
 			// Else send a warning
 			else {
@@ -91,4 +106,6 @@ module.exports = class TeachCommand extends commando.Command {
 			}
 		}
 	}
-};
+}
+
+module.exports = TeachCommand;

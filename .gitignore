@@ -1,6 +1,8 @@
 .vscode
+.vs
 node_modules
 config.json
 database.db
 *.m4a
 *.ogg
+*.env

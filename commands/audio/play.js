@@ -1,5 +1,7 @@
+const { Message } = require("discord.js");
 const commando = require(`discord.js-commando`);
 const ytdl = require(`ytdl-core`);
+const str = require('../../util/stringutils');
 
 module.exports = class AudioCommand extends commando.Command {
 	constructor(client) {
@@ -16,7 +18,7 @@ module.exports = class AudioCommand extends commando.Command {
 					key: `type`,
 					prompt: `What audio type do you want to play?`,
 					type: `string`,
-					oneOf: [ `local`, `youtube` ],
+					oneOf: [ `link`, `local`, `youtube` ],
 				},
 				{
 					key: `loc`,
@@ -31,9 +33,20 @@ module.exports = class AudioCommand extends commando.Command {
 					max: 20,
 					default: 4,
 				},
+				{
+					key: `seek`,
+					prompt: `Specify time to start at`,
+					type: `integer`,
+					default: 0,
+				},
 			],
 		});
 	}
+	/**
+	 *
+	 * @param {Message} message
+	 * @param {*} args
+	 */
 	async run(message, args) {
 		// Get the voice connections, find if there is one in this guild, if it exists, return with a reply
 		const vcon = this.client.voice.connections;
@@ -43,14 +56,14 @@ module.exports = class AudioCommand extends commando.Command {
 		if (message.member.voice.channel) {
 			const chan = message.member.voice.channel;
 			// Check if there is an ongoing lesson in this voice channel, if true, return with a reply
-			const lesson = this.client.lessons.find(les => les.class === chan.name.slice(0, 2));
-			if (lesson && message.member != lesson.teacher) return message.reply(`Only the teacher can play audio during the lesson!`).then(res => {res.delete({ timeout: 5000 }); message.delete({ timeout: 5000 });});
+			const lesson = this.client.lessonManager.lessons.find(les => les.class === str.getChanName(chan).slice(0, 2));
+			if (lesson && message.member != lesson.teacher.member) return message.reply(`Only the teacher can play audio during the lesson!`).then(res => {res.delete({ timeout: 5000 }); message.delete({ timeout: 5000 });});
 			// If YouTube was specified
 			if (args.type === `youtube`) {
 				// Join the channel
 				const connection = await chan.join();
 				// Use ytdl to play the specified link
-				const dispatcher = connection.play(ytdl(args.loc, { filter: "audioonly" }), { volume: args.vol / 10 });
+				const dispatcher = connection.play(ytdl(args.loc, { filter: "audioonly" }), { volume: args.vol / 10, seek: args.seek });
 				// When playback ends, send a message and disconnect
 				dispatcher.on(`finish`, () => {
 					message.reply(`I have finished playing!`);
@@ -58,12 +71,12 @@ module.exports = class AudioCommand extends commando.Command {
 					connection.disconnect();
 				});
 			}
-			// Else if link was specified
-			else if (args.type === `local`) {
+			// Else if link/local was specified
+			else if (args.type === `local` || args.type === `link`) {
 				// Join the channel
 				const connection = await chan.join();
 				// Play the specified link
-				const dispatcher = connection.play(`${args.loc}`, { volume: args.vol / 10 });
+				const dispatcher = connection.play(`${args.loc}`, { volume: args.vol / 10, seek: args.seek });
 				// When playback ends, send a message and disconnect
 				dispatcher.on(`finish`, () => {
 					message.reply(`I have finished playing!`);
