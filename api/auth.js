@@ -1,5 +1,6 @@
 const express = require('express');
 const axios = require('axios').default;
+const { GuildMember } = require('discord.js');
 
 const router = express.Router();
 
@@ -25,6 +26,9 @@ function authorize(token) {
 		axios.get('https://discord.com/api/users/@me', { headers: { 'Authorization': token } })
 			.then(response => {
 				if (response.status != 200) return reject({ status: response.status });
+				/**
+				 * @type {GuildMember}
+				 */
 				const member = global.client.guilds.cache.find(g => g.id == `702836521622962198`).members.resolve(response.data.id);
 				if (!member) return resolve(false);
 				global.client.permManager.isClassTeacher(member)
@@ -32,7 +36,7 @@ function authorize(token) {
 						resolve({
 							user: member.user,
 							member: member,
-							admin: member.hasPermission(`ADMINISTRATOR`),
+							admin: member.hasPermission(`ADMINISTRATOR`) || member.roles.highest.id === `769952519832600607`,
 							isTeacher: global.client.permManager.isTeacher(member),
 							subjects: global.client.permManager.getTeacherSubjects(member),
 							classTeacher: classteacher,
