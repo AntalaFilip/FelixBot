@@ -10,9 +10,9 @@ class SplitCommand extends Command {
 			group: `lesson`,
 			memberName: `split`,
 			description: `Split people into random groups`,
-			examples: [ `split 2`, `split 4` ],
+			examples: [`split 2`, `split 4`],
 			guildOnly: true,
-			userPermissions: [ `MOVE_MEMBERS` ],
+			userPermissions: [`MOVE_MEMBERS`],
 			args: [
 				{
 					key: `gsize`,
