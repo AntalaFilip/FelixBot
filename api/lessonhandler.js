@@ -14,7 +14,7 @@ router.get('/', (req, res) => {
 				if (query.class) lss = lss.filter(l => l.classid == query.class);
 				let lessons;
 				if (req.authorized.isTeacher) {
-					if (classt) lessons = lss.filter(ls => classt.name.includes(ls.classid));
+					if (classt) lessons = lss.filter(ls => classt.name.startsWith(ls.classid));
 					else lessons = lss.filter(ls => ls.teacher.member.id == req.authorized.member.userID);
 				}
 				if (req.authorized.admin) lessons = lss;
@@ -30,7 +30,7 @@ router.get('/', (req, res) => {
 				if (query.class) lss = lss.filter(l => l.classid == query.class);
 				let lessons;
 				if (req.authorized.isTeacher) {
-					if (classt) lessons = lss.filter(ls => classt.name.includes(ls.classid));
+					if (classt) lessons = lss.filter(ls => classt.name.startsWith(ls.classid));
 					else lessons = lss.filter(ls => ls.teacher.member.id == req.authorized.member.userID);
 				}
 				if (req.authorized.admin) lessons = lss;
