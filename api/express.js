@@ -8,8 +8,8 @@ const cors = require('cors');
 const RateLimit = require('express-rate-limit');
 
 const authLimiter = new RateLimit({
-	windowMs: 60 * 1000,
-	max: 5,
+	windowMs: 1000,
+	max: 3,
 });
 
 app.use(authorizer);
