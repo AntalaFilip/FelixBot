@@ -45,7 +45,7 @@ class SplitCommand extends Command {
 		let i = 0;
 		const size = from.members.size;
 		/**
-		 * @type {Array<Array<GuildMember>}
+		 * @type {Array<Array<GuildMember>>}
 		 */
 		const users = [];
 		to.forEach(ch => users.push([]));
