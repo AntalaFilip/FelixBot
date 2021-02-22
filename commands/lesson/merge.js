@@ -52,7 +52,7 @@ class MergeCommand extends Command {
 					embedmsg.edit(embed[1])
 						.then(msg => {
 							if (lesson) reactions.addFunctionalReaction(`end`, msg, [lesson.teacher.member.user], lesson);
-							reactions.addFunctionalReaction([`split`], msg, [lesson ? lesson.teacher.member.user : member]);
+							reactions.addFunctionalReaction([`split`], msg, [lesson ? lesson.teacher.member.user : member], lesson ? lesson : undefined);
 						});
 				});
 		}, args.time * 1000);
