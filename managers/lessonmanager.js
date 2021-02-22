@@ -262,6 +262,7 @@ class LessonManager {
 			sumembed.addField(student.member.displayName, atten);
 			i++;
 		}
+		this.update(lesson);
 		lesson.teacher.member.createDM().then(dm => dm.send(sumembed));
 	}
 
