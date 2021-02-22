@@ -20,7 +20,6 @@ class SplitCommand extends Command {
 					label: `groupsize`,
 					type: `integer`,
 					min: 2,
-					max: 6,
 				},
 			],
 		});
