@@ -1,7 +1,8 @@
-const { MessageEmbed, GuildMember, VoiceChannel } = require(`discord.js`);
+const { MessageEmbed, GuildMember, VoiceChannel, CategoryChannel } = require(`discord.js`);
 const { Command, CommandoMessage } = require("discord.js-commando");
 const { lessonShouldEnd } = require("../../util/timeutils");
 const SplitAudit = require('../../types/audit/splitaudit');
+const reactionUtils = require("../../util/reactions");
 
 class SplitCommand extends Command {
 	constructor(client) {
@@ -31,7 +32,23 @@ class SplitCommand extends Command {
 	 * @param {*} args
 	 */
 	async run(message, args) {
-		
+		const mem = message.member;
+		const lesson = this.client.lessonManager.lessons.find(ls => ls.teacher.member.id == mem.id);
+		if (!mem.voice.channel) return message.reply(`You have to be in a voice channel!`);
+		const chan = mem.voice.channel;
+		const ctg = chan.parent;
+		let chans = ctg.children.filter(ch => ch.type === 'voice' && !ch.name.includes('*') && ch.id != chan.id);
+		if (lesson) chans = lesson.allocated.filter(ch => ch.id != chan.id);
+		if (!ctg.children.has(message.channel.id)) return message.reply(`Command aborted! For safety reasons you may only run commands in the same category as the one you are trying to execute them in. For reference, you were trying to run a command in the category '${ctg.name}', but sent the command in category '${message.channel.parent.name}'`);
+		this.exec(mem, chan, chans)
+			.then((val) => {
+				const [map, embed] = val;
+				message.channel.send(embed)
+					.then(msg => {
+						reactionUtils.addFunctionalReaction(`merge`, msg, [lesson ? lesson.teacher.member.user : mem], lesson);
+						if (lesson) reactionUtils.addFunctionalReaction(`end`, msg, [lesson ? lesson.teacher.member.user : mem], lesson);
+					});
+			});
 	}
 
 	/**
