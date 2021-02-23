@@ -19,7 +19,7 @@ class PermissionsManager {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param {GuildMember} member
 	 */
 	getTeacherSubjects(member) {
@@ -28,7 +28,7 @@ class PermissionsManager {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param {GuildMember} member
 	 */
 	isClassTeacher(member) {
