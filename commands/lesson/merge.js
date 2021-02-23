@@ -71,6 +71,7 @@ class MergeCommand extends Command {
 			const users = [];
 			for (const usr of chan.members) {
 				try {
+					if (!usr[1].voice.channel) continue;
 					usr[1].voice.setChannel(to, `Merged; ${initiator.displayName}`);
 					users.push(usr[1].displayName);
 					i++;
