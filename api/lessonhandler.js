@@ -1,6 +1,7 @@
 const express = require('express');
 
 const router = express.Router();
+const db = require('../managers/databasemanager').db;
 
 router.get('/', (req, res) => {
 	if (!req.authorized) return res.status(401).send();
@@ -57,6 +58,17 @@ router.post('/:id', (req, res) => {
 
 router.patch('/:id', (req, res) => {
 	res.status(500).send();
+});
+
+router.delete('/:id', (req, res) => {
+	if (!req.authorized) return res.status(401).send();
+	if (!req.authorized.admin) return res.status(403).send();
+
+	db.query(`DELETE * FROM lessons WHERE id = ${req.params.id}`,
+		(err, response) => {
+			if (err) return res.status(500).send({ err: err });
+			res.status(200).send();
+		});
 });
 
 module.exports = router;
