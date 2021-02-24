@@ -12,7 +12,7 @@ class SplitAudit extends Audit {
 	 * @param {number?} id The ID of the audit event
 	 */
 	constructor(initiator, from, to, list, timestamp = new Date(), id = null) {
-		super(initiator, timestamp, id);
+		super(initiator, null, timestamp, id);
 		this.action = 'split';
 		this.data = {
 			to: to,
