@@ -3,7 +3,7 @@ const { InteractionType, InteractionResponseType, InteractionResponseFlags } = r
 
 const router = express.Router();
 
-router.get('/', (req, res) => {
+router.post('/', (req, res) => {
 	const data = req.body;
 	const token = data.token;
 
