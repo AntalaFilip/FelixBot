@@ -33,6 +33,10 @@ router.post('/', verifyKeyMiddleware(process.env.PUBKEY), (req, res) => {
 			},
 		};
 
+		if (data.name == "test" && data.options[0] == true) {
+			response.data.flags = InteractionResponseFlags.EPHEMERAL;
+		}
+
 		res.status(200).send(response);
 	}
 
