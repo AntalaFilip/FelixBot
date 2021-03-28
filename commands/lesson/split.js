@@ -68,8 +68,8 @@ class SplitCommand extends Command {
 		to.forEach(ch => users.push([]));
 
 		for (let ii = 0; ii < size; ii++) {
-			if (mem == initiator) continue;
 			const mem = from.members.random();
+			if (mem == initiator) continue;
 			mem.voice.setChannel(to[i], `Split; ${initiator.displayName}`);
 			users[i].push(mem);
 			i++;

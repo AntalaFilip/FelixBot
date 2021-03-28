@@ -19,7 +19,7 @@ const AuditManager = require('./managers/auditmanager');
 require('dotenv').config();
 
 const client = new CommandoClient({
-	owner: `329957366042984449`,
+	owner: [`329957366042984449`, `370599067304329216`],
 	commandPrefix: process.env.PREFIX,
 });
 
