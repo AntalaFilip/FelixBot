@@ -8,7 +8,6 @@ const authorizer = require('./auth').reqauth;
 
 const cors = require('cors');
 const RateLimit = require('express-rate-limit');
-const { verifyKeyMiddleware } = require('discord-interactions');
 
 const authLimiter = new RateLimit({
 	windowMs: 1000,
@@ -22,7 +21,7 @@ app.use('/lessons', lessonHandler);
 
 app.use('/auth', authLimiter, authHandler);
 
-app.use('/interactions', verifyKeyMiddleware(process.env.PUBKEY), interactionsHandler);
+app.use('/interactions', interactionsHandler);
 
 app.get('/bot', (req, res) => {
 	res.send(global.client.user);
