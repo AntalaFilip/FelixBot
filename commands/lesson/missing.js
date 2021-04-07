@@ -38,7 +38,8 @@ class MissingCommand extends Command {
 		 */
 		const lmgr = this.client.lessonManager;
 		const channel = message.channel;
-		const lesson = lmgr.isTeachingLesson(message.member) || lmgr.isInLesson(message.member);
+		let lesson = lmgr.isTeachingLesson(message.member);
+		if (!lesson) lesson = lmgr.isInLesson(message.member);
 		if (!lesson) return message.reply("You are not teaching a lesson right now!");
 		const role = await resolveClass(getChanName(channel));
 		if (role) {
