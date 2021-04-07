@@ -51,3 +51,4 @@ class MissingCommand extends Command {
 		}
 	}
 }
+module.exports = MissingCommand;
