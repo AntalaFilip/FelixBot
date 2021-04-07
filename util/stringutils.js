@@ -1,8 +1,9 @@
-const { GuildChannel } = require("discord.js");
+const { GuildChannel, Role } = require("discord.js");
 
 const StringUtils = {
 	/**
 	 * @param {string} classid
+	 * @returns {Promise<Role>}
 	 */
 	resolveClass(classid) {
 		return new Promise((resolve, reject) => {
