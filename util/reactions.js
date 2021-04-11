@@ -86,7 +86,7 @@ const reactionUtils = {
 		}
 		case `↩`: {
 			const cmd = new MergeCommand(global.client);
-			cmd.run(new CommandoMessage(reaction.message, cmd, "5"), { time: 5 });
+			cmd.run(new CommandoMessage(reaction.message), { time: 5 });
 			break;
 		}
 		case `🔀`: {
