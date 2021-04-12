@@ -1,6 +1,5 @@
 const { Message, User, MessageReaction, GuildMember, ReactionUserManager } = require("discord.js");
 const Lesson = require("../types/lesson/lesson");
-const MergeCommand = require('../commands/lesson/merge');
 const { CommandoMessage } = require("discord.js-commando");
 
 const reactionUtils = {
@@ -79,6 +78,7 @@ const reactionUtils = {
 	 * @param {Lesson} lesson
 	 */
 	async runFunction(reaction, user, lesson = null) {
+		const MergeCommand = require('../commands/lesson/merge');
 		switch (reaction.emoji.toString()) {
 		case `🏁`: {
 			if (lesson) return await global.client.lessonManager.end(lesson, lesson.teacher.member.guild.member(user).displayName);
