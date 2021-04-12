@@ -1,7 +1,5 @@
-const { Role } = require("discord.js");
 const { Command, CommandoMessage } = require("discord.js-commando");
 const LessonManager = require("../../managers/lessonmanager");
-const Lesson = require("../../types/lesson/lesson");
 const { getChanName, resolveClass } = require("../../util/stringutils");
 
 class MissingCommand extends Command {
@@ -18,6 +16,15 @@ class MissingCommand extends Command {
 			examples: [`missing`],
 			guildOnly: true,
 			userPermissions: [`MOVE_MEMBERS`],
+			args: [
+				{
+					key: `time`,
+					prompt: `Enter merge delay (0 for instant merge):`,
+					label: `delay`,
+					type: `integer`,
+					default: 5,
+				},
+			],
 		});
 	}
 
@@ -35,12 +42,13 @@ class MissingCommand extends Command {
 		if (!lesson) lesson = lmgr.isInLesson(message.member);
 		if (!lesson) return message.reply("You are not teaching a lesson right now!");
 		const role = await resolveClass(getChanName(channel));
-		if (role instanceof Role && lesson instanceof Lesson) {
+		if (role) {
 			const missing = [];
 			role.members.forEach(mem => {
-				
+				if (!lesson.students.includes(mem) && !lesson.teacher.member == mem) {
+					missing.push(mem);
+				}
 			});
-			
 		}
 	}
 }
