@@ -1,5 +1,30 @@
 const Timetable = [
 	// Title
+	[`Timetable - FELIX 2.st - online learning (19.4 - 23.4)`],
+	// Monday
+	[
+
+	],
+	// Tuesday
+	[
+
+	],
+	// Wednesday
+	[
+
+	],
+	// Thursday
+	[
+
+	],
+	// Friday
+	[
+
+	],
+];
+
+const TimetableOld = [
+	// Title
 	[`Timetable - FELIX 2.st - online learning`],
 	// Monday
 	[
@@ -171,5 +196,6 @@ const Timetable = [
 		`!anj@ko&pa#765075641778962442$janka%4^1^2`,
 	],
 ];
+
 
 module.exports = Timetable;
