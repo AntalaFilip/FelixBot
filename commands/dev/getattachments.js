@@ -54,6 +54,9 @@ class GetAttachmentCommand extends Command {
 			fs.rmdirSync(temppath);
 			fs.mkdirSync(temppath);
 		}
+		else {
+			fs.mkdirSync(temppath);
+		}
 		const folderpath = path.join(temppath, `${new Date().getTime()}`);
 		fs.mkdirSync(folderpath);
 		logger.debug(`Fetching messages...`);
