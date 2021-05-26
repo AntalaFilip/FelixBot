@@ -6,6 +6,7 @@ const authHandler = require('./auth').router;
 const authorizer = require('./auth').reqauth;
 const cors = require('cors');
 const RateLimit = require('express-rate-limit');
+const path = require('path');
 
 const authLimiter = new RateLimit({
 	windowMs: 1000,
@@ -26,6 +27,8 @@ app.get('/bot', (req, res) => {
 app.get('/owners', (req, res) => {
 	res.send(global.client.owners);
 });
+
+app.use('/download', express.static(path.join(__dirname, '../', 'download')));
 
 app.all('/*', (req, res) => {
 	res.status(404).send(`Not found`);
