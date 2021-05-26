@@ -72,14 +72,17 @@ class GetAttachmentCommand extends Command {
 					fs.mkdirSync(authorPath);
 				}
 				for (const att of attachments) {
-					const filepath = path.join(authorPath, att.id);
-					console.log(`Writing new file to ${filepath}`);
+					logger.debug(`Fetching attachment ${att.id} at ${att.url}`);
 					const res = await axios.get(att.url);
+					const header = res.headers['Content-Type'];
+					const ext = header.substring(header.indexOf('/') + 1);
+					const filepath = path.join(authorPath, att.id + `.${ext}`);
+					logger.debug(`Writing new file to ${filepath}`);
 					fs.writeFileSync(filepath, res.data);
 				}
 			}
 		}
-		console.log(`Finished writing files`);
+		logger.debug(`Finished writing files`);
 		const exportname = `export_${new Date().getTime()}.tar.gz`;
 		const exportpath = path.join(temppath, exportname);
 		await new Promise((resolve, reject) => {
