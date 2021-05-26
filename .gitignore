@@ -2,6 +2,7 @@
 .vs
 node_modules
 download
+temp
 config.json
 database.db
 *.m4a
