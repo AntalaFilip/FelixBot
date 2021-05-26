@@ -88,3 +88,4 @@ class GetAttachmentCommand extends Command {
 		});
 	}
 }
+module.exports = GetAttachmentCommand;
