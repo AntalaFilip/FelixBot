@@ -46,7 +46,6 @@ class GetAttachmentCommand extends Command {
 	 * @param {TextChannel} channel
 	 */
 	async exec(channel) {
-		if (process.env.NODE_ENV !== 'PRODUCTION') throw new Error('This command may only be used in production');
 		const logger = global.clientlogger;
 		logger.debug(`Starting attachment export from channel ${channel.id} in guild ${channel.guild.name} (${channel.guild.id})`);
 		const temppath = path.join(__dirname, 'temp');
@@ -73,8 +72,8 @@ class GetAttachmentCommand extends Command {
 				}
 				for (const att of attachments) {
 					logger.debug(`Fetching attachment ${att.id} at ${att.url}`);
-					const res = await axios.get(att.url);
-					const header = res.headers['Content-Type'];
+					const res = await axios.get(att.url, { responseType: 'arraybuffer' });
+					const header = res.headers['content-type'];
 					const ext = header.substring(header.indexOf('/') + 1);
 					const filepath = path.join(authorPath, att.id + `.${ext}`);
 					logger.debug(`Writing new file to ${filepath}`);
