@@ -86,7 +86,7 @@ class GetAttachmentCommand extends Command {
 				logger.error(err);
 				throw new Error('Failed to write targz file');
 			}
-			fs.copyFileSync(exportpath, path.join(__dirname, '../../', 'download/'));
+			fs.copyFileSync(exportpath, path.join(__dirname, '../../', 'download', exportname));
 			return exportname;
 		});
 	}
