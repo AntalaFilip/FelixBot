@@ -20,6 +20,7 @@
     "nodemon": "^2.0.6",
     "sqlite": "^4.0.15",
     "sqlite3": "^5.0.0",
+    "targz": "^1.0.1",
     "ytdl-core": "^4.0.0"
   },
   "devDependencies": {
