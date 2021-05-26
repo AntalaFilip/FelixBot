@@ -19,7 +19,7 @@ class GetAttachmentCommand extends Command {
 				{
 					key: 'channel',
 					prompt: 'Link a channel (using #)',
-					type: 'tchan',
+					type: 'text-channel',
 				},
 			],
 		});
