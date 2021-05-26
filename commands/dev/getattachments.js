@@ -61,36 +61,39 @@ class GetAttachmentCommand extends Command {
 		const folderpath = path.join(temppath, `${new Date().getTime()}`);
 		fs.mkdirSync(folderpath);
 		logger.debug(`Fetching messages...`);
-		const messages = await channel.messages.fetch();
-		messages.forEach(msg => {
+		const messages = await (await channel.messages.fetch()).array();
+		for (const msg of messages) {
 			const author = msg.member;
 			const authorPath = path.join(folderpath, author.displayName);
-			const attachments = msg.attachments;
-			if (attachments.size > 0) {
+			const attachments = msg.attachments.array();
+			if (attachments.length > 0) {
 				if (!fs.existsSync(authorPath)) {
 					console.log(`Creating directory for ${author.displayName} (${author.id})`);
 					fs.mkdirSync(authorPath);
 				}
-				attachments.forEach(async att => {
+				for (const att of attachments) {
 					const filepath = path.join(authorPath, att.id);
 					console.log(`Writing new file to ${filepath}`);
 					const res = await axios.get(att.url);
 					fs.writeFileSync(filepath, res.data);
-				});
+				}
 			}
-		});
+		}
 		console.log(`Finished writing files`);
 		const exportname = `export_${new Date().getTime()}.tar.gz`;
 		const exportpath = path.join(temppath, exportname);
-		targz.compress({ src: folderpath, dest: exportpath }, err => {
-			if (err) {
-				logger.error('Failed to compress files to targz');
-				logger.error(err);
-				throw new Error('Failed to write targz file');
-			}
-			fs.copyFileSync(exportpath, path.join(__dirname, '../../', 'download', exportname));
-			return exportname;
+		await new Promise((resolve, reject) => {
+			targz.compress({ src: folderpath, dest: exportpath }, err => {
+				if (err) {
+					logger.error('Failed to compress files to targz');
+					logger.error(err);
+					reject(new Error('Failed to write targz file'));
+				}
+				fs.copyFileSync(exportpath, path.join(__dirname, '../../', 'download', exportname));
+				resolve();
+			});
 		});
+		return exportname;
 	}
 }
 module.exports = GetAttachmentCommand;
