@@ -1,6 +1,7 @@
 .vscode
 .vs
 node_modules
+download
 config.json
 database.db
 *.m4a
