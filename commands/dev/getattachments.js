@@ -3,6 +3,7 @@ const { Command, CommandoMessage } = require("discord.js-commando");
 const fs = require('fs');
 const path = require('path');
 const targz = require('targz');
+const axios = require('axios').default;
 require('dotenv').config({ path: path.join(__dirname, '../../') });
 
 class GetAttachmentCommand extends Command {
@@ -70,10 +71,11 @@ class GetAttachmentCommand extends Command {
 					console.log(`Creating directory for ${author.displayName} (${author.id})`);
 					fs.mkdirSync(authorPath);
 				}
-				attachments.forEach(att => {
+				attachments.forEach(async att => {
 					const filepath = path.join(authorPath, att.id);
 					console.log(`Writing new file to ${filepath}`);
-					fs.writeFileSync(filepath, att.attachment);
+					const res = await axios.get(att.url);
+					fs.writeFileSync(filepath, res.data);
 				});
 			}
 		});
