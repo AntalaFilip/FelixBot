@@ -3,7 +3,7 @@ const { Command, CommandoMessage } = require("discord.js-commando");
 const fs = require('fs');
 const path = require('path');
 const targz = require('targz');
-require('dotenv').config();
+require('dotenv').config({ path: path.join(__dirname, '../../') });
 
 class GetAttachmentCommand extends Command {
 	constructor(client) {
