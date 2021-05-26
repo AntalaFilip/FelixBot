@@ -51,7 +51,7 @@ class GetAttachmentCommand extends Command {
 		const temppath = path.join(__dirname, 'temp');
 		if (fs.existsSync(temppath)) {
 			logger.debug(`Temp folder exists, clearing it`);
-			fs.rmdirSync(temppath);
+			fs.rmdirSync(temppath, { recursive: true });
 			fs.mkdirSync(temppath);
 		}
 		else {
