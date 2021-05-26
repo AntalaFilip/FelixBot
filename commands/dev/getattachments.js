@@ -48,7 +48,7 @@ class GetAttachmentCommand extends Command {
 	async exec(channel) {
 		const logger = global.clientlogger;
 		logger.debug(`Starting attachment export from channel ${channel.id} in guild ${channel.guild.name} (${channel.guild.id})`);
-		const temppath = path.join(__dirname, 'temp');
+		const temppath = path.join(__dirname, '../../', 'temp');
 		if (fs.existsSync(temppath)) {
 			logger.debug(`Temp folder exists, clearing it`);
 			fs.rmdirSync(temppath, { recursive: true });
