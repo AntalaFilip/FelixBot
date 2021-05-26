@@ -203,6 +203,10 @@ class DatabaseManager {
 					res.forEach(raw => {
 						const parsed = this.parseDatabaseResult(raw);
 						const user = this.client.guilds.cache.find(g => g.id == parsed.guild).members.cache.find(u => u.id == parsed.user);
+						if (!user) {
+							this.logger.error(`Cannot find user ${parsed.user} in the guild!`);
+							return;
+						}
 						let to;
 						let from;
 						let audit;
