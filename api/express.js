@@ -30,6 +30,8 @@ app.get('/bot', (req, res) => {
 	res.send(global.client.user);
 });
 
+app.use('/download', express.static('download'));
+
 app.get('/owners', (req, res) => {
 	res.send(global.client.application.owner);
 });
