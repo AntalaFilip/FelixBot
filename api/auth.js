@@ -14,7 +14,7 @@ router.get('/', (req, res) => {
 				res.send(result);
 			},
 			err => {
-				if (err === false) res.status(401).send({ message: `You are not a member of the Felix Discord server!`, join: `https://discord.gg/kKh8BeS` });
+				if (err === false) res.status(403).send({ message: `You are not a member of the Felix Discord server!`, join: `https://discord.gg/kKh8BeS` });
 				else if (err.status) res.status(err.status).send();
 				else res.status(500).send();
 			},

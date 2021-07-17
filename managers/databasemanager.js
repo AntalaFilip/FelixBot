@@ -1,155 +1,285 @@
 const { GuildMember, Guild } = require('discord.js');
-const { CommandoClient, CommandoGuild } = require('discord.js-commando');
-const { createConnection } = require('mysql');
+const { default: knex } = require('knex');
+const FelixBotClient = require('../client');
 const Audit = require('../types/audit/audit');
 const MergeAudit = require('../types/audit/mergeaudit');
 const SplitAudit = require('../types/audit/splitaudit');
 const Lesson = require('../types/lesson/lesson');
 const Logger = require('../util/logger');
+const Parsers = require('../util/parsers');
 const str = require('../util/stringutils');
 require('dotenv').config();
-
-const db = createConnection({
-	host: process.env.DBHOST,
-	port: 3314,
-	database: process.env.DB,
-	user: process.env.DBUSER,
-	password: process.env.DBPASS,
-});
 
 class DatabaseManager {
 	/**
 	 * Creates a new DatabaseManager.
-	 * @param {CommandoClient} client The client that instantiated this.
+	 * @param {FelixBotClient} client The client that instantiated this.
 	 */
 	constructor(client) {
 		this.client = client;
 		this.logger = new Logger("DatabaseManager");
 		this.logger.log(`Ready!`);
+
+		this.knex = knex({
+			connection: {
+				host: process.env.DBHOST,
+				port: 3314,
+				database: process.env.DB,
+				user: process.env.DBUSER,
+				password: process.env.DBPASS,
+			},
+			client: `mysql`,
+		});
+	}
+
+	async insertTeacher(data) {
+		const query = this.knex
+			.insert({
+				dsid: data.member.id,
+				eduid: data.euser.id,
+				name: data.member.displayName,
+				autolessons: data.autolessons ?? 1,
+			})
+			.into('teachers');
+
+		const res = await query;
+		return res[0];
+	}
+
+	async getTeacher(id) {
+		const query = this.knex
+			.select('*')
+			.from('teachers');
+
+		if (id) query.where({ id });
+
+		const res = await query;
+		const data = Parsers.parseTeacher(res);
+
+		if (id && !Array.isArray(id)) return data[0];
+		return data;
+	}
+
+	async updateTeacher(id, data) {
+		const query = this.knex
+			.table('teachers')
+			.update(data)
+			.where({ id });
+
+		await query;
+		return;
+	}
+
+	async insertRole(data) {
+		const query = this.knex
+			.insert({
+				roleid: data.role.id,
+				eduid: data.eduid,
+				name: data.role.name,
+			})
+			.into('roles');
+
+		const res = await query;
+		return res[0];
 	}
 
 	/**
 	 * Parses a result from the database
-	 * @param {string} result The string to parse
+	 * @param {[]} result The string to parse
+	 * @returns {[] | {}}
 	 */
 	parseDatabaseResult(result) {
-		const parsed = new Map();
-		const res = new Map(Object.entries(result));
-		res.forEach((val, key) => {
-			try {
-				const newval = JSON.parse(val);
-				parsed.set(key, newval);
-			}
-			catch (error) {
-				parsed.set(key, val);
-			}
+		if (!Array.isArray(result)) result = [result];
+		const mapped = result.map(r => {
+			const parsed = new Map();
+			const res = new Map(Object.entries(r));
+			res.forEach((val, key) => {
+				try {
+					const newval = JSON.parse(val);
+					parsed.set(key, newval);
+				}
+				catch (error) {
+					parsed.set(key, val);
+				}
+			});
+			return Object.fromEntries(parsed);
 		});
-		return Object.fromEntries(parsed);
+
+		if (mapped.length === 1) return mapped[0];
+		return mapped;
 	}
 
 	/**
 	 * Fetches all ongoing lessons in the database, parses them into Lesson objects, and returns them as an array.
-	 * @param {CommandoGuild} guild
-	 * @returns {Promise<Lesson[] | Array>} Promise with an array of Lesson objects, or an empty array, if no lessons are ongoing.
+	 * @param {Guild} guild
+	 * @returns {Promise<Lesson[]>} Promise with an array of Lesson objects, or an empty array, if no lessons are ongoing.
 	 */
-	getOngoingLessons(guild) {
-		return new Promise((resolve, reject) => {
-			if (!guild) guild = this.client.guilds.cache.find(g => g.id == `702836521622962198`);
-			const array = new Array();
-			db.query(`SELECT * FROM lessons WHERE endedat IS NULL`, (err, res) => {
-				if (err) return reject(err);
+	async getOngoingLessons(guild) {
+		const query = this.knex
+			.select(
+				'*',
+			)
+			.from('lessons AS l')
+			.where('l.endedat', null);
 
-				res.forEach(raw => {
-					const val = this.parseDatabaseResult(raw);
-					const ls = new Lesson(val.id, val.allocated, guild.members.cache.find(t => t.id == val.teacher), val.lesson, val.classname.slice(0, 2), val.group, val.period, val.students, val.startedat, null);
-					array.push(ls);
-				});
-				resolve(array);
-			});
-		});
+		const res = await query;
+		const data = this.parseDatabaseResult(res);
+		const lessons = data.map(val => (
+			new Lesson(val.id, val.allocated, guild.members.cache.find(t => t.id == val.teacher), val.lesson, val.classname.slice(0, 2), val.group, val.period, val.students, val.startedat, null)
+		));
+
+		return lessons;
 	}
 
-	getAllLessons(guild = this.client.guilds.cache.find(g => g.id == `702836521622962198`)) {
-		return new Promise((resolve, reject) => {
-			const array = new Array();
-			db.query(`SELECT * FROM lessons`, (err, res) => {
-				if (err) return reject(err);
+	async getAllLessons(guild = this.client.guilds.cache.find(g => g.id == `702836521622962198`)) {
+		const query = this.knex
+			.select(
+				'*',
+			)
+			.from('lessons AS l');
 
-				res.forEach(raw => {
-					const val = this.parseDatabaseResult(raw);
-					const ls = new Lesson(val.id, val.allocated, guild.members.cache.find(t => t.id == val.teacher), val.lesson, val.classname.slice(0, 2), val.group, val.period, val.students, new Date(val.startedat), new Date(val.endedat));
-					array.push(ls);
-				});
-				resolve(array);
-			});
+		const res = await query;
+		const data = this.parseDatabaseResult(res);
+		/** @type {Lesson[]} */
+		const lessons = data.map(val => {
+			const teacher = guild.members.cache.find(t => t.id == val.teacher);
+			if (!teacher) {
+				this.logger.warn(`Lesson ${val.id} has no corresponding teacher (${val.teacher}) in the guild!`);
+				return;
+			}
+			const ls = new Lesson(
+				val.id,
+				val.allocated,
+				teacher,
+				val.lesson, val.classname.slice(0, 2),
+				val.group,
+				val.period,
+				val.students,
+				val.startedat,
+				val.endedat ? new Date(val.endedat) : null,
+			);
+			return ls;
 		});
+		const filtered = lessons.filter(l => l instanceof Lesson);
+		return filtered;
 	}
 
 	/**
 	 * @param {Guild} guild
 	 * @param {number} id
 	 */
-	getLesson(guild = this.client.guilds.cache.find(g => g.id == `702836521622962198`), id) {
-		return new Promise((resolve, reject) => {
-			db.query(`SELECT * FROM lessons WHERE id = ${id}`, (err, res) => {
-				if (err) return reject(err);
+	async getLesson(guild = this.client.guilds.cache.find(g => g.id == `702836521622962198`), id) {
+		const query = this.knex
+			.select(
+				'*',
+			)
+			.from('lessons AS l')
+			.where({ id });
 
-				const val = this.parseDatabaseResult(res.pop());
-				const ls = new Lesson(val.id, val.allocated, guild.members.cache.find(t => t.id == val.teacher), val.lesson, val.classname.slice(0, 2), val.group, val.period, val.students, new Date(val.startedat), new Date(val.endedat));
-				resolve(ls);
-			});
-		});
+		const res = await query;
+		const data = this.parseDatabaseResult(res[0]);
+		const ls = new Lesson(data.id, data.allocated, guild.members.cache.find(t => t.id == data.teacher), data.lesson, data.classname.slice(0, 2), data.group, data.period, data.students, new Date(data.startedat), new Date(data.endedat));
+		return ls;
 	}
 
 	/**
-	 * Gets the guild's settings
-	 * @param {string} guildId
+	 * @param {Guild} guild
+	 * @returns
 	 */
-	getSettings(guildId = '702836521622962198') {
-		return new Promise((resolve, reject) => {
-			db.query(
-				`SELECT * FROM settings WHERE guild = "${guildId}"`,
-				(err, res) => {
-					if (err) throw err;
-					if (res.length < 0) {
-						reject(new Error('There are no settings for that guild'));
-					}
-					else {
-						resolve(this.parseDatabaseResult(res.pop()));
-					}
-				});
-		});
+	async getAllUsers(guild = this.client.guilds.cache.find(g => g.id == `702836521622962198`)) {
+		const query = this.knex
+			.select(
+				'*',
+			)
+			.from('teachers AS t');
+
+		const res = await query;
+		const data = this.parseDatabaseResult(res);
+		const users = data.map(u => ({
+			member: guild.members.resolve(String(u.dsid)),
+			autolessons: Boolean(u.autolessons),
+			eduid: String(u.eduid),
+		}));
+		return users;
+	}
+
+	async getUser(guild = this.client.guilds.cache.find(g => g.id == `702836521622962198`), id) {
+		const query = this.knex
+			.select(
+				'*',
+			)
+			.from('teachers AS t')
+			.where({ id });
+
+		const res = await query;
+		const data = this.parseDatabaseResult(res[0]);
+		const user = {
+			member: guild.members.resolve(String(data.dsid)),
+			autolessons: Boolean(data.autolessons),
+			eduid: String(data.eduid),
+		};
+		return user;
+	}
+
+	async insertUser(data) {
+		const query = this.knex
+			.insert(data)
+			.into('users');
+
+		const res = await query;
+		return res[0];
+	}
+
+
+	/**
+	 * Gets the guild's settings
+	 * @param {bigint} id
+	 */
+	async getSettings(id = 702836521622962198n) {
+		const query = this.knex
+			.select(
+				'*',
+			)
+			.from('guilds AS g')
+			.where({ id });
+
+		const res = await query;
+		const data = this.parseDatabaseResult(res[0]);
+		return data;
 	}
 
 	/**
 	 * Syncs the Lesson with the database.
 	 * @param {Lesson} lesson The Lesson to sync.
 	 */
-	updateLesson(lesson) {
-		return new Promise((resolve, reject) => {
-			if (process.env.NODE_ENV === 'development') this.logger.debug(`Updating lesson: ${lesson.id}`);
-			const allocated = new Array();
-			lesson.allocated.forEach(chan => allocated.push(chan.id));
-			db.query(`UPDATE lessons SET students = '${JSON.stringify(lesson.students)}', allocated = '${JSON.stringify(allocated)}' WHERE id = ${lesson.id}`, err => {
-				if (err) reject(new Error(`SQL Error ${err}`));
-				else resolve();
-			});
-		});
+	async updateLesson(lesson) {
+		this.client.isDev() && this.logger.debug(`Updating lesson: ${lesson.id}`);
+		const allocids = lesson.allocated.map(c => c.id);
+		const jsonids = JSON.stringify(allocids);
+		const students = JSON.stringify(lesson.students);
+		const query = this.knex
+			.table('lessons')
+			.update({ students, allocated: jsonids })
+			.where({ id: lesson.id });
+
+		await query;
+		return;
 	}
 
 	/**
 	 * Executes an update query for endedAt which essentially ends the lesson in the database.
 	 * @param {Lesson} lesson The lesson that should be ended.
 	 */
-	endLesson(lesson) {
-		return new Promise((resolve, reject) => {
-			this.logger.debug(`Ending lesson: ${lesson.id}`);
-			this.updateLesson(lesson);
-			db.query(`UPDATE lessons SET endedat = "${str.dateToString(lesson.endedAt)}" WHERE id = ${lesson.id}`, err => {
-				if (err) reject(new Error(`Error while inserting into database, is 'endedAt' set? - ${err}`));
-				else resolve();
-			});
-		});
+	async endLesson(lesson) {
+		this.client.isDev() && this.logger.debug(`Ending lesson: ${lesson.id}`);
+		await this.updateLesson(lesson);
+		const query = this.knex
+			.table('lessons')
+			.update({ endedat: str.dateToString(lesson.endedAt) })
+			.where({ id: lesson.id });
+
+		await query;
+		return;
 	}
 
 	/**
@@ -157,21 +287,27 @@ class DatabaseManager {
 	 * @param {Lesson} lesson The Lesson that should get pushed to the database.
 	 * @returns Promise with the numeric ID of the Lesson, generated by the database.
 	 */
-	pushNewLesson(lesson) {
-		return new Promise((resolve, reject) => {
-			this.logger.debug(`Inserting new lesson: ${lesson.lessonid + '@' + lesson.classid}`);
-			str.resolveClass(lesson.classid)
-				.then((classname) => {
-					const studentJson = JSON.stringify(lesson.students);
-					const allocated = new Array();
-					lesson.allocated.forEach(chan => allocated.push(chan.id));
-					db.query(`INSERT INTO lessons (teacher, lesson, classname, \`group\`, period, startedat, students, allocated) VALUES ("${lesson.teacher.member.id}", "${lesson.lessonid}", "${classname}", "${lesson.group}", ${lesson.period}, "${str.dateToString(new Date(lesson.startedAt))}", '${studentJson}', '${JSON.stringify(allocated)}')`,
-						(err, res) => {
-							if (err) reject(new Error(`SQL error ${err}`));
-							else resolve(res.insertId);
-						});
-				});
-		});
+	async pushNewLesson(lesson) {
+		this.client.isDev() && this.logger.debug(`Inserting new lesson: ${lesson.lessonid + '@' + lesson.classid}`);
+		const classname = await str.resolveClass(lesson.classid);
+		const studentJson = JSON.stringify(lesson.students);
+		const allocated = lesson.allocated.map(c => c.id);
+		const allocJson = JSON.stringify(allocated);
+		const query = this.knex
+			.insert({
+				teacher: lesson.teacher.member.id,
+				lesson: lesson.lessonid,
+				classname,
+				group: lesson.group,
+				period: lesson.period,
+				startedat: str.dateToString(lesson.startedAt),
+				allocated: allocJson,
+				students: studentJson,
+			})
+			.into('users');
+
+		const res = await query;
+		return res[0];
 	}
 
 	/**
@@ -182,53 +318,57 @@ class DatabaseManager {
 	 * @param {Date?} timestamp
 	 * @returns {Promise<number>}
 	 */
-	insertAudit(action, member, eventdata, timestamp = null) {
-		return new Promise((resolve, reject) => {
-			this.logger.debug(`Inserting new audit event: ${action}`);
-			db.query(`INSERT INTO audit (user, guild, action, data, timestamp) VALUES ("${member.id}", "${member.guild.id}", "${action}", '${eventdata}' ${timestamp ? ', "' + str.dateToString(timestamp) + '"' : 'CURRENT_TIMESTAMP'})`,
-				(err, res) => {
-					if (err) return reject(new Error(`SQL error ${err}`));
-					resolve(res.insertId);
-				});
-		});
+	async insertAudit(action, member, eventdata, timestamp = null) {
+		this.client.isDev() && this.logger.debug(`Inserting new audit event: ${action}`);
+		const query = this.knex
+			.insert({
+				user: member.id,
+				guild: member.guild.id,
+				action,
+				data: eventdata,
+				timestamp: timestamp ? str.dateToString(timestamp) : 'CURRENT_TIMESTAMP',
+			})
+			.into('audits');
+
+		const res = await query;
+		return res[0];
 	}
 
-	getAllAudits() {
-		return new Promise((resolve, reject) => {
-			this.logger.debug(`Fetching audits from database`);
-			db.query(`SELECT * FROM audit`,
-				(err, res) => {
-					if (err) reject(new Error(`SQL error ${err}`));
-					const arr = [];
-					res.forEach(raw => {
-						const parsed = this.parseDatabaseResult(raw);
-						const user = this.client.guilds.cache.find(g => g.id == parsed.guild).members.cache.find(u => u.id == parsed.user);
-						let to;
-						let from;
-						let audit;
-						switch(parsed.action) {
-						case 'merge':
-							from = [];
-							parsed.data.from.forEach(id => from.push(user.guild.channels.resolve(id)));
-							to = user.guild.channels.resolve(parsed.data.to);
-							audit = new MergeAudit(user, to, from, parsed.data.list, parsed.timestamp, parsed.id);
-							break;
-						case 'split':
-							to = [];
-							parsed.data.to.forEach(id => to.push(user.guild.channels.resolve(id)));
-							from = user.guild.channels.resolve(parsed.data.from);
-							audit = new SplitAudit(user, from, to, parsed.data.list, parsed.timestamp, parsed.id);
-							break;
-						default:
-							audit = new Audit(user, parsed.data, parsed.timestamp, parsed.id);
-						}
-						arr.push(audit);
-					});
-					resolve(arr);
-				});
+	async getAllAudits() {
+		this.client.isDev() && this.logger.debug(`Fetching audits from database`);
+		const query = this.knex
+			.select('*')
+			.from('audits');
+
+		const res = await query;
+		const data = res.map(raw => {
+			const parsed = this.parseDatabaseResult(raw);
+			const user = this.client.guilds.cache.find(g => g.id == parsed.guild).members.cache.find(u => u.id == parsed.user);
+			if (!user) return;
+			let to;
+			let from;
+			let audit;
+			switch (parsed.action) {
+				case 'merge':
+					from = [];
+					parsed.data.from.forEach(id => from.push(user.guild.channels.resolve(id)));
+					to = user.guild.channels.resolve(parsed.data.to);
+					audit = new MergeAudit(user, to, from, parsed.data.list, parsed.timestamp, parsed.id);
+					break;
+				case 'split':
+					to = [];
+					parsed.data.to.forEach(id => to.push(user.guild.channels.resolve(id)));
+					from = user.guild.channels.resolve(parsed.data.from);
+					audit = new SplitAudit(user, from, to, parsed.data.list, parsed.timestamp, parsed.id);
+					break;
+				default:
+					audit = new Audit(user, parsed.data, parsed.timestamp, parsed.id);
+			}
+			return audit;
 		});
+		return data;
 	}
 }
 
 module.exports = DatabaseManager;
-exports.db = db;
+exports.db = knex;

@@ -6,7 +6,7 @@ const EventEmitter = require('events');
 class Lesson extends EventEmitter {
 	/**
 	 * Creates a lesson object
-	 * @param {number} id The ID of the Lesson, generated automatically if creating a new Lesson, if present, Lesson won't get pushed to database automatically.
+	 * @param {number} id The ID of the Lesson, generated automatically if creating a new Lesson. If present, Lesson won't get pushed to database automatically.
 	 * @param {Array} allocated The allocated channels for this lesson
 	 * @param {GuildMember} teacher The lesson teacher
 	 * @param {String} lessonid The lesson ID
@@ -57,6 +57,10 @@ class Lesson extends EventEmitter {
 				this.students.push(st);
 			}, this);
 		}
+	}
+
+	static is(lesson) {
+		return lesson instanceof Lesson;
 	}
 }
 

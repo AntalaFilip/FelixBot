@@ -5,6 +5,7 @@ const lessonHandler = require('./lessonhandler');
 const interactionsHandler = require('./interactionshandler').router;
 const authHandler = require('./auth').router;
 const authorizer = require('./auth').reqauth;
+const go = require('./go');
 
 const cors = require('cors');
 const RateLimit = require('express-rate-limit');
@@ -21,6 +22,8 @@ app.use('/lessons', lessonHandler);
 
 app.use('/auth', authLimiter, authHandler);
 
+app.use('/go', go);
+
 app.use('/interactions', interactionsHandler);
 
 app.get('/bot', (req, res) => {
@@ -28,7 +31,7 @@ app.get('/bot', (req, res) => {
 });
 
 app.get('/owners', (req, res) => {
-	res.send(global.client.owners);
+	res.send(global.client.application.owner);
 });
 
 app.all('/*', (req, res) => {

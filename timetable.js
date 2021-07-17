@@ -1,6 +1,6 @@
 const Timetable = [
 	// Title
-	[`Timetable - FELIX 2.st - online learning`],
+	[`Timetable - FELIX, online learning - 2020/2021 v2`],
 	// Monday
 	[
 		// Plameniaky

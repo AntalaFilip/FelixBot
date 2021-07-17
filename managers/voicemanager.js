@@ -1,5 +1,5 @@
-const { VoiceState, GuildMember } = require("discord.js");
-const { CommandoClient } = require("discord.js-commando");
+const { joinVoiceChannel, VoiceConnection, entersState, VoiceConnectionStatus } = require("@discordjs/voice");
+const { VoiceState, GuildMember, VoiceChannel, StageChannel, Collection, Snowflake } = require("discord.js");
 const Lesson = require("../types/lesson/lesson");
 const LessonStudent = require("../types/lesson/lessonstudent");
 const LessonTeacher = require("../types/lesson/lessonteacher");
@@ -16,6 +16,8 @@ class VoiceManager {
 		this.client = client;
 		this.logger = new Logger("VoiceManager");
 		this.logger.log('Ready!');
+		/** @type {Collection<Snowflake, VoiceConnection>} */
+		this.connections = new Collection();
 	}
 
 	/**
@@ -145,6 +147,43 @@ class VoiceManager {
 			const participant = lesson.students.find(st => st.member.id == newstate.member.id) || lesson.teacher.member.id == newstate.member.id ? lesson.teacher : null;
 			if (participant) this.client.lessonManager.togglevideo(lesson, participant, newstate.selfVideo);
 		}
+	}
+
+	/**
+	 * @param {VoiceChannel | StageChannel} channel
+	 */
+	async connectToVoice(channel) {
+		const conn = this.connections.get(channel.guild.id);
+		if (conn) throw new Error('Already connected!');
+
+		const connection = joinVoiceChannel({
+			adapterCreator: channel.guild.voiceAdapterCreator,
+			channelId: channel.id,
+			guildId: channel.guild.id,
+		});
+
+		try {
+			await entersState(connection, VoiceConnectionStatus.Ready, 10e3);
+		}
+		catch (err) {
+			this.logger.warn(err);
+			connection.destroy();
+			throw err;
+		}
+
+		this.connections.set(channel.guild.id, connection);
+		return connection;
+	}
+
+	/**
+	 * @param {VoiceConnection} connection
+	 */
+	destroyConnection(connection) {
+		const conn = this.connections.findKey(v => v == connection);
+		if (!conn) throw new Error('This connection does not exist!');
+
+		connection.destroy();
+		this.connections.delete(conn);
 	}
 }
 

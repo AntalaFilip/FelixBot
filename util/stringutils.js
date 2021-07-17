@@ -31,6 +31,19 @@ const StringUtils = {
 	dateToString(date) {
 		return date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
 	},
+
+	/**
+	 * Capitalizes the first letter of the string and makes everything else lowercase
+	 * @param {string} string
+	 */
+	capitalizeFirstLetter(string) {
+		return string.charAt(0).toLocaleUpperCase() + string.slice(1);
+	},
+
+	removeStartingDot(string) {
+		const removed = string.startsWith('.') ? string.slice(1) : string;
+		return removed;
+	},
 };
 
 module.exports = StringUtils;

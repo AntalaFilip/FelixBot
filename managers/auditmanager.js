@@ -1,4 +1,5 @@
-const { CommandoClient } = require("discord.js-commando");
+const { Client } = require("discord.js");
+const FelixBotClient = require("../client");
 const Audit = require("../types/audit/audit");
 const MergeAudit = require("../types/audit/mergeaudit");
 const SplitAudit = require("../types/audit/splitaudit");
@@ -7,11 +8,12 @@ const Logger = require("../util/logger");
 class AuditManager {
 	/**
 	 *
-	 * @param {CommandoClient} client
+	 * @param {FelixBotClient} client
 	 */
 	constructor(client) {
 		this.client = client;
 		this.logger = new Logger(`AuditManager`);
+		/** @type {Audit[]} */
 		this.audits = [];
 		this.ready = new Promise((resolve, reject) => {
 			client.databaseManager.getAllAudits()

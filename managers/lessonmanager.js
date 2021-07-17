@@ -1,4 +1,3 @@
-const { CommandoClient } = require("discord.js-commando");
 const { MessageEmbed, GuildMember, VoiceChannel } = require('discord.js');
 const Logger = require("../util/logger");
 const Lesson = require("../types/lesson/lesson");

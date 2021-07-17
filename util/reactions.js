@@ -1,7 +1,5 @@
 const { Message, User, MessageReaction, GuildMember, ReactionUserManager } = require("discord.js");
 const Lesson = require("../types/lesson/lesson");
-const MergeCommand = require('../commands/lesson/merge');
-const { CommandoMessage } = require("discord.js-commando");
 
 const reactionUtils = {
 	/**
@@ -80,32 +78,33 @@ const reactionUtils = {
 	 */
 	async runFunction(reaction, user, lesson = null) {
 		switch (reaction.emoji.toString()) {
-		case `🏁`: {
-			if (lesson) return await global.client.lessonManager.end(lesson, lesson.teacher.member.guild.member(user).displayName);
-			else throw new Error(`No lesson was passed!`);
-		}
-		case `↩`: {
-			const cmd = new MergeCommand(global.client);
-			cmd.run(new CommandoMessage(reaction.message, cmd, "5"), { time: 5 });
-			break;
-		}
-		case `🔀`: {
-			return;
-		}
+			case `🏁`: {
+				if (lesson) return await global.client.lessonManager.end(lesson, lesson.teacher.member.guild.member(user).displayName);
+				else throw new Error(`No lesson was passed!`);
+			}
+			case `↩`: {
+				const MergeCommand = require('../commands/lesson/merge');
+				const cmd = new MergeCommand(global.client);
+				cmd.run(new Message(reaction.message, cmd, "5"), { time: 5 });
+				break;
+			}
+			case `🔀`: {
+				return;
+			}
 		}
 	},
 
 	getFunctionalEmoji(name) {
 		switch (name) {
-		case `end`: return `🏁`;
-		case `merge`: return `↩`;
-		case `split`: return `🔀`;
-		case `playpause`: return `⏯`;
-		case `play`: return `▶`;
-		case `pause`: return `⏸`;
-		case `stop`: return `⏹`;
-		case `record`: return `⏺`;
-		default: return null;
+			case `end`: return `🏁`;
+			case `merge`: return `↩`;
+			case `split`: return `🔀`;
+			case `playpause`: return `⏯`;
+			case `play`: return `▶`;
+			case `pause`: return `⏸`;
+			case `stop`: return `⏹`;
+			case `record`: return `⏺`;
+			default: return null;
 		}
 	},
 };

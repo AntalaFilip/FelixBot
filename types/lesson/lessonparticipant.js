@@ -8,7 +8,7 @@ class LessonParticipant {
 	constructor(participant) {
 
 		/**
-		 * @type {{connects: Array<Date>, disconnects: Array<Date>, mutes: Array, deafs: Array, video: Array, total: number | null}}
+		 * @type {{connects: Date[], disconnects: Date[], mutes: Array, deafs: Array, video: Array, total: number | null}}
 		 */
 		this.voice = {
 			connects: [],

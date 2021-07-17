@@ -1,3 +1,5 @@
+const chalk = require("chalk");
+
 class Logger {
 	/**
 	 *
@@ -7,29 +9,29 @@ class Logger {
 		this.instance = instance;
 	}
 
-	log(toLog) {
+	log(toLog, ...additional) {
 		const log = `[${new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')}] [${this.instance || 'SYSTEM'}/INFO]: ${toLog}`;
-		console.log(log);
+		console.log(log, ...additional);
 	}
 
-	info(toLog) {
+	info(toLog, ...additional) {
 		const log = `[${new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')}] [${this.instance || 'SYSTEM'}/INFO]: ${toLog}`;
-		console.info(log);
+		console.info(log, ...additional);
 	}
 
-	warn(toLog) {
-		const log = `[${new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')}] [${this.instance || 'SYSTEM'}/WARN]: ${toLog}`;
-		console.warn(log);
+	warn(toLog, ...additional) {
+		const log = chalk.yellow(`[${new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')}] [${this.instance || 'SYSTEM'}/WARN]: ${toLog}`);
+		console.warn(log, ...additional);
 	}
 
-	error(toLog) {
-		const log = `[${new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')}] [${this.instance || 'SYSTEM'}/ERROR]: ${toLog}`;
-		console.error(log);
+	error(toLog, ...additional) {
+		const log = chalk.red(`[${new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')}] [${this.instance || 'SYSTEM'}/ERROR]: ${toLog}`);
+		console.error(log, ...additional);
 	}
 
-	debug(toLog) {
-		const log = `[${new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')}] [${this.instance || 'SYSTEM'}/DEBUG]: ${toLog}`;
-		console.debug(log);
+	debug(toLog, ...additional) {
+		const log = chalk.gray(`[${new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')}] [${this.instance || 'SYSTEM'}/DEBUG]: ${toLog}`);
+		console.debug(log, ...additional);
 	}
 }
 
