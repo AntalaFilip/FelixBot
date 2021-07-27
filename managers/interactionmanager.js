@@ -79,7 +79,7 @@ class InteractionManager {
 			await cmd.run(interaction);
 		}
 		else if (interaction.isMessageComponent()) {
-			await cmd.component(interaction.customId, interaction);
+			await cmd.component(interaction);
 		}
 	}
 }

@@ -1,4 +1,4 @@
-const { GuildMember } = require('discord.js');
+const { GuildMember, CommandInteraction } = require('discord.js');
 const { Command } = require('../../types/command');
 const { CmdMessageResponse } = require('../../util/interactions');
 
@@ -10,25 +10,24 @@ class SendWelcomeCommand extends Command {
 			group: `misc`,
 			memberName: `sendwelcome`,
 			description: `Sends a welcome message to the specified member`,
-			examples: [ `sendwelcome 702922217155067924` ],
+			examples: [`sendwelcome 702922217155067924`],
 		});
 	}
 
 	/**
-	 * Runs the SendWelcome command with the specified Message and arguments
-	 * @param {CommandoMessage} message
-	 * @param {any} args
+	 * @param {CommandInteraction} interaction
 	 */
 	async run(interaction) {
-		const guild = await this.client.guilds.fetch(interaction.guild_id);
-		const user = interaction.data.options[0].value;
-		const member = guild.members.cache.find(mem => mem.id === user);
+		const guild = interaction.guild;
+		const args = interaction.options;
+		const user = args.get('user').user;
+		const member = guild.members.resolve(user);
 		if (member) {
-			this.exec(member);
-			return CmdMessageResponse(`Sent welcome to ${member.displayName}`, true);
+			await this.exec(member);
+			return await interaction.reply({ ephemeral: true, content: `Sent welcome to ${member.displayName}` });
 		}
 		else {
-			return CmdMessageResponse(`Failed to fetch this user`, true);
+			return await interaction.reply({ ephemeral: true, content: `Failed to fetch this user` });
 		}
 	}
 
@@ -36,14 +35,14 @@ class SendWelcomeCommand extends Command {
 	 * Executes the SendWelcome command with the specified member
 	 * @param {GuildMember} member
 	 */
-	exec(member) {
-		member.createDM()
-			.then(dm => {
-				dm.send(`Ahoj! Vitaj vo FELIX Discorde!`);
-				dm.send(`Prosím Ťa, napíš svoje meno, priezvisko a triedu jednému z našich administrátorov (Filip Antala, Mati Halák, Zuzka Burjanová) aby Ťa mohli zaradiť do tvojej triedy.`);
-				dm.send(`Ak sa Ti ale nechce písať administrátorovi (alebo žiaden práve nie je online), môžeš napísať meno a triedu aj mne nasledovne (prosím, používaj diakritiku):`);
-				dm.send(`/identify TvojeMeno TvojePriezvisko`);
-			});
+	async exec(member) {
+		await member.send(
+			`Ahoj! Vitaj vo FELIX Discorde!
+			Je potrebné aby si sa identifikoval/a.
+			Môžeš tak urobiť pomocou príkazu \`/identify\` - jednoducho mi ho pošli sem do správy a postupuj podľa pokynov.
+			Dbaj prosím na diakritiku v svojom mene.
+			(Táto správa bola vygenerovaná automaticky, pri problémoch kontaktujte našich administrátorov.)`,
+		);
 		this.client.logger.info(`Sent welcome message to: ${member.displayName}`);
 	}
 }

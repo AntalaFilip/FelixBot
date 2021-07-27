@@ -33,13 +33,21 @@ const StringUtils = {
 	},
 
 	/**
-	 * Capitalizes the first letter of the string and makes everything else lowercase
+	 * Capitalizes the first letter of each word of the string and makes everything else lowercase
 	 * @param {string} string
 	 */
 	capitalizeFirstLetter(string) {
-		return string.charAt(0).toLocaleUpperCase() + string.slice(1);
+		string = string.trim();
+		const strings = string.split(' ');
+		const uppers = strings.map(s => s.charAt(0).toLocaleUpperCase() + s.slice(1).toLocaleLowerCase());
+		return uppers.join(' ');
 	},
 
+	/**
+	 * Returns the same string without a starting dot.
+	 * @param {string} string
+	 * @returns {string}
+	 */
 	removeStartingDot(string) {
 		const removed = string.startsWith('.') ? string.slice(1) : string;
 		return removed;

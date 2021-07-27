@@ -7,6 +7,8 @@ const LessonManager = require("./managers/lessonmanager");
 const AuditManager = require("./managers/auditmanager");
 const InteractionManager = require("./managers/interactionmanager");
 const Logger = require("./util/logger");
+const config = require('./config.json');
+const EduPageManager = require("./managers/edupagemanager");
 
 class FelixBotClient extends Client {
 	/**
@@ -25,8 +27,9 @@ class FelixBotClient extends Client {
 			this.lessonManager = new LessonManager(this);
 			this.auditManager = new AuditManager(this);
 			this.interactionManager = new InteractionManager(this);
+			this.edupageManager = new EduPageManager(this);
 			this.server = http.createServer(require('./api/express')).listen(process.env.PORT, () => this.logger.log(`HTTP Server ready on ${process.env.PORT}!`));
-			this.user.setActivity(`Readying interactions!`);
+			this.user.setActivity(config.presenceStatus);
 		});
 	}
 

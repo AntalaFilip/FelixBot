@@ -2,5 +2,13 @@
 	{
 		"from": "felix-skolsky-poriadok",
 		"to": "https://cloud5p.edupage.org/cloud?z%3AP20pC3tuSpnusANggydUxZHONcRXAFH%2BFYmzdBQBlKzeGPUXGm27O4pJYzHZV6ad"
+	},
+	{
+		"from": "id-manually",
+		"to": ""
+	},
+	{
+		"from": "identify-authorization",
+		"to": ""
 	}
 ]

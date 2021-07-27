@@ -1,4 +1,4 @@
-const { GuildMember, Guild } = require('discord.js');
+const { GuildMember, Guild, Role } = require('discord.js');
 const { default: knex } = require('knex');
 const FelixBotClient = require('../client');
 const Audit = require('../types/audit/audit');
@@ -23,7 +23,7 @@ class DatabaseManager {
 		this.knex = knex({
 			connection: {
 				host: process.env.DBHOST,
-				port: 3314,
+				port: process.env.DBPORT || null,
 				database: process.env.DB,
 				user: process.env.DBUSER,
 				password: process.env.DBPASS,
@@ -32,11 +32,18 @@ class DatabaseManager {
 		});
 	}
 
+	/**
+	 * @param {Object} data
+	 * @param {GuildMember} [data.member]
+	 * @param {Object} [data.eusr]
+	 * @param {boolean} [data.autolessons]
+	 * @returns
+	 */
 	async insertTeacher(data) {
 		const query = this.knex
 			.insert({
 				dsid: data.member.id,
-				eduid: data.euser.id,
+				eduid: data.eusr.id,
 				name: data.member.displayName,
 				autolessons: data.autolessons ?? 1,
 			})
@@ -46,17 +53,18 @@ class DatabaseManager {
 		return res[0];
 	}
 
-	async getTeacher(id) {
+	async getTeacher(id, eduid) {
 		const query = this.knex
 			.select('*')
 			.from('teachers');
 
-		if (id) query.where({ id });
+		if (id) query.where({ dsid: id });
+		if (eduid) query.where({ eduid: id });
 
 		const res = await query;
 		const data = Parsers.parseTeacher(res);
 
-		if (id && !Array.isArray(id)) return data[0];
+		if ((id && !Array.isArray(id)) || (eduid && !Array.isArray(eduid))) return data[0];
 		return data;
 	}
 
@@ -64,7 +72,7 @@ class DatabaseManager {
 		const query = this.knex
 			.table('teachers')
 			.update(data)
-			.where({ id });
+			.where({ dsid: id });
 
 		await query;
 		return;
@@ -81,6 +89,53 @@ class DatabaseManager {
 
 		const res = await query;
 		return res[0];
+	}
+
+	/**
+	 * @param {Object} data
+	 * @param {GuildMember} [data.member]
+	 * @param {Object} [data.eusr]
+	 * @param {Role} [data.role]
+	 * @param {import('../util/parsers').VerificationLevel} [data.verification]
+	 * @returns
+	 */
+	async insertMember(data) {
+		const query = this.knex
+			.insert({
+				dsid: data.member.id,
+				eduid: data.eusr.id,
+				name: data.member.displayName,
+				verification: data.verification,
+				role: data.role.id,
+			})
+			.into('members');
+
+		const res = await query;
+		return res[0];
+	}
+
+	async getMember(id) {
+		const query = this.knex
+			.select('*')
+			.from('members');
+
+		if (id) query.where({ dsid: id });
+
+		const res = await query;
+		const data = Parsers.parseMember(res);
+
+		if (id && !Array.isArray(id)) return data[0];
+		return data;
+	}
+
+	async updateMember(id, data) {
+		const query = this.knex
+			.table('members')
+			.update(data)
+			.where({ dsid: id });
+
+		await query;
+		return;
 	}
 
 	/**
@@ -242,7 +297,6 @@ class DatabaseManager {
 			)
 			.from('guilds AS g')
 			.where({ id });
-
 		const res = await query;
 		const data = this.parseDatabaseResult(res[0]);
 		return data;
