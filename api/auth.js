@@ -1,6 +1,7 @@
 const express = require('express');
 const axios = require('axios').default;
 const { GuildMember } = require('discord.js');
+const { verifyIdentity } = require('../util/verification');
 
 const router = express.Router();
 
@@ -19,6 +20,13 @@ router.get('/', (req, res) => {
 				else res.status(500).send();
 			},
 		);
+});
+
+router.get('/verify/email/:token', async (req, res) => {
+	const token = req.params['token'];
+	if (!token) return res.status(400).send('Missing token!');
+
+	const data = await verifyIdentity(token);
 });
 
 function authorize(token) {

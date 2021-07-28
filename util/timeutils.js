@@ -18,6 +18,25 @@ const TimeUtils = {
 
 		return false;
 	},
+
+	/**
+	 * @param {Date} date
+	 */
+	getSchoolYear(date) {
+		if (!date) date = new Date();
+
+		const year = date.getFullYear();
+		const month = date.getMonth() + 1;
+		let y1 = year;
+		if (month < 9) y1--;
+		const y2 = y1++;
+
+		return {
+			y1,
+			y2,
+			literal: `${y1}/${y2}`,
+		};
+	},
 };
 
 module.exports = TimeUtils;

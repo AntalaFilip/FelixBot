@@ -1,9 +1,9 @@
 const nodemailer = require('nodemailer');
 
 const transport = nodemailer.createTransport({
-	host: process.env.SMTPHOST,
+	host: process.env.SMTPENDPOINT,
 	port: process.env.SMTPPORT,
-	secure: process.env.SMTPTLS,
+	requireTLS: true,
 	auth: {
 		user: process.env.SMTPUSER,
 		pass: process.env.SMTPPASS,
@@ -14,4 +14,4 @@ const transport = nodemailer.createTransport({
 	sender: 'FelixBot <noreply@felixbot.antala.tk>',
 });
 
-module.exports = transport;
+module.exports = { mailer: transport };

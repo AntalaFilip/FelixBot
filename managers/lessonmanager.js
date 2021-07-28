@@ -8,11 +8,12 @@ const str = require('../util/stringutils');
 const LessonParticipant = require("../types/lesson/lessonparticipant");
 const LessonStudent = require("../types/lesson/lessonstudent");
 const LessonTeacher = require("../types/lesson/lessonteacher");
+const FelixBotClient = require('../client');
 
 class LessonManager {
 	/**
 	 * Creates a new LessonManager.
-	 * @param {CommandoClient} client
+	 * @param {FelixBotClient} client
 	 */
 	constructor(client) {
 		this.client = client;

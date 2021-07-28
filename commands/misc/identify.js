@@ -3,6 +3,9 @@ const { Command } = require('../../types/command');
 const { CmdMessageResponse, ComMessageResponse, CallbackType, MessageComponent, ButtonStyle } = require('../../util/interactions');
 const StringUtils = require('../../util/stringutils');
 const config = require('../../config.json');
+const EduTeacher = require('../../types/edu/eduteacher');
+const EduStudent = require('../../types/edu/edustudent');
+const { sendEmailVerification } = require('../../util/verification');
 
 class IdentifyCommand extends Command {
 	constructor(client) {
@@ -163,20 +166,41 @@ class IdentifyCommand extends Command {
 		const guild = interaction.guild || this.client.guilds.resolve(config.guild);
 		const user = interaction.user;
 		const member = interaction.member ?? guild.members.resolve(user);
-		const args = interaction.options;
-		const eduid = args.get('eduid').value;
+		const opts = interaction.options;
+		const subcmd = opts.getSubCommand();
 
 		if (!member) return await interaction.reply({ ephemeral: true, content: `Nie si členom tohto Discord serveru!` });
 
 		const dbm = await DB.getMember(user.id) || await DB.getTeacher(user.id);
 		if (dbm) return await interaction.reply({ ephemeral: true, content: 'Už si sa raz identifikoval/a.\nAk chceš niečo zmeniť, napíš, prosím svojmu triednemu učiteľovi.' });
 
-		// if (pendingIdentification.includes(member.id)) return await interaction.reply({ ephemeral: true, content: `Už si sa raz identifikoval, počkaj kým bude tvoja žiadosť schválená alebo odmietnutá.` });
-		// if (member.roles.cache.size > 1) return await interaction.reply({ ephemeral: true, content: `Prepáč, ale už máš pridelenú triedu.` });
-		const fname = StringUtils.capitalizeFirstLetter(args.get('firstname').value);
-		const lname = StringUtils.capitalizeFirstLetter(args.get('lastname').value);
+
+		if (subcmd === 'student') {
+			const args = opts.get('student').options;
+			const fname = StringUtils.capitalizeFirstLetter(args[0].value);
+			const lname = StringUtils.capitalizeFirstLetter(args[1].value);
+			/** @type {string?} */
+			const eduid = args[2] && args[2].value;
+
+			if (eduid) {
+				const id = Array.from(eduid.matchAll('[0-9]')).map(o => o[0]).join('');
+				const eusr = EDU.students.find(s => s.id === id);
+				if (!eusr) return await interaction.reply({ ephemeral: true, content: `Študent s takýmto identifikátorom neexistuje.` });
 
 
+			}
+		}
+		else if (subcmd === 'teacher') {
+
+		}
+		else if (subcmd === 'guest') {
+
+		}
+
+
+
+
+		/*
 		if (eduid) {
 			let id;
 			if (typeof eduid === 'number') {
@@ -198,33 +222,75 @@ class IdentifyCommand extends Command {
 			}
 		}
 
-		try {
-			await member.setNickname(fname + ' ' + lname, 'Automatic identification process');
+		return; */
+	}
+
+	/**
+	 *
+	 * @param {GuildMember} member
+	 * @param {Object} props
+	 * @param {string} [props.name]
+	 * @param {import('discord.js').RoleResolvable} [props.role]
+	 * @param {string} [props.email]
+	 * @param {import('../../util/parsers').VerificationLevel} [props.vrf]
+	 * @param {EduStudent | EduTeacher} eusr
+	 */
+	async exec(member, { email, name, role, vrf }, eusr) {
+		const DB = this.client.databaseManager;
+		let n, r, db, m;
+
+		if (eusr instanceof EduStudent) {
+			if (!vrf) vrf = 'PENDING';
+			db = await DB.insertMember({
+				eusr,
+				member,
+				role: role.id ?? role,
+				verification: vrf,
+			});
 		}
-		catch (err) {
-			if (err instanceof DiscordAPIError && err.message == 'Missing Permissions') {
-				msgcontent = 'Nemám právo ti nastaviť meno, musíš si ho nastaviť sám/a.\n**Prosím urob tak predtým, ako budeš pokračovať.**';
+		else if (eusr instanceof EduTeacher) {
+			if (!vrf) vrf = 'VERIFY_EMAIL';
+			db = await DB.insertTeacher({
+				member,
+				email,
+				eusr,
+			});
+		}
+		else {
+			if (!vrf && email) vrf = 'VERIFY_EMAIL';
+			else if (!vrf) vrf = 'VERIFY_TEACHER';
+			db = await DB.insertMember({
+				eusr,
+				member,
+				role,
+				verification: vrf,
+			});
+		}
+
+		if (name) {
+			try {
+				n = await member.setNickname(name, 'Automatic identification process');
+			}
+			catch {
+				n = false;
+			}
+		}
+		if (role && (vrf != 'VERIFY_EMAIL' || vrf != 'VERIFY_TEACHER')) {
+			try {
+				r = await member.roles.add(role, 'Automatic identification process');
+			}
+			catch {
+				r = false;
 			}
 		}
 
-		const rsb = this.components.roleSelectionButtons;
-
-		const msg = {
-			content: msgcontent,
-			components: [
-				new MessageActionRow()
-					.addComponents(rsb.student(), rsb.guest(), rsb.teacher()),
-			],
-		};
-
-		if (interaction.inGuild()) {
-			await interaction.reply({ ephemeral: true, content: `Poslal som ti súkromnú správu s ďalšími informáciami.` });
-			await user.send(msg);
+		if (vrf === 'VERIFY_EMAIL') {
+			const sent = await sendEmailVerification(email, member.displayName, { userid: member.id });
+			if (sent.accepted.length > 0) m = true;
+			else m = false;
 		}
-		else {
-			await interaction.reply(msg);
-		}
-		return;
+
+		return { n, r, db, m };
 	}
 
 	/**

@@ -4,6 +4,8 @@ const FelixBotClient = require('../client');
 const Audit = require('../types/audit/audit');
 const MergeAudit = require('../types/audit/mergeaudit');
 const SplitAudit = require('../types/audit/splitaudit');
+const EduStudent = require('../types/edu/edustudent');
+const EduTeacher = require('../types/edu/eduteacher');
 const Lesson = require('../types/lesson/lesson');
 const Logger = require('../util/logger');
 const Parsers = require('../util/parsers');
@@ -35,7 +37,8 @@ class DatabaseManager {
 	/**
 	 * @param {Object} data
 	 * @param {GuildMember} [data.member]
-	 * @param {Object} [data.eusr]
+	 * @param {EduTeacher} [data.eusr]
+	 * @param {string} [data.email]
 	 * @param {boolean} [data.autolessons]
 	 * @returns
 	 */
@@ -43,8 +46,9 @@ class DatabaseManager {
 		const query = this.knex
 			.insert({
 				dsid: data.member.id,
-				eduid: data.eusr.id,
+				eduid: Number(data.eusr.id) || null,
 				name: data.member.displayName,
+				email: data.email,
 				autolessons: data.autolessons ?? 1,
 			})
 			.into('teachers');
@@ -94,7 +98,7 @@ class DatabaseManager {
 	/**
 	 * @param {Object} data
 	 * @param {GuildMember} [data.member]
-	 * @param {Object} [data.eusr]
+	 * @param {EduStudent} [data.eusr]
 	 * @param {Role} [data.role]
 	 * @param {import('../util/parsers').VerificationLevel} [data.verification]
 	 * @returns
@@ -103,7 +107,7 @@ class DatabaseManager {
 		const query = this.knex
 			.insert({
 				dsid: data.member.id,
-				eduid: data.eusr.id,
+				eduid: Number(data.eusr.id) || null,
 				name: data.member.displayName,
 				verification: data.verification,
 				role: data.role.id,

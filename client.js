@@ -20,14 +20,18 @@ class FelixBotClient extends Client {
 		global.client = this;
 		this.logger = new Logger("CLIENT");
 
-		this.once('ready', () => {
+		this.once('ready', async () => {
 			this.databaseManager = new DatabaseManager(this);
 			this.voiceManager = new VoiceManager(this);
 			this.permManager = new PermissionsManager(this);
 			this.lessonManager = new LessonManager(this);
+			await this.lessonManager.ready;
 			this.auditManager = new AuditManager(this);
+			await this.auditManager.ready;
 			this.interactionManager = new InteractionManager(this);
 			this.edupageManager = new EduPageManager(this);
+			await this.edupageManager.ready;
+			this.emit('loaded');
 			this.server = http.createServer(require('./api/express')).listen(process.env.PORT, () => this.logger.log(`HTTP Server ready on ${process.env.PORT}!`));
 			this.user.setActivity(config.presenceStatus);
 		});

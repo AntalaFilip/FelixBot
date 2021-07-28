@@ -1,4 +1,5 @@
 const { GuildMember } = require("discord.js");
+const { removeStartingDot } = require("../../util/stringutils");
 
 class LessonParticipant {
 	/**
@@ -27,12 +28,12 @@ class LessonParticipant {
 
 		if (participant instanceof GuildMember) {
 			this.member = participant;
-			this.name = participant.displayName.startsWith('.') ? participant.displayName.slice(1) : participant.displayName;
+			this.name = removeStartingDot(participant.displayName);
 			this.created = new Date();
 		}
 		else {
 			this.member = participant.member;
-			this.name = participant.member.displayName.startsWith('.') ? participant.member.displayName.slice(1) : participant.member.displayName;
+			this.name = removeStartingDot(participant.member.displayName);
 			this.created = participant.created;
 			this.voice = participant.voice;
 		}
