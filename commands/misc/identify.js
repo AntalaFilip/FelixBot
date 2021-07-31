@@ -6,11 +6,8 @@ const config = require('../../config.json');
 const EduTeacher = require('../../types/edu/eduteacher');
 const EduStudent = require('../../types/edu/edustudent');
 const { sendEmailVerification } = require('../../util/verification');
-<<<<<<< Updated upstream
-=======
 const { capitalizeFirstLetter } = require('../../util/stringutils');
 const latinise = require('../../util/latinize');
->>>>>>> Stashed changes
 
 class IdentifyCommand extends Command {
 	constructor(client) {
@@ -201,11 +198,7 @@ class IdentifyCommand extends Command {
 		const DB = this.client.databaseManager;
 		const guild = interaction.guild || this.client.guilds.resolve(config.guild);
 		const user = interaction.user;
-<<<<<<< Updated upstream
-		const member = interaction.member ?? guild.members.resolve(user);
-=======
 		const member = interaction.member ?? await guild.members.fetch(user);
->>>>>>> Stashed changes
 		const opts = interaction.options;
 		const subcmd = opts.getSubCommand();
 
@@ -216,39 +209,6 @@ class IdentifyCommand extends Command {
 		if (dbm) return await interaction.reply({ ephemeral: true, content: 'Už si sa raz identifikoval/a.\nAk chceš niečo zmeniť, napíš, prosím svojmu triednemu učiteľovi / administrátorovi.' });
 
 
-<<<<<<< Updated upstream
-
-		if (subcmd === 'student') {
-			const args = opts.get('student').options;
-			const fname = StringUtils.capitalizeFirstLetter(args[0].value);
-			const lname = StringUtils.capitalizeFirstLetter(args[1].value);
-			/** @type {string?} */
-			const eduid = args[2] && args[2].value;
-
-			if (eduid) {
-				const id = Array.from(eduid.matchAll('[0-9]')).map(o => o[0]).join('');
-				const eusr = EDU.students.find(s => s.id === id);
-				if (!eusr) return await interaction.reply({ ephemeral: true, content: `Študent s takýmto identifikátorom neexistuje.` });
-
-
-			}
-		}
-		else if (subcmd === 'teacher') {
-
-		}
-		else if (subcmd === 'guest') {
-
-		}
-
-
-
-
-		/*
-		if (eduid) {
-			let id;
-			if (typeof eduid === 'number') {
-				id = String(eduid);
-=======
 		if (subcmd === 'student') {
 			const args = opts.data[0].options;
 			const fname = StringUtils.capitalizeFirstLetter(args[0].value);
@@ -280,7 +240,6 @@ class IdentifyCommand extends Command {
 					],
 				});
 				return;
->>>>>>> Stashed changes
 			}
 			else {
 				const embed = new MessageEmbed();
@@ -412,77 +371,6 @@ class IdentifyCommand extends Command {
 		const DB = this.client.databaseManager;
 		let n, r, db, m, tv;
 
-<<<<<<< Updated upstream
-		return; */
-	}
-
-	/**
-	 *
-	 * @param {GuildMember} member
-	 * @param {Object} props
-	 * @param {string} [props.name]
-	 * @param {import('discord.js').RoleResolvable} [props.role]
-	 * @param {string} [props.email]
-	 * @param {import('../../util/parsers').VerificationLevel} [props.vrf]
-	 * @param {EduStudent | EduTeacher} eusr
-	 */
-	async exec(member, { email, name, role, vrf }, eusr) {
-		const DB = this.client.databaseManager;
-		let n, r, db, m;
-
-		if (eusr instanceof EduStudent) {
-			if (!vrf) vrf = 'PENDING';
-			db = await DB.insertMember({
-				eusr,
-				member,
-				role: role.id ?? role,
-				verification: vrf,
-			});
-		}
-		else if (eusr instanceof EduTeacher) {
-			if (!vrf) vrf = 'VERIFY_EMAIL';
-			db = await DB.insertTeacher({
-				member,
-				email,
-				eusr,
-			});
-		}
-		else {
-			if (!vrf && email) vrf = 'VERIFY_EMAIL';
-			else if (!vrf) vrf = 'VERIFY_TEACHER';
-			db = await DB.insertMember({
-				eusr,
-				member,
-				role,
-				verification: vrf,
-			});
-		}
-
-		if (name) {
-			try {
-				n = await member.setNickname(name, 'Automatic identification process');
-			}
-			catch {
-				n = false;
-			}
-		}
-		if (role && (vrf != 'VERIFY_EMAIL' || vrf != 'VERIFY_TEACHER')) {
-			try {
-				r = await member.roles.add(role, 'Automatic identification process');
-			}
-			catch {
-				r = false;
-			}
-		}
-
-		if (vrf === 'VERIFY_EMAIL') {
-			const sent = await sendEmailVerification(email, member.displayName, { userid: member.id });
-			if (sent.accepted.length > 0) m = true;
-			else m = false;
-		}
-
-		return { n, r, db, m };
-=======
 		if (eusr instanceof EduStudent) {
 			if (!vrf) vrf = 'PENDING';
 			db = await DB.insertMember({
@@ -583,7 +471,6 @@ class IdentifyCommand extends Command {
 		}
 
 		return { n, r, db, m, tv, msg };
->>>>>>> Stashed changes
 	}
 
 	/**

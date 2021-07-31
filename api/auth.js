@@ -2,10 +2,7 @@ const express = require('express');
 const axios = require('axios').default;
 const { GuildMember } = require('discord.js');
 const { verifyIdentity } = require('../util/verification');
-<<<<<<< Updated upstream
-=======
 const { JsonWebTokenError, TokenExpiredError } = require('jsonwebtoken');
->>>>>>> Stashed changes
 
 const router = express.Router();
 
@@ -30,9 +27,6 @@ router.get('/verify/email/:token', async (req, res) => {
 	const token = req.params['token'];
 	if (!token) return res.status(400).send('Missing token!');
 
-<<<<<<< Updated upstream
-	const data = await verifyIdentity(token);
-=======
 	try {
 		const user = await verifyIdentity(token);
 		return res.status(200).send(`Successfully verified`);
@@ -55,7 +49,6 @@ router.get('/verify/email/:token', async (req, res) => {
 			global.apilogger.error(err);
 		}
 	}
->>>>>>> Stashed changes
 });
 
 function authorize(token) {

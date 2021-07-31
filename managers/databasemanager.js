@@ -117,11 +117,7 @@ class DatabaseManager {
 		const query = this.knex
 			.insert({
 				dsid: data.member.id,
-<<<<<<< Updated upstream
-				eduid: Number(data.eusr.id) || null,
-=======
 				eduid: (data.eusr && Number(data.eusr.id)) || null,
->>>>>>> Stashed changes
 				name: data.member.displayName,
 				verification: data.verification,
 				role: data.role.id,

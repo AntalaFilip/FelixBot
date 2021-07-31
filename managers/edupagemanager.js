@@ -31,11 +31,7 @@ class EduPageManager {
 		this.weeks = [];
 		/** @type {EduDay[]} */
 		this.days = [];
-<<<<<<< Updated upstream
-		/** @type {EduPeriod} */
-=======
 		/** @type {EduPeriod[]} */
->>>>>>> Stashed changes
 		this.periods = [];
 		/** @type {EduSubject[]} */
 		this.subjects = [];
@@ -56,11 +52,7 @@ class EduPageManager {
 			this.loadEduPageData()
 				.then(c => {
 					this.logger.info(`Ready; fetched ${c} items`);
-<<<<<<< Updated upstream
-					resolve();
-=======
 					resolve(Date.now() - now);
->>>>>>> Stashed changes
 				});
 		});
 	}
@@ -206,12 +198,8 @@ class EduPageManager {
 		const data = lessons.data_rows;
 		const mapped = data.map(lesson => {
 			const subject = this.subjects.find(s => s.id === lesson.subjectid);
-<<<<<<< Updated upstream
-			if (subject) return;
-=======
 			const cls = this.classes.find(c => lesson.classids.includes(c.id));
 			if (!subject || !cls) return;
->>>>>>> Stashed changes
 			const l = new EduLesson(lesson);
 			return l;
 		}).filter(o => o);
