@@ -2,6 +2,10 @@ const express = require('express');
 const axios = require('axios').default;
 const { GuildMember } = require('discord.js');
 const { verifyIdentity } = require('../util/verification');
+<<<<<<< Updated upstream
+=======
+const { JsonWebTokenError, TokenExpiredError } = require('jsonwebtoken');
+>>>>>>> Stashed changes
 
 const router = express.Router();
 
@@ -26,7 +30,32 @@ router.get('/verify/email/:token', async (req, res) => {
 	const token = req.params['token'];
 	if (!token) return res.status(400).send('Missing token!');
 
+<<<<<<< Updated upstream
 	const data = await verifyIdentity(token);
+=======
+	try {
+		const user = await verifyIdentity(token);
+		return res.status(200).send(`Successfully verified`);
+	}
+	catch (err) {
+		if (err instanceof JsonWebTokenError) {
+			res.status(404).send('Invalid token');
+		}
+		else if (err instanceof TokenExpiredError) {
+			res.status(403).send('Your verification token has expired!');
+		}
+		else if (err.message === 'Already verified!') {
+			res.status(410).send('You have already verified your identity');
+		}
+		else if (err.message === 'Invalid payload!') {
+			res.status(500).send('Invalid payload!');
+		}
+		else {
+			res.status(500).send('An internal error has occurred');
+			global.apilogger.error(err);
+		}
+	}
+>>>>>>> Stashed changes
 });
 
 function authorize(token) {

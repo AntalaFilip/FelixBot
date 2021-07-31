@@ -1,6 +1,6 @@
 /**
  * Shuffles an array using the Fisher-Yates Shuffle.
- * Taken from {@link https://stackoverflow.com/a/2450976 stackoverflow}
+ * "Borrowed" from {@link https://stackoverflow.com/a/2450976 stackoverflow}
  * @param {Array} array
  * @returns
  */

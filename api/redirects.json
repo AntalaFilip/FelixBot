@@ -5,7 +5,7 @@
 	},
 	{
 		"from": "id-manually",
-		"to": ""
+		"to": "/howtoid"
 	},
 	{
 		"from": "identify-authorization",

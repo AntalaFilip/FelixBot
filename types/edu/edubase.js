@@ -26,6 +26,10 @@ class EduBase {
 	get guild() {
 		return this.client.guilds.resolve(config.guild);
 	}
+
+	static is(obj) {
+		return obj instanceof this;
+	}
 }
 
 module.exports = EduBase;

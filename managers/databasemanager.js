@@ -40,6 +40,7 @@ class DatabaseManager {
 	 * @param {EduTeacher} [data.eusr]
 	 * @param {string} [data.email]
 	 * @param {boolean} [data.autolessons]
+	 * @param {import('../util/parsers').VerificationLevel} [data.verification]
 	 * @returns
 	 */
 	async insertTeacher(data) {
@@ -72,6 +73,15 @@ class DatabaseManager {
 		return data;
 	}
 
+	/**
+	 * @param {Object} data
+	 * @param {GuildMember} [data.member]
+	 * @param {EduTeacher} [data.eusr]
+	 * @param {string} [data.email]
+	 * @param {boolean} [data.autolessons]
+	 * @param {import('../util/parsers').VerificationLevel} [data.verification]
+	 * @returns
+	 */
 	async updateTeacher(id, data) {
 		const query = this.knex
 			.table('teachers')
@@ -107,7 +117,11 @@ class DatabaseManager {
 		const query = this.knex
 			.insert({
 				dsid: data.member.id,
+<<<<<<< Updated upstream
 				eduid: Number(data.eusr.id) || null,
+=======
+				eduid: (data.eusr && Number(data.eusr.id)) || null,
+>>>>>>> Stashed changes
 				name: data.member.displayName,
 				verification: data.verification,
 				role: data.role.id,
@@ -132,6 +146,15 @@ class DatabaseManager {
 		return data;
 	}
 
+	/**
+	 * @param {import('discord.js').Snowflake} id
+	 * @param {Object} data
+	 * @param {GuildMember} [data.member]
+	 * @param {EduStudent} [data.eusr]
+	 * @param {Role} [data.role]
+	 * @param {import('../util/parsers').VerificationLevel} [data.verification]
+	 * @returns
+	 */
 	async updateMember(id, data) {
 		const query = this.knex
 			.table('members')

@@ -25,7 +25,10 @@ class Parsers {
 			const obj = {
 				member,
 				eduUser: eusr,
+				name: t.name,
 				autolessons: Boolean(t.autolessons),
+				/** @type {VerificationLevel} */
+				verification: t.verification,
 			};
 			return obj;
 		});
@@ -44,12 +47,20 @@ class Parsers {
 		const EDU = client.edupageManager;
 
 		const map = data.map(m => {
-			const member = guild.members.resolve(m.dsid);
+			const id = m.dsid;
+			const member = guild.members.resolve(id);
 			const student = member.roles.cache.find(r => config.classRoles.find(rr => r.id == rr.value));
+<<<<<<< Updated upstream
 			const eusr = student ? EDU.students.find(s => s.id == String(m.eduid)) : null;
+=======
+			const eusr = (student && m.eduid) ? EDU.students.find(s => s.id == String(m.eduid)) : null;
+			const role = guild.roles.resolve(m.role);
+>>>>>>> Stashed changes
 
 			const obj = {
 				member,
+				role,
+				name: m.name,
 				eduUser: eusr,
 				/** @type {VerificationLevel} */
 				verification: m.verification,

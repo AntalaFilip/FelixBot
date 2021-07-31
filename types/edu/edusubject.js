@@ -13,6 +13,14 @@ class EduSubject extends EduBase {
 		/** @type {[][][]} */
 		this.timeoff = timeoff;
 	}
+
+	get lessons() {
+		return this.manager.lessons.filter(l => l.subjectid === this.id);
+	}
+
+	get teachers() {
+		return this.manager.teachers.filter(t => this.lessons.find(l => l.teacherids.includes(t.id)));
+	}
 }
 
 module.exports = EduSubject;

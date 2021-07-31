@@ -20,6 +20,7 @@ class EduPageManager {
 	 * @param {FelixBotClient} client
 	 */
 	constructor(client) {
+		const now = Date.now();
 		this.client = client;
 		this.guild = this.client.guilds.resolve(config.guild);
 		this.logger = new Logger('EduPageManager');
@@ -30,7 +31,11 @@ class EduPageManager {
 		this.weeks = [];
 		/** @type {EduDay[]} */
 		this.days = [];
+<<<<<<< Updated upstream
 		/** @type {EduPeriod} */
+=======
+		/** @type {EduPeriod[]} */
+>>>>>>> Stashed changes
 		this.periods = [];
 		/** @type {EduSubject[]} */
 		this.subjects = [];
@@ -44,13 +49,18 @@ class EduPageManager {
 		this.groups = [];
 		/** @type {EduStudent[]} */
 		this.students = [];
+		/** @type {EduLesson[]} */
 		this.lessons = [];
 
 		this.ready = new Promise((resolve) => {
 			this.loadEduPageData()
 				.then(c => {
 					this.logger.info(`Ready; fetched ${c} items`);
+<<<<<<< Updated upstream
 					resolve();
+=======
+					resolve(Date.now() - now);
+>>>>>>> Stashed changes
 				});
 		});
 	}
@@ -73,6 +83,7 @@ class EduPageManager {
 		count += await this.loadWeeksFromTables(tables.find(t => t.id === 'weeks'));
 		count += await this.loadDaysFromTables(tables.find(t => t.id === 'days'));
 		count += await this.loadPeriodsFromTables(tables.find(t => t.id === 'periods'));
+		count += await this.loadSubjectsFromTables(tables.find(t => t.id === 'subjects'));
 		count += await this.loadClassroomsFromTables(tables.find(t => t.id === 'classrooms'));
 		count += await this.loadTeachersFromTables(tables.find(t => t.id === 'teachers'));
 		count += await this.loadClassesFromTables(tables.find(t => t.id === 'classes'));
@@ -195,7 +206,12 @@ class EduPageManager {
 		const data = lessons.data_rows;
 		const mapped = data.map(lesson => {
 			const subject = this.subjects.find(s => s.id === lesson.subjectid);
+<<<<<<< Updated upstream
 			if (subject) return;
+=======
+			const cls = this.classes.find(c => lesson.classids.includes(c.id));
+			if (!subject || !cls) return;
+>>>>>>> Stashed changes
 			const l = new EduLesson(lesson);
 			return l;
 		}).filter(o => o);

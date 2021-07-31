@@ -4,6 +4,9 @@ const SendWelcomeCommand = require('./commands/misc/sendwelcome');
 const Logger = require('./util/logger');
 const Lesson = require('./types/lesson/lesson');
 const FelixBotClient = require('./client');
+const EduStudent = require('./types/edu/edustudent');
+const EduTeacher = require('./types/edu/eduteacher');
+const config = require('./config.json');
 require('dotenv').config();
 
 const intents = new Intents().add('DIRECT_MESSAGES', 'DIRECT_MESSAGE_REACTIONS', 'DIRECT_MESSAGE_TYPING', 'GUILDS', 'GUILD_BANS', 'GUILD_INTEGRATIONS', 'GUILD_INVITES', 'GUILD_MEMBERS', 'GUILD_MESSAGES', 'GUILD_MESSAGE_REACTIONS', 'GUILD_MESSAGE_TYPING', 'GUILD_PRESENCES', 'GUILD_VOICE_STATES', 'GUILD_WEBHOOKS');
@@ -13,11 +16,11 @@ global.apilogger = new Logger("API");
 const logger = client.logger;
 
 client
-	.on(`error`, logger.error)
-	.on(`warn`, logger.warn)
-	.on(`debug`, logger.debug)
+	.on(`error`, e => logger.error(e))
+	.on(`warn`, m => logger.warn(m))
+	.on(`debug`, m => logger.debug(m))
 	.once(`ready`, () => {
-		logger.log(`Ready; logged in as ${client.user.username}#${client.user.discriminator} (${client.user.id})`);
+		logger.info(`Ready; logged in as ${client.user.username}#${client.user.discriminator} (${client.user.id})`);
 	})
 	.on(`disconnect`, () => { logger.warn(`Disconnected!`); })
 	.on(`reconnecting`, () => { logger.warn(`Reconnecting...`); })
@@ -31,9 +34,36 @@ client
 			}
 		}
 	})
-	.on(`guildMemberAdd`, member => {
-		// When a new member joins, execute the SendWelcomeCommand
-		new SendWelcomeCommand(client).exec(member);
+	.on(`guildMemberAdd`, async member => {
+		client.logger.debug(`${member.displayName} (${member.id}) has joined the server, awaiting screening pass...`);
+	})
+	.on('guildMemberUpdate', async (oldm, newm) => {
+		if (oldm.pending === true && newm.pending === false) {
+			client.logger.debug(`${newm.displayName} (${newm.id}) passed membership screening.`);
+			const DB = client.databaseManager;
+			const dbm = await DB.getMember(newm.id) || await DB.getTeacher(newm.id);
+			// When a new member joins, execute the SendWelcomeCommand
+			if (!dbm) {
+				new SendWelcomeCommand(client).exec(newm);
+			}
+			else {
+				const eusr = dbm.eduUser;
+				const role = dbm.role;
+				const name = dbm.name;
+				const roles = [];
+				if (eusr instanceof EduStudent) roles.push(eusr.class.role);
+				else if (eusr instanceof EduTeacher) roles.push(eusr.subjects.map(s => s.role), config.roles.teacher);
+
+				if (role && !roles.includes(role)) roles.push(role);
+				await newm.roles.add(roles, `Automatic identification process; database`);
+				if (name) await newm.setNickname(name, `Automatic identification process; database`);
+				await newm.send(`
+Ahoj, vitaj znovu vo Felix Discorde!
+Keďže už si raz bol/a členom, automaticky som ti nastavil údaje.
+Ak je niečo nesprávne, napíš prosím naším administrátorom.`);
+			}
+			client.logger.debug(`Automatically set user properties for ${newm.id}`);
+		}
 	})
 	.on(`interactionCreate`, async interaction => {
 		await client.interactionManager.handleIncomingInteraction(interaction);
@@ -43,7 +73,10 @@ client.login(process.env.TOKEN);
 
 process.on('SIGINT', () => {
 	client.logger.log('Shutting down...');
-	client.server.close(() => {
-		process.exit(1);
-	});
+	if (client.server) {
+		client.server.close(() => {
+			process.exit(1);
+		});
+	}
+	else process.exit(1);
 });

@@ -38,10 +38,10 @@ class SendWelcomeCommand extends Command {
 	async exec(member) {
 		await member.send(
 			`Ahoj! Vitaj vo FELIX Discorde!
-			Je potrebné aby si sa identifikoval/a.
-			Môžeš tak urobiť pomocou príkazu \`/identify\` - jednoducho mi ho pošli sem do správy a postupuj podľa pokynov.
-			Dbaj prosím na diakritiku v svojom mene.
-			(Táto správa bola vygenerovaná automaticky, pri problémoch kontaktujte našich administrátorov.)`,
+	Je potrebné aby si sa identifikoval/a.
+	Môžeš tak urobiť pomocou príkazu \`/identify\` - jednoducho mi ho pošli sem do správy a postupuj podľa pokynov.
+	Dbaj prosím na diakritiku v svojom mene.
+	(Táto správa bola vygenerovaná automaticky, pri problémoch kontaktujte našich administrátorov.)`,
 		);
 		this.client.logger.info(`Sent welcome message to: ${member.displayName}`);
 	}

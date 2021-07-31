@@ -6,6 +6,7 @@ const interactionsHandler = require('./interactionshandler').router;
 const authHandler = require('./auth').router;
 const authorizer = require('./auth').reqauth;
 const go = require('./go');
+const path = require('path');
 
 const cors = require('cors');
 const RateLimit = require('express-rate-limit');
@@ -34,6 +35,10 @@ app.use('/download', express.static('download'));
 
 app.get('/owners', (req, res) => {
 	res.send(global.client.application.owner);
+});
+
+app.get('/howtoid', (req, res) => {
+	res.sendFile(path.join(__dirname, 'howtoid.html'));
 });
 
 app.all('/*', (req, res) => {

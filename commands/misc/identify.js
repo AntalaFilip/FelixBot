@@ -6,6 +6,11 @@ const config = require('../../config.json');
 const EduTeacher = require('../../types/edu/eduteacher');
 const EduStudent = require('../../types/edu/edustudent');
 const { sendEmailVerification } = require('../../util/verification');
+<<<<<<< Updated upstream
+=======
+const { capitalizeFirstLetter } = require('../../util/stringutils');
+const latinise = require('../../util/latinize');
+>>>>>>> Stashed changes
 
 class IdentifyCommand extends Command {
 	constructor(client) {
@@ -111,10 +116,11 @@ class IdentifyCommand extends Command {
 			 * @param {[]} matches
 			 * @returns
 			 */
-			userListSelectMenu: (matches) => (
+			userListSelectMenu: (matches, name) => (
 				new MessageSelectMenu(
 					{
-						customId: `identify_pick_user`,
+						customId: `identify_pick_user/${name}`,
+						placeholder: `Vyber seba`,
 						minValues: 1, maxValues: 1,
 						options: matches.map((m, i) => ({
 							label: `Žiak ${i}`,
@@ -123,12 +129,12 @@ class IdentifyCommand extends Command {
 					},
 				)
 			),
-			thisIsMeButton: (eusr) => (
+			thisIsMeButton: (eusr, email) => (
 				new MessageButton(
 					{
 						style: 'SUCCESS',
 						label: 'Som to ja',
-						customId: `identify_pick_user/${eusr.id}`,
+						customId: `identify_pick_user/${eusr.id}/${email}`,
 						emoji: '🙋',
 					},
 				)
@@ -153,6 +159,32 @@ class IdentifyCommand extends Command {
 					},
 				)
 			),
+			tvrf: {
+				authorize: (member, role) => (
+					new MessageButton({
+						style: 'SUCCESS',
+						customId: `identify_authorize_allow/${member.id}/${role.id || role}`,
+						label: 'Authorize',
+						emoji: '✅',
+					})
+				),
+				forbid: (member, role) => (
+					new MessageButton({
+						style: 'DANGER',
+						customId: `identify_authorize_deny/${member.id}/${role.id || role}`,
+						label: 'Forbid',
+						emoji: '❌',
+					})
+				),
+				about: () => (
+					new MessageButton({
+						style: 'LINK',
+						label: 'What is this?',
+						emoji: '❓',
+						url: 'https://api.felixbot.antala.tk/go/identify-authorization',
+					})
+				),
+			},
 		};
 	}
 
@@ -161,19 +193,30 @@ class IdentifyCommand extends Command {
 	 * @returns
 	 */
 	async run(interaction) {
+		if (interaction.guild) return await interaction.reply({ ephemeral: true, content: 'Tento príkaz môžeš použiť iba v privátnej správe' });
+		/** @type {CommandInteraction} */
+		// eslint-disable-next-line no-self-assign
+		interaction = interaction;
 		const EDU = this.client.edupageManager;
 		const DB = this.client.databaseManager;
 		const guild = interaction.guild || this.client.guilds.resolve(config.guild);
 		const user = interaction.user;
+<<<<<<< Updated upstream
 		const member = interaction.member ?? guild.members.resolve(user);
+=======
+		const member = interaction.member ?? await guild.members.fetch(user);
+>>>>>>> Stashed changes
 		const opts = interaction.options;
 		const subcmd = opts.getSubCommand();
 
 		if (!member) return await interaction.reply({ ephemeral: true, content: `Nie si členom tohto Discord serveru!` });
+		if (member.pending) return await interaction.reply({ ephemeral: true, content: `Najprv, prosím dokonči membership screening vo FELIX serveri.` });
 
 		const dbm = await DB.getMember(user.id) || await DB.getTeacher(user.id);
-		if (dbm) return await interaction.reply({ ephemeral: true, content: 'Už si sa raz identifikoval/a.\nAk chceš niečo zmeniť, napíš, prosím svojmu triednemu učiteľovi.' });
+		if (dbm) return await interaction.reply({ ephemeral: true, content: 'Už si sa raz identifikoval/a.\nAk chceš niečo zmeniť, napíš, prosím svojmu triednemu učiteľovi / administrátorovi.' });
 
+
+<<<<<<< Updated upstream
 
 		if (subcmd === 'student') {
 			const args = opts.get('student').options;
@@ -205,23 +248,171 @@ class IdentifyCommand extends Command {
 			let id;
 			if (typeof eduid === 'number') {
 				id = String(eduid);
+=======
+		if (subcmd === 'student') {
+			const args = opts.data[0].options;
+			const fname = StringUtils.capitalizeFirstLetter(args[0].value);
+			const lname = StringUtils.capitalizeFirstLetter(args[1].value);
+			const initials = lname.charAt(0) + fname.charAt(0);
+			/** @type {string?} */
+			const eduid = args[2] && args[2].value;
+
+			if (eduid) {
+				const id = String(Array.from(eduid.matchAll('[0-9]')).map(o => o[0]).join(''));
+				const eusr = EDU.students.find(s => s.id === id);
+				if (!eusr) return await interaction.reply({ ephemeral: true, content: `Študent s takýmto identifikátorom neexistuje.` });
+
+				const { msg } = await this.exec(member, { name: `${fname} ${lname}`, vrf: 'PENDING', role: eusr.class.role }, eusr);
+				if (!msg) return await interaction.reply({ content: 'Úspešne som ti nastavil prístupové práva' });
+				else {
+					return await interaction.reply({ content: msg });
+				}
 			}
-			else if (typeof eduid === 'string') {
-				id = Array.from(eduid.matchAll('[0-9]')).map(o => o[0]).join('');
+
+			const matches = EDU.students.filter(s => s.short === initials);
+
+			if (matches.length === 0) {
+				await interaction.reply({
+					content: `V školskom EduPage som nenašiel žiadneho žiaka zhodujúceho sa s daným menom.\nSi si istý, že si zadal správne meno? Ak áno, môžeš sa identifikovať aj manuálne. Ak nie, spusti príkaz odznova.`,
+					components: [
+						new MessageActionRow()
+							.addComponents(this.components.identifyManuallyButton()),
+					],
+				});
+				return;
+>>>>>>> Stashed changes
 			}
+			else {
+				const embed = new MessageEmbed();
+				embed.setTitle('Zoznam zhôd');
+				embed.setDescription(`Zoznam žiakov s iniciálami: "${initials}"`);
+				embed.addFields(
+					matches.map((match, i) => ({
+						name: `Žiak ${i}`,
+						value: `Edupage ID: ${match.id}\nTrieda: ${match.class.name}\nSkupiny: ${match.groups.map(g => g.name).join(', ')}`,
+						inline: true,
+					})),
+				);
+				embed.setTimestamp();
+				embed.setFooter(`Ak si nie si úplne istý/á stlač 'nie som si istý'`);
 
-			let type;
-			const usr = (EDU.teachers.find(t => t.id == id) && (type = 'Ucitel')) || (EDU.students.find(s => s.id == id) && (type = 'Student'));
-			if (!usr) return await interaction.reply({ ephemeral: true, content: `Nenašiel som používateľa s ID ${id}` });
-
-			if (type === 'Ucitel') {
-
-			}
-			else if (type === 'Student') {
-
+				await interaction.reply({
+					content: `V školskom EduPage som našiel nasledujúcich študentov s iniciálami '${initials}'\nProsím, vyber seba.`,
+					embeds: [embed],
+					components: [
+						new MessageActionRow()
+							.addComponents(this.components.userListSelectMenu(matches, `${fname} ${lname}`)),
+						new MessageActionRow()
+							.addComponents(this.components.notSureUserButton()),
+					],
+				});
+				return;
 			}
 		}
 
+		else if (subcmd === 'teacher') {
+			const args = opts.data[0].options;
+			const [{ value: email }, { value: type }, edu] = args;
+			const eduid = edu && edu.value;
+
+			if (!email.includes('@')) return interaction.reply({ ephemeral: true, content: 'Nesprávny formát emailu' });
+			const mpart = email.split('@');
+
+			const domain = mpart[1];
+			if (domain != config.domain) return interaction.reply({ ephemeral: true, content: `Email musí byť tvoj pracovný (@${config.domain}) email` });
+
+			const names = mpart[0].split('.').map(o => capitalizeFirstLetter(o));
+			const initials = (names[1].charAt(0) + names[0].charAt(0)).toLocaleUpperCase();
+
+			if (type === 'teacher' || type === 'leadership') {
+				const leadership = (type === 'leadership');
+				if (eduid) {
+					const id = String(Array.from(eduid.matchAll('[0-9]')).map(o => o[0]).join(''));
+					const eusr = EDU.teachers.find(t => t.id === id);
+					if (!eusr) return await interaction.reply({ ephemeral: true, content: `Učiteľ s takýmto identifikátorom neexistuje.` });
+
+					const { msg } = await this.exec(member, { vrf: 'VERIFY_EMAIL', email, role: leadership ? config.roles.leadership : config.roles.teacher }, eusr);
+					if (msg) return await interaction.reply({ content: msg });
+					await interaction.reply({ content: 'Odoslal som ti verifikačný email' });
+					return;
+				}
+				const matches = EDU.teachers.filter(t => latinise(t.short) === initials);
+				const embed = new MessageEmbed();
+				embed.setTitle('Zoznam zhôd');
+				embed.setTimestamp();
+				embed.setFooter('Ak ešte nie si v školskom EduPage systéme, nemôžeš sa identifikovať.');
+
+				if (matches.length === 1) {
+					const match = matches[0];
+					const subjects = match.subjects;
+					embed.setDescription(`Našiel som 1 učiteľa s iniciálami: "${initials}"`);
+					embed.addField('Učiteľ', `EduPage ID: ${match.id}\nPohlavie: ${match.gender || 'nezadané'}\nPredmety: ${subjects}\nEmail: ${email}`);
+
+					await interaction.reply({
+						content: `V školskom EduPage som našiel nasledujúceho učiteľa zhodujúceho sa s Tvojimi iniciálmi.`,
+						embeds: [embed],
+						components: [
+							new MessageActionRow()
+								.addComponents(
+									this.components.thisIsMeButton(match, email),
+									this.components.notMeButton(),
+								),
+						],
+					});
+					return;
+				}
+				else if (!leadership) {
+					await interaction.reply({
+						content: `V školskom EduPage som ${matches.length === 0 ? 'nenašiel žiadneho učiteľa zhodujúceho' : 'našiel viacero učiteľov zhodujúcich'} sa s Tvojimi iniciálmi (${initials}).\nProsím, identifikuj sa manuálne.`,
+						components: [
+							new MessageActionRow()
+								.addComponents(this.components.identifyManuallyButton()),
+						],
+					});
+					return;
+				}
+			}
+			const role = guild.roles.resolve(config.roles[type]);
+			const { msg } = this.exec(member, { email, role, name: names.join(' '), vrf: 'VERIFY_EMAIL' });
+			if (msg) return await interaction.reply({ content: msg });
+			await interaction.reply({ content: 'Poslal som ti verifikačný email' });
+			return;
+		}
+		else if (subcmd === 'guest') {
+			const args = opts.data[0].options;
+			const type = args[0].value;
+
+			if (type === 'exstudent') {
+				const { msg } = await this.exec(member, { vrf: 'PENDING', role: config.roles.alumni });
+				if (msg) return await interaction.reply({ content: msg });
+				await interaction.reply('Úspešne som ti nastavil prístupové práva');
+				return;
+			}
+			else if (type === 'lesson') {
+				const { msg } = await this.exec(member, { vrf: 'VERIFY_TEACHER', role: config.roles.guest });
+				if (msg) return await interaction.reply({ content: msg });
+				await interaction.reply(`Odoslal som žiadosť o potvrdenie identifikácie, prosím počkaj, kým ju učiteľ príjme.`);
+				return;
+			}
+		}
+	}
+
+	/**
+	 *
+	 * @param {GuildMember} member
+	 * @param {Object} props
+	 * @param {string} [props.name]
+	 * @param {import('discord.js').RoleResolvable} [props.role]
+	 * @param {string} [props.email]
+	 * @param {import('../../util/parsers').VerificationLevel} [props.vrf]
+	 * @param {EduStudent | EduTeacher} eusr
+	 */
+	async exec(member, { email, name, role, vrf }, eusr) {
+		role = member.guild.roles.resolve(role);
+		const DB = this.client.databaseManager;
+		let n, r, db, m, tv;
+
+<<<<<<< Updated upstream
 		return; */
 	}
 
@@ -291,6 +482,108 @@ class IdentifyCommand extends Command {
 		}
 
 		return { n, r, db, m };
+=======
+		if (eusr instanceof EduStudent) {
+			if (!vrf) vrf = 'PENDING';
+			db = await DB.insertMember({
+				eusr,
+				member,
+				role,
+				verification: vrf,
+			});
+		}
+		else if (eusr instanceof EduTeacher) {
+			if (!vrf) vrf = 'VERIFY_EMAIL';
+			db = await DB.insertTeacher({
+				member,
+				email,
+				eusr,
+			});
+		}
+		else {
+			if (!vrf && email) vrf = 'VERIFY_EMAIL';
+			else if (!vrf) vrf = 'VERIFY_TEACHER';
+			db = await DB.insertMember({
+				eusr,
+				member,
+				role,
+				verification: vrf,
+			});
+		}
+
+		if (name) {
+			try {
+				n = await member.setNickname(name, 'Automatic identification process');
+			}
+			catch {
+				n = false;
+			}
+		}
+		if (role && (vrf != 'VERIFY_EMAIL' && vrf != 'VERIFY_TEACHER')) {
+			try {
+				const toAdd = [role];
+				if (eusr instanceof EduTeacher) {
+					if (!toAdd.find(rl => rl.id === config.roles.teacher)) toAdd.push(config.roles.teacher);
+					if (eusr.class && !toAdd.find(rl => (rl.id ?? rl) === eusr.class.role.id)) toAdd.push(eusr.class.role);
+				}
+				r = await member.roles.add(toAdd, 'Automatic identification process');
+			}
+			catch {
+				r = false;
+			}
+		}
+
+		if (vrf === 'VERIFY_EMAIL') {
+			const sent = await sendEmailVerification(email, member.displayName, { userid: member.id, roleid: role.id });
+			if (sent.accepted.length > 0) m = true;
+			else m = false;
+		}
+		else if (vrf === 'VERIFY_TEACHER') {
+			role = member.guild.roles.resolve(role);
+			/** @type {TextChannel} */
+			const channel = member.guild.channels.resolve(config.authorizationChannel);
+			const hooks = await channel.fetchWebhooks();
+			const embed = new MessageEmbed({ author: { name: member.displayName, iconURL: member.user.avatarURL() } });
+			embed.setTitle(`Authorize user identification`).setColor('ff0000').setTimestamp(new Date())
+				.addField('Who', `${member.displayName} (${member.user.username}#${member.user.discriminator}) has self-identified as <@&${role.id}>.`)
+				.addField('Why', `As this is a role that grants a high amount of access, an authorized person needs to confirm this action.`)
+				.addField('Action', `Authorize or forbid this action using the buttons below.`)
+				.setFooter('Authorization pending...');
+
+			let hook = hooks.find(h => h.name === `Felix Trust and Safety`);
+			if (!hook) hook = await channel.createWebhook(`Felix Trust and Safety`, { reason: 'Identity verification' });
+			try {
+				await hook.send({
+					embeds: [embed],
+					components: [
+						new MessageActionRow()
+							.addComponents(
+								this.components.tvrf.authorize(member, role),
+								this.components.tvrf.forbid(member, role),
+								this.components.tvrf.about(),
+							),
+					],
+				});
+				tv = true;
+			}
+			catch {
+				tv = false;
+			}
+		}
+
+		let msg;
+		if (n === false || r === false || db === false || m === false) {
+			msg = `Nepodarilo sa mi:\n`;
+			if (n === false) msg += 'zmeniť ti meno (trochu zlé)\n';
+			if (r === false) msg += 'nastaviť ti prístupové práva (dosť zlé)\n';
+			if (m === false) msg += 'poslať ti verifikačný mail (dosť zlé, zadal/a si funkčný mail?)\n';
+			if (tv === false) msg += 'odoslať žiadosť o potvrdenie identity (veľmi zlé)\n';
+			if (db === false) msg += 'uložiť ťa do databázy (veľmi zlé)\n';
+			msg += 'prosím, skús to ešte raz a ak problém pretrváva kontaktuj našich administrátorov';
+		}
+
+		return { n, r, db, m, tv, msg };
+>>>>>>> Stashed changes
 	}
 
 	/**
@@ -303,62 +596,17 @@ class IdentifyCommand extends Command {
 		const id = split[0];
 		const args = split.slice(1);
 		const guild = interaction.guild ?? this.client.guilds.resolve(config.guild);
-
-		if (id === 'identify_class_select' && interaction.isSelectMenu()) {
-			const member = interaction.member ?? guild.members.resolve(interaction.user);
-			if (!member) return await interaction.reply({ ephemeral: true, content: 'Prepáč, ale už nie si členom Felix Discordu.' });
-
-			const role_id = interaction.values[0];
-			// if (config.classRoles.find(r => r.value === role_id).confirm === true) {
-			// 	/** @type {TextChannel} */
-			// 	const channel = guild.channels.resolve(config.authorizationChannel);
-			// 	const hooks = await channel.fetchWebhooks();
-			// 	const embed = new MessageEmbed({ author: { name: member.displayName, iconURL: member.user.avatarURL() } });
-			// 	const role = guild.roles.resolve(role_id);
-			// 	embed.setTitle(`Authorize user identification`).setColor('ff0000').setTimestamp(new Date())
-			// 		.addField('Who', `${member.displayName} (${member.user.username}#${member.user.discriminator}) has self-identified as <@&${role.id}>.`)
-			// 		.addField('Why', `As this is a role that grants a high amount of access, an authorized person needs to confirm this action.`)
-			// 		.addField('Action', `Authorize or forbid this action using the buttons below.`)
-			// 		.setFooter('Authorization pending...');
-
-			// 	const components = [
-			// 		MessageComponent.actionRow(
-			// 			MessageComponent.button(
-			// 				ButtonStyle.Success, { label: 'Authorize', emoji: { name: '✅' } }, `identify_authorize_allow/${member.id}/${role.id}`,
-			// 			),
-			// 			MessageComponent.button(
-			// 				ButtonStyle.Destructive, { label: 'Forbid', emoji: { name: '❌' } }, `identify_authorize_deny/${member.id}/${role.id}`,
-			// 			),
-			// 			MessageComponent.button(
-			// 				ButtonStyle.Link, { label: 'What is this?', emoji: { name: '❓' } }, null, 'https://api.felixbot.antala.tk/go/identify-authorization',
-			// 			),
-			// 		),
-			// 	];
-			// 	let hook = hooks.find(h => h.name === `Felix Identity Authorization`);
-			// 	if (!hook) hook = await channel.createWebhook(`Felix Identity Authorization`);
-			// 	hook.send({ embeds: [embed], components });
-
-			// 	pendingIdentification.push(member.id);
-			// 	const response = ComMessageResponse(`Identifikoval si sa ako ${role.name}. Táto rola ale potrebuje potrvdenie. \nProsím počkaj, kým učiteľ prijme alebo zamietne tvoju žiadosť.`, true);
-			// 	response.data.components = [];
-			// 	return response;
-			// }
-			// else {
-			await member.roles.add(role_id, 'Automatic identification process');
-			await interaction.reply({ ephemeral: true, content: 'Úspešne som ti nastavil prístupové práva.' });
-			return;
-			// }
-		}
-		else if (id === `identify_authorize_allow`) {
+		if (id === `identify_authorize_allow`) {
 			const member = guild.members.resolve(args[0]);
 			/** @type {TextChannel} */
 			const message = interaction.message;
 			const allowedBy = interaction.member;
 			const embed = new MessageEmbed(message.embeds[0]);
-			member.roles.add(args[1], `Automatic identification process, authorized by ${allowedBy.displayName}`);
-			member.send(`${allowedBy.displayName} (${allowedBy.user.username}#${allowedBy.user.discriminator}) akceptoval/a tvoju žiadosť.`);
+			await member.roles.add(args[1], `Automatic identification process, authorized by ${allowedBy.displayName}`);
+			await this.client.databaseManager.updateMember(member.id, { verification: 'VERIFIED' });
+			await member.send(`${allowedBy.displayName} (${allowedBy.user.username}#${allowedBy.user.discriminator}) akceptoval/a tvoju žiadosť.`);
 			embed.setFooter(`Authorized by ${allowedBy.displayName}`).spliceFields(2, 1).addField('Authorized', `<@${allowedBy.id}> authorized this action at ${new Date().toLocaleString('en-GB')}.`);
-			await interaction.message.edit({
+			await interaction.update({
 				embeds: [embed],
 				components: [
 					new MessageActionRow()
@@ -368,11 +616,13 @@ class IdentifyCommand extends Command {
 			return;
 		}
 		else if (id === `identify_authorize_deny`) {
-			const member = guild.members.resolve(args[0]);
+			const member = guild.members.resolve(args[0]) ?? guild.members.fetch(args[0]);
+			const audits = guild.fetchAuditLogs({ type: 'MEMBER_KICK' });
 			const message = interaction.message;
 			const forbiddenBy = interaction.member;
 			const embed = new MessageEmbed(message.embeds[0]);
 			member.send(`${forbiddenBy.displayName} (${forbiddenBy.user.username}#${forbiddenBy.user.discriminator}) zamietol/la tvoju žiadosť.`);
+			await member.kick(`Verification denied`);
 			embed.setFooter(`Forbidden by ${forbiddenBy.displayName}`).spliceFields(2, 1).addField('Forbidden', `<@${forbiddenBy.id}> forbid this action at ${new Date().toLocaleString('en-GB')}.`);
 			await interaction.message.edit({
 				embeds: [embed],
@@ -383,136 +633,6 @@ class IdentifyCommand extends Command {
 			});
 			return;
 		}
-		else if (id.includes(`identify_select`)) {
-			const member = interaction.member || guild.members.resolve(interaction.user);
-			if (!member) return await interaction.reply({ ephemeral: true, content: 'Prepáč, ale už nie si členom Felix Discordu.' });
-			const name = StringUtils.removeStartingDot(member.displayName);
-			const names = name.split(' ');
-			const initials = (names[names.length - 1].charAt(0) + names[0].charAt(0)).toLocaleUpperCase();
-			if (id === `identify_select_student`) {
-				const studentMatches = EDU.students.filter(s => s.short == initials);
-				if (studentMatches.length === 0) {
-					await interaction.update({
-						components: [
-							new MessageActionRow()
-								.addComponents(
-									this.components.roleSelectionButtons.student()
-										.setDisabled(true)
-										.setStyle('DANGER'),
-								),
-						],
-					});
-
-					await interaction.followUp({
-						content: `V školskom EduPage som nenašiel žiadneho žiaka zhodujúceho sa s daným menom.\nSi si istý, že si zadal správne meno? Ak áno, môžeš sa identifikovať aj manuálne. Ak nie, spusti príkaz odznova.`,
-						components: [
-							new MessageActionRow()
-								.addComponents(this.components.identifyManuallyButton()),
-						],
-					});
-					return;
-				}
-				else {
-					const embed = new MessageEmbed();
-					embed.setTitle('Zoznam zhôd');
-					embed.setDescription(`Zoznam žiakov s iniciálami: "${initials}"`);
-					embed.addFields(
-						studentMatches.map((match, i) => ({
-							name: `Žiak ${i}`,
-							value: `Edupage ID: ${match.id}\nTrieda: ${match.class.name}\nSkupiny: ${match.groups.map(g => g.name).join(', ')}`,
-							inline: true,
-						})),
-					);
-					embed.setTimestamp();
-					embed.setFooter(`Ak si nie si úplne istý/á stlač 'nie som si istý'`);
-
-					await interaction.update({
-						components: [
-							new MessageActionRow()
-								.addComponents(
-									this.components.roleSelectionButtons.student()
-										.setDisabled(true)
-										.setStyle('SUCCESS'),
-								),
-						],
-					});
-
-					await interaction.followUp({
-						content: `V školskom EduPage som našiel nasledujúcich študentov s iniciálami '${initials}'\nProsím, vyber seba.`,
-						embeds: [embed],
-						components: [
-							new MessageActionRow()
-								.addComponents(this.components.userListSelectMenu(studentMatches)),
-							new MessageActionRow()
-								.addComponents(this.components.notSureUserButton()),
-						],
-					});
-					return;
-				}
-			}
-			else if (id === `identify_select_teacher`) {
-				const teacherMatch = EDU.teachers.filter(t => t.short == initials);
-				const embed = new MessageEmbed();
-				embed.setTitle('Zoznam zhôd');
-				embed.setTimestamp();
-				embed.setFooter('Ak ešte nie si v školskom EduPage systéme, nemôžeš sa identifikovať.');
-
-				if (teacherMatch.length === 1) {
-					const match = teacherMatch[0];
-					const subjects = EDU.lessons.filter(l => l.teacher.id === match.id).map(l => l.subject.short).join(', ');
-					embed.setDescription(`Našiel som 1 učiteľa s iniciálami: "${initials}"`);
-					embed.addField('Učiteľ', `EduPage ID: ${match.id}\nPohlavie: ${match.gender || 'nezadané'}\nPredmety: ${subjects}`);
-
-					await interaction.update({
-						components: [
-							new MessageActionRow()
-								.addComponents(
-									this.components.roleSelectionButtons.teacher()
-										.setDisabled(true)
-										.setStyle('SUCCESS'),
-								),
-						],
-					});
-
-					await interaction.followUp({
-						content: `V školskom EduPage som našiel nasledujúceho učiteľa zhodujúceho sa s Tvojimi iniciálmi.`,
-						embeds: [embed],
-						components: [
-							new MessageActionRow()
-								.addComponents(
-									this.components.thisIsMeButton(match),
-									this.components.notMeButton(),
-								),
-						],
-					});
-					return;
-				}
-				else {
-					await interaction.update({
-						components: [
-							new MessageActionRow()
-								.addComponents(
-									this.components.roleSelectionButtons.teacher()
-										.setDisabled(true)
-										.setStyle('DANGER'),
-								),
-						],
-					});
-
-					await interaction.followUp({
-						content: `V školskom EduPage som ${teacherMatch.length === 0 ? 'nenašiel žiadneho učiteľa zhodujúceho' : 'našiel viacero učiteľov zhodujúcich'} sa s Tvojimi iniciálmi.\nProsím, identifikuj sa manuálne.`,
-						components: [
-							new MessageActionRow()
-								.addComponents(this.components.identifyManuallyButton()),
-						],
-					});
-					return;
-				}
-			}
-			else if (id === `identify_select_guest`) {
-				// TODO
-			}
-		}
 		else if (id === `identify_pick_user` && interaction.isSelectMenu()) {
 			const member = interaction.member ?? guild.members.resolve(interaction.user);
 			if (!member) return await interaction.reply({ ephemeral: true, content: 'Prepáč, ale už nie si členom Felix Discordu.' });
@@ -520,9 +640,7 @@ class IdentifyCommand extends Command {
 			const eduid = interaction.values[0];
 			const eduStudent = EDU.students.find(s => s.id === eduid);
 			const role = eduStudent.class.role;
-			await member.roles.add(role);
-			const DB = this.client.databaseManager;
-			await DB.insertMember({ member, eusr: eduStudent, verification: 'PENDING', role });
+			await this.exec(member, { name: args[0], role, vrf: 'PENDING' }, eduStudent);
 			await interaction.update({ components: [], embeds: [], content: `Super! Úspešne som ťa zaradil ako ${member.displayName}, ${role.name}, EduPage ID ${eduStudent.id}` });
 			return;
 		}
@@ -532,16 +650,14 @@ class IdentifyCommand extends Command {
 
 			const eduid = args[0];
 			const eduTeacher = EDU.teachers.find(t => t.id === eduid);
-			await member.roles.add(config.teacherrole);
-			const DB = this.client.databaseManager;
-			await DB.insertTeacher({ member, eusr: eduTeacher });
-			await interaction.update({ components: [], embeds: [], content: `Super! Úspešne som ťa zaradil ako ${member.displayName}, Učiteľ, EduPage ID ${eduTeacher.id}` });
+			const { msg } = await this.exec(member, { email: args[1], role: config.roles.teacher, vrf: 'VERIFY_EMAIL' }, eduTeacher);
+			if (msg) return interaction.update({ components: [], embeds: [], content: msg });
+			await interaction.update({ components: [], embeds: [], content: `Poslal som ti verifikačný email.` });
 			return;
 		}
 		else if (id === `identify_enter_id`) {
-			// TODO
-			const state = args[0];
-			await interaction.reply({
+			await interaction.update({ components: [] });
+			await interaction.followUp({
 				content: 'Prosím, nájdi v EduPage svoj identifikátor a spusti `/identify` s ním.',
 				components: [
 					new MessageActionRow()

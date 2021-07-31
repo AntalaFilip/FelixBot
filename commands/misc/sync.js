@@ -1,5 +1,5 @@
+const { CommandInteraction } = require("discord.js");
 const { Command } = require("../../types/command");
-const { CallbackType } = require("../../util/interactions");
 
 class SyncCommand extends Command {
 	constructor(client) {
@@ -9,20 +9,18 @@ class SyncCommand extends Command {
 			group: `misc`,
 			memberName: `sync`,
 			description: `Sync the client with the database`,
-			examples: [`sync`],
 		});
 	}
 
-
+	/**
+	 *
+	 * @param {CommandInteraction} interaction
+	 * @returns
+	 */
 	async run(interaction) {
 		const ls = await this.client.lessonManager.forceSync();
-		return {
-			"type": CallbackType.CHANNEL_MESSAGE,
-			"data": {
-				"content": `Re-synced ${ls.length} lessons from the database`,
-				"flags": 64,
-			},
-		};
+		const ep = await this.client.edupageManager.loadEduPageData();
+		return interaction.reply({ content: `Re-synced ${ls.length} lessons from the database & ${ep} objects from EduPage`, ephemeral: true });
 	}
 }
 

@@ -33,14 +33,15 @@ class InteractionManager {
 			dir.forEach(dirent => {
 				if (dirent.isFile() && dirent.name.endsWith('.js')) {
 					try {
-						const command = require(path.join(dirpath, dirent.name));
+						const CMD = require(path.join(dirpath, dirent.name));
 						/** @type {Command} */
-						const cmd = new command(this.client);
+						const cmd = new CMD(this.client);
 						this.commands.set(cmd.options.name, cmd);
 						this.logger.debug(`Loaded ${cmd.options.name} command`);
 					}
 					catch (err) {
-						this.logger.warn(`Failed to load command ${dirent.name}`, err);
+						this.logger.warn(`Failed to load command ${dirent.name}`, err.message.split('\n')[0]);
+						this.logger.verbose(err);
 					}
 				}
 				else if (dirent.isDirectory()) {

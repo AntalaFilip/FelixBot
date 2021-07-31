@@ -46,7 +46,7 @@ class Lesson extends EventEmitter {
 		 * @type {LessonStudent[]}
 		 */
 		this.students = new Array();
-		// For each member/studentdata if its ID doesn't match the teach, create a new LessonStudent and push it to the studentlist.
+		// For each member/studentdata if its ID doesn't match the teacher, create a new LessonStudent and push it to the studentlist.
 		if (students) {
 			students.forEach(student => {
 				if (student instanceof GuildMember) {

@@ -13,6 +13,14 @@ class EduTeacher extends EduBase {
 		/** @type {GuildMember} */
 		this.member = member ?? null;
 	}
+
+	get class() {
+		return this.manager.classes.find(c => c.teacherid === this.id);
+	}
+
+	get subjects() {
+		return this.manager.subjects.filter(s => s.lessons.find(l => l.teacherids.includes(this.id)));
+	}
 }
 
 module.exports = EduTeacher;

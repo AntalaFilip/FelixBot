@@ -11,7 +11,7 @@ class Command {
 		this.client = client;
 		this.options = options;
 
-		this.client.logger.log(`Instantiating command ${options.name}`);
+		this.client.logger.debug(`Instantiating command ${options.name}`);
 	}
 
 	/**

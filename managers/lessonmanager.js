@@ -1,4 +1,4 @@
-const { MessageEmbed, GuildMember, VoiceChannel } = require('discord.js');
+const { MessageEmbed, GuildMember, VoiceChannel, CategoryChannel, TextChannel } = require('discord.js');
 const Logger = require("../util/logger");
 const Lesson = require("../types/lesson/lesson");
 const timetable = require("../timetable");
@@ -105,15 +105,13 @@ class LessonManager {
 	 * @param {GuildMember} member
 	 */
 	isTeachingLesson(member) {
-		const lesson = this.lessons.find(ls => ls.teacher.member == member);
-		if (lesson) return lesson;
-		else return false;
+		const lesson = this.lessons.find(ls => ls.teacher.member.id === member.id);
+		return lesson ?? false;
 	}
 
 	isInLesson(member) {
-		const lesson = this.lessons.find(ls => ls.students.find(st => st.member == member));
-		if (lesson) return lesson;
-		else return false;
+		const lesson = this.lessons.find(ls => ls.students.find(st => st.member.id === member.id));
+		return lesson ?? false;
 	}
 
 	/**
@@ -143,6 +141,7 @@ class LessonManager {
 		if (lesson instanceof Lesson == false) throw new Error(`Something went wrong; the lesson is not a Lesson!`);
 		const settings = await this.client.databaseManager.getSettings();
 		const current = timetable[new Date().getDay()].filter(ls => ls.includes(`@${lesson.classid}`) && ls.includes(`%${lesson.period}`) && ls.includes(`^${settings.week}`));
+		/** @type {CategoryChannel} */
 		const ctg = lesson.teacher.member.guild.channels.cache.find(ch => ch.name.startsWith(lesson.classid)).parent;
 		const vcs = ctg.children.filter(ch => ch.type == `voice` && !ch.name.includes('*')).sort((c1, c2) => c1.position - c2.position);
 		const les = this.lessons.find(ls => ls.classid == lesson.classid && ls != lesson);
@@ -177,13 +176,17 @@ class LessonManager {
 			.setDescription(`${lesson.lessonid.toUpperCase()} has started!`)
 			.setThumbnail('https://cdn.discordapp.com/attachments/371283762853445643/768906541277380628/Felix-logo-01.png')
 			.setTimestamp()
-			.setURL(`https://felixdiscord.felixmuzikal.sk/app/lessons/${lesson.id}`)
+			.setURL(`https://felixbot.antala.tk/app/lessons/${lesson.id}`)
 			.setFooter(`End the lesson by reacting with the checkered flag`);
-		const tchan = ctg.children.find(ch => ch.name.includes(lesson.lessonid));
-		const pubmsg = await tchan.send(embed);
+
+		/** @type {TextChannel} */
+		const tchan = ctg.children.find(ch => ch.name.includes('predmety'));
+		const thread = tchan.threads.cache.find(tc => !tc.archived && tc.name.includes(lesson.lessonid));
+
+		if (!thread) await tchan.threads.create({ startMessage: { embeds: [embed] }, name: `${lesson.lessonid.toUpperCase()}-${new Date().toLocaleDateString('sk-SK', { year: '2-digit', month: 'numeric', day: 'numeric' }).split(' ').join('')}` });
+		else await thread.send({ embeds: [embed] });
+
 		lesson.emit(`start`);
-		reactions.addFunctionalReaction(`end`, pubmsg, [lesson.teacher.member.user], lesson);
-		reactions.addFunctionalReaction([`merge`, `split`], pubmsg, [lesson.teacher.member.user], lesson);
 		return embed;
 	}
 

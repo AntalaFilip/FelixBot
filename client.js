@@ -9,6 +9,7 @@ const InteractionManager = require("./managers/interactionmanager");
 const Logger = require("./util/logger");
 const config = require('./config.json');
 const EduPageManager = require("./managers/edupagemanager");
+const GameManager = require("./managers/gamemanager");
 
 class FelixBotClient extends Client {
 	/**
@@ -31,6 +32,10 @@ class FelixBotClient extends Client {
 			this.interactionManager = new InteractionManager(this);
 			this.edupageManager = new EduPageManager(this);
 			await this.edupageManager.ready;
+<<<<<<< Updated upstream
+=======
+			this.gameManager = new GameManager(this);
+>>>>>>> Stashed changes
 			this.emit('loaded');
 			this.server = http.createServer(require('./api/express')).listen(process.env.PORT, () => this.logger.log(`HTTP Server ready on ${process.env.PORT}!`));
 			this.user.setActivity(config.presenceStatus);

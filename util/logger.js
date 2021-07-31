@@ -9,29 +9,64 @@ class Logger {
 		this.instance = instance;
 	}
 
-	log(toLog, ...additional) {
-		const log = `[${new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')}] [${this.instance || 'SYSTEM'}/INFO]: ${toLog}`;
-		console.log(log, ...additional);
+	get logHeader() {
+		return `FELIX [${new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')}] [${this.instance || 'SYSTEM'}]`;
 	}
 
-	info(toLog, ...additional) {
-		const log = `[${new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')}] [${this.instance || 'SYSTEM'}/INFO]: ${toLog}`;
-		console.info(log, ...additional);
+	log(...additional) {
+		additional.forEach(msg => {
+			String(msg).split('\n').forEach(m => console.info(this.formatMessage(m, 'info')));
+		});
 	}
 
-	warn(toLog, ...additional) {
-		const log = chalk.yellow(`[${new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')}] [${this.instance || 'SYSTEM'}/WARN]: ${toLog}`);
-		console.warn(log, ...additional);
+	info(...additional) {
+		additional.forEach(msg => {
+			String(msg).split('\n').forEach(m => console.info(this.formatMessage(m, 'info')));
+		});
 	}
 
-	error(toLog, ...additional) {
-		const log = chalk.red(`[${new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')}] [${this.instance || 'SYSTEM'}/ERROR]: ${toLog}`);
-		console.error(log, ...additional);
+	warn(...additional) {
+		additional.forEach(msg => {
+			String(msg).split('\n').forEach(m => console.warn(this.formatMessage(m, 'warn')));
+		});
 	}
 
-	debug(toLog, ...additional) {
-		const log = chalk.gray(`[${new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')}] [${this.instance || 'SYSTEM'}/DEBUG]: ${toLog}`);
-		console.debug(log, ...additional);
+	error(...additional) {
+		additional.forEach(msg => {
+			String(msg).split('\n').forEach(m => console.error(this.formatMessage(m, 'error')));
+		});
+	}
+
+	verbose(...additional) {
+		if (process.env.VERBOSE) {
+			additional.forEach(msg => {
+				String(msg).split('\n').forEach(m => console.debug(this.formatMessage(m, 'verbose')));
+			});
+		}
+	}
+
+	debug(...additional) {
+		if (process.env.DEBUG) {
+			additional.forEach(msg => {
+				String(msg).trim().split('\n').forEach(m => console.debug(this.formatMessage(m, 'debug')));
+			});
+		}
+	}
+
+	formatMessage(msg, level) {
+		let format = `FELIX [${new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')}] [${this.instance || 'SYSTEM'}] [${level.toUpperCase()}]: ${msg}`;
+		switch(level) {
+			case 'warn':
+				format = chalk.yellow(format);
+				break;
+			case 'error':
+				format = chalk.red(format);
+				break;
+			case 'debug':
+				format = chalk.gray(format);
+				break;
+		}
+		return format;
 	}
 }
 
