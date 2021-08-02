@@ -5,6 +5,7 @@ const Logger = require("../util/logger");
 const { default: axios } = require("axios");
 const { Command } = require("../types/command");
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+const config = require('../config.json');
 
 class InteractionManager {
 	/**
@@ -22,6 +23,7 @@ class InteractionManager {
 
 		this.loadCommands();
 		this.checkWebhook();
+		this.logger.log('Ready!');
 	}
 
 	loadCommands() {
@@ -53,15 +55,12 @@ class InteractionManager {
 		/** @type {fs.Dirent[]} */
 		const dir = fs.readdirSync(this.commandDir, { withFileTypes: true });
 		loadCommandsFromDir(this.commandDir, dir);
+		this.logger.log('Finished loading commands');
 	}
 
 	checkWebhook() {
-		const guild = this.client.guilds.cache.find(g => g.id === `702836521622962198`);
+		const guild = this.client.guilds.resolve(config.guild);
 
-	}
-
-	addLoadedCommand(command) {
-		this.commands.push(command);
 	}
 
 	/**
