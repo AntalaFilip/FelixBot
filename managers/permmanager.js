@@ -1,7 +1,11 @@
 const { GuildMember } = require("discord.js");
+const FelixBotClient = require("../client");
 const Logger = require("../util/logger");
 
 class PermissionsManager {
+	/**
+	 * @param {FelixBotClient} client
+	 */
 	constructor(client) {
 		this.client = client;
 		this.logger = new Logger("PermissionsManager");
