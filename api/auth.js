@@ -84,16 +84,23 @@ function authorize(token) {
 	});
 }
 
-function reqauth(req, res, next) {
-	const token = req.header(`Authorization`);
+function reqauth(reject, req, res, next) {
+	const token = req.header(`Authorization`) || req.cookies.authToken;
 	req.authorized = false;
-	if (!token) return next();
+	if (!token) {
+		if (reject) return res.status(403).send('Forbidden');
+		return next();
+	}
 	authorize(token)
 		.then(result => {
+			if (!result && reject) return res.status(401).send(`Unauthorized`);
 			req.authorized = result;
 			return next();
 		})
-		.catch(err => next());
+		.catch(err => {
+			if ((err.status || err.response) && reject) return res.status(403).send('Forbidden');
+			next();
+		});
 }
 
 exports.router = router;

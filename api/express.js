@@ -7,6 +7,7 @@ const authHandler = require('./auth').router;
 const authorizer = require('./auth').reqauth;
 const go = require('./go');
 const path = require('path');
+const cookie = require('cookie-parser');
 
 const cors = require('cors');
 const RateLimit = require('express-rate-limit');
@@ -16,7 +17,8 @@ const authLimiter = new RateLimit({
 	max: 3,
 });
 
-app.use(authorizer);
+app.use(cookie());
+app.use(authorizer.bind(this, false));
 app.use(cors({ origin: '*' }));
 
 app.use('/lessons', lessonHandler);
@@ -30,6 +32,8 @@ app.use('/interactions', interactionsHandler);
 app.get('/bot', (req, res) => {
 	res.send(global.client.user);
 });
+
+app.use('/download/secure', authorizer.bind(this, true), express.static('download/secure'));
 
 app.use('/download', express.static('download'));
 
