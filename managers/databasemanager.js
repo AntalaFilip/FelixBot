@@ -64,7 +64,7 @@ class DatabaseManager {
 			.from('teachers');
 
 		if (id) query.where({ dsid: id });
-		if (eduid) query.where({ eduid: id });
+		if (eduid) query.where({ eduid });
 
 		const res = await query;
 		const data = Parsers.parseTeacher(res);
