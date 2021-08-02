@@ -16,9 +16,6 @@ class QuestionCommand extends Command {
 		});
 	}
 
-	/**
-	 * @param {CommandoMessage} message
-	 */
 	async run(interaction) {
 		const guild = this.client.guilds.resolve(interaction.guild_id);
 		// Get the member
