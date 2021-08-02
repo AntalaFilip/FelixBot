@@ -56,6 +56,9 @@ class Logger {
 	formatMessage(msg, level) {
 		let format = `FELIX [${new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')}] [${this.instance || 'SYSTEM'}] [${level.toUpperCase()}]: ${msg}`;
 		switch(level) {
+			case 'info':
+				format = chalk.blueBright(format);
+				break;
 			case 'warn':
 				format = chalk.yellow(format);
 				break;
