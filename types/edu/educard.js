@@ -31,8 +31,8 @@ class EduCard extends EduBase {
 		return this.manager.weekdefs.filter(wd => wd.matches(this.rawweeks)).map(wd => wd.week).filter(o => o);
 	}
 
-	get classes() {
-		return this.manager.classes.filter(c => this.classroomids.includes(c.id));
+	get classrooms() {
+		return this.manager.classrooms.filter(c => this.classroomids.includes(c.id));
 	}
 }
 
