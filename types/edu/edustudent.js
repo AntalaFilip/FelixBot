@@ -18,6 +18,10 @@ class EduStudent extends EduBase {
 	get groups() {
 		return this.manager.groups.filter(g => this.groupids.includes(g.id));
 	}
+
+	get lessons() {
+		return this.manager.lessons.filter(l => l.studentids.includes(this.id));
+	}
 }
 
 module.exports = EduStudent;

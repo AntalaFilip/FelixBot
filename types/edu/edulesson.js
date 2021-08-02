@@ -1,4 +1,5 @@
 const EduBase = require("./edubase");
+const EduTerm = require("./eduterm");
 
 class EduLesson extends EduBase {
 	constructor({
@@ -31,7 +32,7 @@ class EduLesson extends EduBase {
 			days: daysdefid,
 		};
 		/** @type {string} */
-		this.terms = terms;
+		this.rawterms = terms;
 		/** @type {string} */
 		this.seminargroup = seminargroup;
 		/** @type {string} */
@@ -62,6 +63,15 @@ class EduLesson extends EduBase {
 
 	get students() {
 		return this.manager.students.filter(s => this.studentids.includes(s.id));
+	}
+
+	get cards() {
+		return this.manager.cards.filter(c => c.lessonid === this.id);
+	}
+
+	/** @returns {EduTerm[]} */
+	get terms() {
+		return this.manager.termdefs.filter(td => td.matches(this.terms)).map(td => td.term).filter(o => o);
 	}
 }
 

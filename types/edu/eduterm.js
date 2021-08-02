@@ -1,6 +1,6 @@
 const EduBase = require("./edubase");
 
-class EduDay extends EduBase {
+class EduTerm extends EduBase {
 	constructor({ id, name, short }) {
 		super({ id });
 		/** @type {string} */
@@ -10,8 +10,8 @@ class EduDay extends EduBase {
 	}
 
 	get def() {
-		return this.manager.daydefs.find(dd => dd.day === this);
+		return this.manager.termsdef.find(td => td.term === this);
 	}
 }
 
-module.exports = EduDay;
+module.exports = EduTerm;

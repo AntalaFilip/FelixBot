@@ -8,6 +8,10 @@ class EduWeek extends EduBase {
 		/** @type {string} */
 		this.short = short;
 	}
+
+	get def() {
+		return this.manager.weekdefs.find(wd => wd.week === this);
+	}
 }
 
 module.exports = EduWeek;

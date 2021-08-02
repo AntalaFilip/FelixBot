@@ -1,16 +1,23 @@
 const { default: axios } = require("axios");
+const sharp = require('sharp');
+const os = require('os');
 const FelixBotClient = require("../client");
 const config = require('../config.json');
+const EduCard = require("../types/edu/educard");
 const EduClass = require("../types/edu/educlass");
 const EduClassroom = require("../types/edu/educlassroom");
 const EduDay = require("../types/edu/eduday");
+const EduDayDef = require("../types/edu/edudaydef");
 const EduGroup = require("../types/edu/edugroup");
 const EduLesson = require("../types/edu/edulesson");
 const EduPeriod = require("../types/edu/eduperiod");
 const EduStudent = require("../types/edu/edustudent");
 const EduSubject = require("../types/edu/edusubject");
 const EduTeacher = require("../types/edu/eduteacher");
+const EduTerm = require("../types/edu/eduterm");
+const EduTermDef = require("../types/edu/edutermdef");
 const EduWeek = require("../types/edu/eduweek");
+const EduWeekDef = require("../types/edu/eduweekdef");
 const Logger = require("../util/logger");
 const { getSchoolYear } = require("../util/timeutils");
 
@@ -29,8 +36,16 @@ class EduPageManager {
 
 		/** @type {EduWeek[]} */
 		this.weeks = [];
+		/** @type {EduWeekDef[]} */
+		this.weekdefs = [];
 		/** @type {EduDay[]} */
 		this.days = [];
+		/** @type {EduDayDef[]} */
+		this.daydefs = [];
+		/** @type {EduTerm[]} */
+		this.terms = [];
+		/** @type {EduTermDef[]} */
+		this.termdefs = [];
 		/** @type {EduPeriod[]} */
 		this.periods = [];
 		/** @type {EduSubject[]} */
@@ -47,12 +62,20 @@ class EduPageManager {
 		this.students = [];
 		/** @type {EduLesson[]} */
 		this.lessons = [];
+		/** @type {EduCard[]} */
+		this.cards = [];
 
-		this.ready = new Promise((resolve) => {
+		this.ready = new Promise((resolve, reject) => {
 			this.loadEduPageData()
 				.then(c => {
-					this.logger.info(`Ready; fetched ${c} items`);
-					resolve(Date.now() - now);
+					const time = Date.now() - now;
+					this.logger.info(`Ready; fetched ${c} items in ${time}ms`);
+					resolve(time);
+				})
+				.catch(err => {
+					this.logger.error('FATAL: EduPageManager failed to load');
+					reject(err);
+					throw new Error('EduPageManager failed to load!');
 				});
 		});
 	}
@@ -73,7 +96,11 @@ class EduPageManager {
 		let count = 0;
 
 		count += await this.loadWeeksFromTables(tables.find(t => t.id === 'weeks'));
+		count += await this.loadWeekDefsFromTables(tables.find(t => t.id === 'weeksdefs'));
 		count += await this.loadDaysFromTables(tables.find(t => t.id === 'days'));
+		count += await this.loadDayDefsFromTables(tables.find(t => t.id === 'daysdefs'));
+		count += await this.loadTermsFromTables(tables.find(t => t.id === 'terms'));
+		count += await this.loadTermDefsFromTables(tables.find(t => t.id === 'termsdefs'));
 		count += await this.loadPeriodsFromTables(tables.find(t => t.id === 'periods'));
 		count += await this.loadSubjectsFromTables(tables.find(t => t.id === 'subjects'));
 		count += await this.loadClassroomsFromTables(tables.find(t => t.id === 'classrooms'));
@@ -82,6 +109,7 @@ class EduPageManager {
 		count += await this.loadGroupsFromTables(tables.find(t => t.id === 'groups'));
 		count += await this.loadStudentsFromTables(tables.find(t => t.id === 'students'));
 		count += await this.loadLessonsFromTables(tables.find(t => t.id === 'lessons'));
+		count += await this.loadCardsFromTables(tables.find(t => t.id === 'cards'));
 		return count;
 	}
 
@@ -96,6 +124,17 @@ class EduPageManager {
 		return mapped.length;
 	}
 
+	loadWeekDefsFromTables(weekdefs) {
+		/** @type {[]} */
+		const data = weekdefs.data_rows;
+		const mapped = data.map(weekdef => {
+			const wd = new EduWeekDef(weekdef);
+			return wd;
+		});
+		this.weekdefs = mapped;
+		return mapped.length;
+	}
+
 	loadDaysFromTables(days) {
 		/** @type {[]} */
 		const data = days.data_rows;
@@ -104,6 +143,39 @@ class EduPageManager {
 			return d;
 		});
 		this.days = mapped;
+		return mapped.length;
+	}
+
+	loadDayDefsFromTables(daydefs) {
+		/** @type {[]} */
+		const data = daydefs.data_rows;
+		const mapped = data.map(daydef => {
+			const dd = new EduDayDef(daydef);
+			return dd;
+		});
+		this.daydefs = mapped;
+		return mapped.length;
+	}
+
+	loadTermsFromTables(terms) {
+		/** @type {[]} */
+		const data = terms.data_rows;
+		const mapped = data.map(term => {
+			const t = new EduTerm(term);
+			return t;
+		});
+		this.terms = mapped;
+		return mapped.length;
+	}
+
+	loadTermDefsFromTables(termdefs) {
+		/** @type {[]} */
+		const data = termdefs.data_rows;
+		const mapped = data.map(termdef => {
+			const td = new EduTermDef(termdef);
+			return td;
+		});
+		this.termdefs = mapped;
 		return mapped.length;
 	}
 
@@ -204,6 +276,19 @@ class EduPageManager {
 			return l;
 		}).filter(o => o);
 		this.lessons = mapped;
+		return mapped.length;
+	}
+
+	loadCardsFromTables(cards) {
+		/** @type {[]} */
+		const data = cards.data_rows;
+		const mapped = data.map(card => {
+			const lesson = this.lessons.find(l => l.id === card.lessonid);
+			if (!lesson) return;
+			const c = new EduCard(card);
+			return c;
+		}).filter(o => o);
+		this.cards = mapped;
 		return mapped.length;
 	}
 }
