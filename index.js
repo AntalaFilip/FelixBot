@@ -61,8 +61,8 @@ client
 Ahoj, vitaj znovu vo Felix Discorde!
 Keďže už si raz bol/a členom, automaticky som ti nastavil údaje.
 Ak je niečo nesprávne, napíš prosím naším administrátorom.`);
+				client.logger.debug(`Automatically set user properties for ${newm.id}`);
 			}
-			client.logger.debug(`Automatically set user properties for ${newm.id}`);
 		}
 	})
 	.on(`interactionCreate`, async interaction => {
