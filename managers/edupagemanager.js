@@ -85,6 +85,7 @@ class EduPageManager {
 		const { y1 } = getSchoolYear();
 		const ttdata = await axios.post(`https://${settings.edupage}.edupage.org/timetable/server/ttviewer.js?__func=getTTViewerData`, { "__args": [null, y1], "__gsh": "00000000" });
 		const currentttid = ttdata.data.r.regular.default_num || '150';
+		/** @type {{tt_num: string, year: number, text: string, datefrom: string, hidden: boolean}} */
 		const currenttt = ttdata.data.r.regular.timetables.find(tt => tt.tt_num === currentttid);
 		const timetable = await axios.post(`https://${settings.edupage}.edupage.org/timetable/server/regulartt.js?__func=regularttGetData`, { "__args": [null, currentttid], "__gsh": "00000000" });
 		const eduData = timetable.data;
