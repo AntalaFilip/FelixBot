@@ -2,7 +2,7 @@ const { MessageEmbed, CommandInteraction, MessageActionRow, MessageSelectMenu, M
 const timetable = require(`../../timetable`);
 const { Command } = require("../../types/command");
 const { getChanName, removeStartingDot } = require("../../util/stringutils");
-const fetch = require('node-fetch');
+const config = require('../../config.json');
 
 class TimetableCommand extends Command {
 	constructor(client) {
@@ -41,7 +41,6 @@ class TimetableCommand extends Command {
 	 */
 	async run(interaction) {
 		const guild = interaction.guild;
-		const sprom = this.client.databaseManager.getSettings(guild.id);
 		// TODO: future-proof: return in DM's
 		const member = interaction.member;
 		const chan = interaction.channel;
@@ -58,8 +57,7 @@ class TimetableCommand extends Command {
 
 		/** @type {boolean} */
 		const ephemeral = (silent && silent.value) ?? true;
-		const settings = await sprom;
-		const roles = guild.roles.cache.filter(r => settings.classes.find(c => c.name == r.name.toLocaleLowerCase()));
+		const roles = guild.roles.cache.filter(r => config.classRoles.find(cr => cr.value === r.id));
 		await interaction.reply({
 			ephemeral: ephemeral,
 			embeds: [embed],
@@ -74,8 +72,6 @@ class TimetableCommand extends Command {
 
 	async exec(member, role, clsid) {
 		const guild = member.guild;
-		const settings = await this.client.databaseManager.getSettings(guild.id);
-		const cls = settings.classes.find(c => c.name.startsWith(clsid));
 		if (!role) role = guild.roles.cache.find(r => r.name.toLocaleLowerCase().startsWith(clsid));
 		const embed = new MessageEmbed()
 			.setColor(`#000000`)
@@ -86,10 +82,6 @@ class TimetableCommand extends Command {
 			.setThumbnail(`https://cdn.discordapp.com/attachments/371283762853445643/768906541277380628/Felix-logo-01.png`)
 			.setFooter(timetable[0][0])
 			.setTimestamp();
-
-		const scrapeSite = await fetch(`https://${settings.edupage}.edupage.org/timetable/view.php?class=${cls.eduID}`);
-		const html = await scrapeSite.text();
-		const svg = html.slice(html.indexOf('<svg>'), html.indexOf('</svg>') + 6);
 
 		for (let i = 0; i < timetable.length; i++) {
 			const processed = new Array();
