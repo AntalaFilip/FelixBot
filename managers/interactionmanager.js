@@ -65,7 +65,7 @@ class InteractionManager {
 	}
 
 	/**
-	 * Handles an incoming interaction and dispatches it to its handler function, depending on the type.
+	 * Dispatches the incoming interaction to its handler function, depending on its type.
 	 * @param {Interaction} interaction
 	 */
 	async handleIncomingInteraction(interaction) {
