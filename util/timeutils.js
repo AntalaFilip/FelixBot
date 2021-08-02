@@ -1,13 +1,21 @@
-const EduPageManager = require("../managers/edupagemanager");
-
 const TimeUtils = {
 	/**
 	 * @returns {number | null} returns a number representing a period
 	 */
 	getCurrentPeriod() {
 		const date = new Date();
-		/** @type {EduPageManager} */
+		/** @type {import("../managers/edupagemanager")} */
 		const EDU = global.client.edupageManager;
+		const periods = EDU.periods;
+		const eduTime = this.timeToEduString({ date });
+		const eduNumTime = this.timeStringToTime(eduTime);
+		const period = periods.find(p => {
+			const start = this.timeStringToTime(p.starttime) < eduNumTime;
+			const end = this.timeStringToTime(p.endtime) > eduNumTime;
+			return start && end;
+		});
+
+		if (!period) return null;
 
 
 		if (date.getUTCHours() < 7 || date.getUTCHours() > 13) return null;
@@ -17,14 +25,18 @@ const TimeUtils = {
 	},
 
 	/**
-	 * @param {number} num
+	 * @param {string} num
 	 */
 	twoDigit(num) {
-		const string = num.toString();
-		if (string.length === 1) {
-			return Number('0' + string);
+		if (typeof num === 'string') {
+			const strings = num.split(':');
+			strings.forEach(s => {
+				if (s.length % 2) {
+					s = `0${s}`;
+				}
+			});
+			return strings.join(':');
 		}
-		return string;
 	},
 
 	timeToEduString({ date, time }) {
@@ -32,13 +44,24 @@ const TimeUtils = {
 			return `${this.twoDigit(date.getHours())}:${this.twoDigit(date.getMinutes())}`;
 		}
 		else {
-			const str = String(time);
-
+			const str = this.twoDigit(String(time));
+			const hrs = str.substr(0, 2);
+			const min = str.substr(2, 2);
+			return `${hrs}:${min}`;
 		}
 	},
 
-	stringToTime(string) {
+	/**
+	 *
+	 * @param {string} string
+	 * @returns
+	 */
+	timeStringToTime(string) {
+		return Number(string.replace(/:/g, ''));
+	},
 
+	timeStringToDate(string) {
+		return new Date(new Date().toDateString() + ' ' + string);
 	},
 
 	lessonShouldEnd() {
