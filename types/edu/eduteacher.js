@@ -21,6 +21,10 @@ class EduTeacher extends EduBase {
 	get subjects() {
 		return this.manager.subjects.filter(s => s.lessons.find(l => l.teacherids.includes(this.id)));
 	}
+
+	get cards() {
+		return this.manager.cards.filter(c => c.lesson.teacherids.includes(this.id));
+	}
 }
 
 module.exports = EduTeacher;

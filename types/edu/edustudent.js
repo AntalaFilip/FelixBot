@@ -22,6 +22,10 @@ class EduStudent extends EduBase {
 	get lessons() {
 		return this.manager.lessons.filter(l => l.studentids.includes(this.id));
 	}
+
+	get cards() {
+		return this.manager.cards.filter(c => c.lesson.studentids.includes(this.id));
+	}
 }
 
 module.exports = EduStudent;

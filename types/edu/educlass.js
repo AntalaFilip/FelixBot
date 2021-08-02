@@ -32,6 +32,14 @@ class EduClass extends EduBase {
 		return this.manager.students.filter(s => s.classid === this.id);
 	}
 
+	get cards() {
+		return this.manager.cards.filter(c => c.lesson.classids.includes(this.id));
+	}
+
+	get lessons() {
+		return this.manager.lessons.filter(l => l.classids.includes(this.id));
+	}
+
 	get groups() {
 		return this.manager.groups.filter(g => g.classid === this.id);
 	}
