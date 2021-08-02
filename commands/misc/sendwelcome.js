@@ -1,6 +1,5 @@
 const { GuildMember, CommandInteraction } = require('discord.js');
 const { Command } = require('../../types/command');
-const { CmdMessageResponse } = require('../../util/interactions');
 
 class SendWelcomeCommand extends Command {
 	constructor(client) {

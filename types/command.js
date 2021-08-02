@@ -1,10 +1,9 @@
 const { CommandInteraction, MessageComponentInteraction } = require("discord.js");
-const FelixBotClient = require("../client");
 
 class Command {
 	/**
 	 *
-	 * @param {FelixBotClient} client
+	 * @param {import("../client")} client
 	 * @param {*} options
 	 */
 	constructor(client, options) {

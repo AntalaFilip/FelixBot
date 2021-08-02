@@ -1,10 +1,7 @@
 const { MessageEmbed, CommandInteraction, MessageActionRow, MessageSelectMenu, Message, MessageComponentInteraction } = require("discord.js");
 const timetable = require(`../../timetable`);
 const { Command } = require("../../types/command");
-const { ComMessageResponse, CallbackType, MessageComponent, CmdMessageResponse } = require("../../util/interactions");
 const { getChanName, removeStartingDot } = require("../../util/stringutils");
-const sharp = require('sharp');
-const { default: axios } = require("axios");
 const fetch = require('node-fetch');
 
 class TimetableCommand extends Command {

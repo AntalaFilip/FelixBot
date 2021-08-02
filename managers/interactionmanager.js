@@ -1,5 +1,4 @@
 const { Client, Collection, Interaction } = require("discord.js");
-const { InteractionType, CallbackType } = require("../util/interactions");
 const fs = require('fs');
 const path = require('path');
 const Logger = require("../util/logger");

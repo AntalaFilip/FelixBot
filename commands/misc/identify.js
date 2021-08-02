@@ -1,6 +1,5 @@
-const { GuildMember, Role, TextChannel, MessageEmbed, CommandInteraction, MessageActionRow, MessageSelectMenu, MessageButton, MessageComponentInteraction, SelectMenuInteraction, DiscordAPIError } = require('discord.js');
+const { GuildMember, TextChannel, MessageEmbed, CommandInteraction, MessageActionRow, MessageSelectMenu, MessageButton, MessageComponentInteraction } = require('discord.js');
 const { Command } = require('../../types/command');
-const { CmdMessageResponse, ComMessageResponse, CallbackType, MessageComponent, ButtonStyle } = require('../../util/interactions');
 const StringUtils = require('../../util/stringutils');
 const config = require('../../config.json');
 const EduTeacher = require('../../types/edu/eduteacher');

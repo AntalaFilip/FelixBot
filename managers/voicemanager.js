@@ -1,8 +1,7 @@
 const { joinVoiceChannel, VoiceConnection, entersState, VoiceConnectionStatus } = require("@discordjs/voice");
-const { VoiceState, GuildMember, VoiceChannel, StageChannel, Collection, Snowflake } = require("discord.js");
+const { VoiceState, VoiceChannel, StageChannel, Collection, Snowflake } = require("discord.js");
 const Lesson = require("../types/lesson/lesson");
 const LessonStudent = require("../types/lesson/lessonstudent");
-const LessonTeacher = require("../types/lesson/lessonteacher");
 const Logger = require("../util/logger");
 const str = require("../util/stringutils");
 const time = require("../util/timeutils");

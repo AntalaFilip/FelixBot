@@ -2,7 +2,6 @@ const { MessageEmbed, GuildMember, VoiceChannel, CategoryChannel, TextChannel } 
 const Logger = require("../util/logger");
 const Lesson = require("../types/lesson/lesson");
 const timetable = require("../timetable");
-const reactions = require("../util/reactions");
 const time = require('../util/timeutils');
 const str = require('../util/stringutils');
 const LessonParticipant = require("../types/lesson/lessonparticipant");

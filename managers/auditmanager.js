@@ -1,4 +1,3 @@
-const { Client } = require("discord.js");
 const FelixBotClient = require("../client");
 const Audit = require("../types/audit/audit");
 const MergeAudit = require("../types/audit/mergeaudit");

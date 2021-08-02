@@ -1,7 +1,5 @@
+const { InteractionType, verifyKeyMiddleware, InteractionResponseType } = require('discord-interactions');
 const express = require('express');
-const { InteractionResponseFlags, verifyKeyMiddleware } = require('discord-interactions');
-const { InteractionType, CallbackType, MessageComponent, ButtonStyle } = require('../util/interactions');
-
 
 const router = express.Router();
 const manager = global.client.interactionManager;
@@ -15,7 +13,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBKEY), (req, res) => {
 
 	// Handle pings
 	if (type == InteractionType.PING) {
-		res.status(200).send({ type: CallbackType.PONG });
+		res.status(200).send({ type: InteractionResponseType.PONG });
 		return;
 	}
 

@@ -1,7 +1,5 @@
-const { MessageEmbed, GuildMember, VoiceChannel, CategoryChannel, Collection } = require(`discord.js`);
-const { lessonShouldEnd } = require("../../util/timeutils");
+const { MessageEmbed, GuildMember, VoiceChannel, Collection } = require(`discord.js`);
 const SplitAudit = require('../../types/audit/splitaudit');
-const reactionUtils = require("../../util/reactions");
 const { Command } = require("../../types/command");
 const { CmdMessageResponse, CallbackType, MessageComponent, ButtonStyle } = require("../../util/interactions");
 const shuffle = require("../../util/shuffle");
