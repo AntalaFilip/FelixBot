@@ -23,6 +23,8 @@ class FelixBotClient extends Client {
 
 		this.once('ready', async () => {
 			this.databaseManager = new DatabaseManager(this);
+			this.edupageManager = new EduPageManager(this);
+			await this.edupageManager.ready;
 			this.voiceManager = new VoiceManager(this);
 			this.permManager = new PermissionsManager(this);
 			this.lessonManager = new LessonManager(this);
@@ -30,12 +32,7 @@ class FelixBotClient extends Client {
 			this.auditManager = new AuditManager(this);
 			await this.auditManager.ready;
 			this.interactionManager = new InteractionManager(this);
-			this.edupageManager = new EduPageManager(this);
-			await this.edupageManager.ready;
-<<<<<<< Updated upstream
-=======
 			this.gameManager = new GameManager(this);
->>>>>>> Stashed changes
 			this.emit('loaded');
 			this.server = http.createServer(require('./api/express')).listen(process.env.PORT, () => this.logger.log(`HTTP Server ready on ${process.env.PORT}!`));
 			this.user.setActivity(config.presenceStatus);
