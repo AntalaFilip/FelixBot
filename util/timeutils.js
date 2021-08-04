@@ -25,7 +25,7 @@ const TimeUtils = {
 	},
 
 	/**
-	 * @param {string} num
+	 * @param {string | number} num
 	 */
 	twoDigit(num) {
 		if (typeof num === 'string') {
@@ -36,6 +36,13 @@ const TimeUtils = {
 				}
 			});
 			return strings.join(':');
+		}
+		else if (typeof num === 'number') {
+			let string = num.toString();
+			if (string.length % 2) {
+				string = `0${string}`;
+			}
+			return string;
 		}
 	},
 
