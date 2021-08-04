@@ -1,0 +1,31 @@
+{
+	"classRoles": [
+		{
+			"name": "ExampleRoleName",
+			"value": "DiscordRoleSnowflake",
+			"emoji": "OptionalEmoji"
+		}
+	],
+	"subjectExceptions": {
+		"SubjShort1": "DiscordRoleSnowflake",
+		"SubjShort2": true
+	},
+	"timetableFallback": "142",
+	"authorizationChannel": "ChannelSnowflake",
+	"guild": "GuildSnowflake",
+	"presenceStatus": "Readying interactions!",
+	"admin": {
+		"name": "John Doe",
+		"email": "john@example.com",
+		"id": "DiscordUserSnowflake"
+	},
+	"domain": "example.com",
+	"roles": {
+		"guest": "DiscordRoleSnowflake",
+		"teacher": "DiscordRoleSnowflake",
+		"leadership": "DiscordRoleSnowflake",
+		"psychologist": "DiscordRoleSnowflake",
+		"alumni": "DiscordRoleSnowflake",
+		"other": "DiscordRoleSnowflake"
+	}
+}
