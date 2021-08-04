@@ -194,7 +194,8 @@ class EduPageManager {
 	loadSubjectsFromTables(subjects) {
 		/** @type {[]} */
 		const data = subjects.data_rows;
-		const filtered = data.filter(s => this.guild.roles.cache.find(r => r.name === s.short));
+		const exc = config.subjectExceptions;
+		const filtered = data.filter(s => this.guild.roles.cache.find(r => r.name === s.short) || this.guild.roles.resolve(exc[s.short]) || exc[s.short]);
 		const mapped = filtered.map(subject => {
 			const s = new EduSubject(subject);
 			return s;

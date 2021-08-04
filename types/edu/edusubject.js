@@ -1,5 +1,6 @@
 const { Role } = require("discord.js");
 const EduBase = require("./edubase");
+const { subjectExceptions: exc } = require('../../config.json');
 
 class EduSubject extends EduBase {
 	constructor({ id, name, short, color, timeoff, role }) {
@@ -9,7 +10,7 @@ class EduSubject extends EduBase {
 		/** @type {string} */
 		this.short = short;
 		/** @type {Role} */
-		this.role = role ?? this.guild.roles.cache.find(r => r.name === this.short);
+		this.role = role ?? (this.guild.roles.cache.find(r => r.name === this.short) || this.guild.roles.resolve(exc[this.short]));
 		/** @type {[][][]} */
 		this.timeoff = timeoff;
 	}
