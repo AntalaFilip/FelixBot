@@ -1,7 +1,5 @@
 const { Collection } = require("discord.js");
-const FelixBotClient = require("../client");
 const EduCard = require("../types/edu/educard");
-const { removeStartingDot } = require("./stringutils");
 
 class TimetableUtil {
 	/**
