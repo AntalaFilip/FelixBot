@@ -1,3 +1,5 @@
+const EduCard = require("../types/edu/educard");
+
 const TimeUtils = {
 	/**
 	 * @returns {number | null} returns a number representing a period
@@ -71,10 +73,17 @@ const TimeUtils = {
 		return new Date(new Date().toDateString() + ' ' + string);
 	},
 
-	lessonShouldEnd() {
+	/**
+	 * @param {EduCard} card
+	 * @returns
+	 */
+	lessonShouldEnd(card) {
 		const date = new Date();
+		const currtimeedu = this.timeToEduString({ date });
+		const currtimenum = this.timeStringToTime(currtimeedu);
+		const endtimenum = this.timeStringToTime(card.period.endtime);
 
-		if (date.getUTCMinutes() >= 45) return true;
+		if (currtimenum > endtimenum) return true;
 
 		return false;
 	},
