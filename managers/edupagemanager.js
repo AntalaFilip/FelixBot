@@ -1,6 +1,5 @@
 const { default: axios } = require("axios");
-const sharp = require('sharp');
-const os = require('os');
+const { DateTime } = require('luxon');
 const FelixBotClient = require("../client");
 const config = require('../config.json');
 const EduCard = require("../types/edu/educard");
@@ -84,7 +83,7 @@ class EduPageManager {
 		const settings = await this.client.databaseManager.getSettings(config.guild);
 		const { y1 } = getSchoolYear();
 		const ttdata = await axios.post(`https://${settings.edupage}.edupage.org/timetable/server/ttviewer.js?__func=getTTViewerData`, { "__args": [null, y1], "__gsh": "00000000" });
-		const currentttid = ttdata.data.r.regular.default_num || '150';
+		const currentttid = ttdata.data.r.regular.default_num || config.timetableFallback;
 		/** @type {{tt_num: string, year: number, text: string, datefrom: string, hidden: boolean}} */
 		const currenttt = ttdata.data.r.regular.timetables.find(tt => tt.tt_num === currentttid);
 		const timetable = await axios.post(`https://${settings.edupage}.edupage.org/timetable/server/regulartt.js?__func=regularttGetData`, { "__args": [null, currentttid], "__gsh": "00000000" });
@@ -297,6 +296,21 @@ class EduPageManager {
 		}).filter(o => o);
 		this.cards = mapped;
 		return mapped.length;
+	}
+
+	get currentWeek() {
+		const tt = this.currenttt;
+		const from = DateTime.fromISO(tt.datefrom);
+		const ttweek = from.weekNumber;
+		const now = DateTime.now();
+		const nowweek = now.weekNumber;
+		const weeks = this.weeks.length;
+		const i = ttweek % weeks;
+		const curr = nowweek % weeks;
+		let ii = i + curr;
+		if (ii > weeks) ii -= weeks;
+		const week = this.weeks.find(w => w.id == ii);
+		return week;
 	}
 }
 
