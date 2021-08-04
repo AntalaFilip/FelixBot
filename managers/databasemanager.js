@@ -128,17 +128,18 @@ class DatabaseManager {
 		return res[0];
 	}
 
-	async getMember(id) {
+	async getMember(id, eduid) {
 		const query = this.knex
 			.select('*')
 			.from('members');
 
 		if (id) query.where({ dsid: id });
+		if (eduid) query.where({ eduid });
 
 		const res = await query;
 		const data = Parsers.parseMember(res);
 
-		if (id && !Array.isArray(id)) return data[0];
+		if ((id && !Array.isArray(id)) || (eduid && !Array.isArray(eduid))) return data[0];
 		return data;
 	}
 
