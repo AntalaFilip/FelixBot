@@ -285,7 +285,8 @@ class EduPageManager {
 		const data = cards.data_rows;
 		const mapped = data.map(card => {
 			const lesson = this.lessons.find(l => l.id === card.lessonid);
-			if (!lesson) return;
+			const period = this.periods.find(p => p.id === card.period);
+			if (!lesson || !period) return;
 			const c = new EduCard(card);
 			return c;
 		}).filter(o => o);
