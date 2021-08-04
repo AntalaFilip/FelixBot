@@ -1,7 +1,8 @@
+const { GuildMember } = require("discord.js");
 const EduBase = require("./edubase");
 
 class EduStudent extends EduBase {
-	constructor({ id, short, classid, groupids }) {
+	constructor({ id, short, classid, groupids, member }) {
 		super({ id });
 		/** @type {string} */
 		this.short = short;
@@ -9,6 +10,8 @@ class EduStudent extends EduBase {
 		this.classid = classid;
 		/** @type {string[]} */
 		this.groupids = groupids ?? [];
+		/** @type {GuildMember} */
+		this.member = member ?? null;
 	}
 
 	get class() {

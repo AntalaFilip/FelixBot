@@ -253,15 +253,19 @@ class EduPageManager {
 		return mapped.length;
 	}
 
-	loadStudentsFromTables(students) {
+	async loadStudentsFromTables(students) {
+		const DB = this.client.databaseManager;
 		/** @type {[]} */
 		const data = students.data_rows;
-		const mapped = data.map(student => {
+		const prom = data.map(async student => {
 			const cls = this.classes.find(c => c.id === student.classid);
 			if (!cls) return;
+			const dbs = await DB.getMember(null, student.id);
+			student.member = dbs && dbs.member;
 			const s = new EduStudent(student);
 			return s;
-		}).filter(o => o);
+		});
+		const mapped = (await Promise.all(prom)).filter(o => o);
 		this.students = mapped;
 		return mapped.length;
 	}
