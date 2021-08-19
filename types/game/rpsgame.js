@@ -216,9 +216,18 @@ class RPSGame extends Game {
 			});
 		});
 
+		let winning = Array.from(this.players.values()).sort((a, b) => b.score - a.score);
+		let score;
+		let match = 0;
+		winning.forEach(w => {
+			if (!score) score = w.score;
+			else if (score === w.score) match++;
+		});
+		if (match - 1 === winning.length) winning = null;
+
 		return {
 			stats: p2s,
-			winning: Array.from(this.players.values()).sort((a, b) => b.score - a.score)[0],
+			winning: winning,
 		};
 	}
 
