@@ -16,9 +16,9 @@ class Parsers {
 		/** @type {FelixBotClient} */
 		const client = global.client;
 		const guild = client.guilds.resolve(config.guild);
-		const EDU = client.edupageManager;
 
 		const map = data.map(t => {
+			const EDU = client.edupageManager[t.manager];
 			const member = guild.members.resolve(t.dsid);
 			const eusr = EDU.teachers.find(u => u.id == String(t.eduid));
 
@@ -26,6 +26,7 @@ class Parsers {
 				member,
 				eduUser: eusr,
 				name: t.name,
+				manager: t.manager,
 				autolessons: Boolean(t.autolessons),
 				/** @type {VerificationLevel} */
 				verification: t.verification,
@@ -44,9 +45,9 @@ class Parsers {
 		/** @type {FelixBotClient} */
 		const client = global.client;
 		const guild = client.guilds.resolve(config.guild);
-		const EDU = client.edupageManager;
 
 		const map = data.map(m => {
+			const EDU = client.edupageManager[m.manager];
 			const id = m.dsid;
 			const member = guild.members.resolve(id);
 			const student = member.roles.cache.find(r => config.classRoles.find(rr => r.id == rr.value));

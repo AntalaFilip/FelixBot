@@ -6,9 +6,9 @@ const TimeUtils = {
 	 */
 	getCurrentPeriod() {
 		const date = new Date();
-		/** @type {import("../managers/edupagemanager")} */
-		const EDU = global.client.edupageManager;
-		const periods = EDU.periods;
+		/** @type {import("../managers/edupagemanager")[]} */
+		const EDUs = global.client.edupageManager;
+		const periods = EDUs.flatMap(e => e.periods);
 		const eduTime = this.timeToEduString({ date });
 		const eduNumTime = this.timeStringToTime(eduTime);
 		const period = periods.find(p => {

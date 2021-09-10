@@ -1,8 +1,8 @@
 const EduBase = require("./edubase");
 
 class EduCard extends EduBase {
-	constructor({ id, lessonid, period, days, weeks, classroomids }) {
-		super({ id });
+	constructor({ id, lessonid, period, days, weeks, classroomids }, mgr) {
+		super({ id }, mgr);
 		/** @type {string} */
 		this.lessonid = lessonid;
 		/** @type {string} */

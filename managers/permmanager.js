@@ -35,7 +35,7 @@ class PermissionsManager {
 	 */
 	isClassTeacher(member) {
 		return new Promise((resolve, reject) => {
-			if (!this.isTeacher(member)) resolve(null);
+			if (!this.isTeacher(member)) return resolve(null);
 			this.client.databaseManager.getSettings()
 				.then(settings => {
 					const classes = settings.classes;

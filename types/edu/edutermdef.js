@@ -2,8 +2,8 @@ const EduDef = require("./edudef");
 const EduTerm = require("./eduterm");
 
 class EduTermDef extends EduDef {
-	constructor(params) {
-		super(params);
+	constructor(...params) {
+		super(...params);
 	}
 
 	/**

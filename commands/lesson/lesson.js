@@ -11,6 +11,7 @@ const TimetableCommand = require('./timetable');
 class LessonCommand extends Command {
 	constructor(client) {
 		super(client, {
+			id: `865158738066407434`,
 			name: `lesson`,
 			group: `lesson`,
 			memberName: `lesson`,
@@ -121,13 +122,13 @@ class LessonCommand extends Command {
 	 */
 	async run(interaction) {
 		const guild = interaction.guild;
-		const start = interaction.options.has('start');
+		const sub = interaction.options.getSubCommand();
 		// Get the lessons array
 		const lessons = this.client.lessonManager.lessons;
 		// Get the teacher (member that instantiated the command)
 		const teacher = interaction.member;
 		// If the lesson is being started
-		if (start) {
+		if (sub === 'start') {
 			const command = interaction.options.get('start');
 			// Get the voice channel
 			const chan = teacher.voice.channel;
@@ -191,7 +192,7 @@ class LessonCommand extends Command {
 			await interaction.reply({ ephemeral: true, content: `The lesson has started, check the subject channel for confirmation.` });
 		}
 		// Else if the lesson is being ended
-		else {
+		else if (sub === 'end') {
 			const command = interaction.options.get('end');
 			const lsid = command.options && command.options.get('lessonid');
 			// Find the lesson that is being ended

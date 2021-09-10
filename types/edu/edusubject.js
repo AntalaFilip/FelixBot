@@ -3,8 +3,8 @@ const EduBase = require("./edubase");
 const { subjectExceptions: exc } = require('../../config.json');
 
 class EduSubject extends EduBase {
-	constructor({ id, name, short, color, timeoff, role }) {
-		super({ id, color });
+	constructor({ id, name, short, color, timeoff, role }, mgr) {
+		super({ id, color }, mgr);
 		/** @type {string} */
 		this.name = name;
 		/** @type {string} */

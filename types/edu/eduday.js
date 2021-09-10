@@ -1,8 +1,8 @@
 const EduBase = require("./edubase");
 
 class EduDay extends EduBase {
-	constructor({ id, name, short }) {
-		super({ id });
+	constructor({ id, name, short }, mgr) {
+		super({ id }, mgr);
 		/** @type {string} */
 		this.name = name;
 		/** @type {string} */

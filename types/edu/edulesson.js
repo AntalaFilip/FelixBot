@@ -6,9 +6,8 @@ class EduLesson extends EduBase {
 		id, subjectid, teacherids, groupids, classids,
 		count, durationperiods, classroomidss, termsdefid, weeksdefid,
 		daysdefid, terms, seminargroup, bell, studentids,
-	}) {
-		super({ id });
-
+	}, mgr) {
+		super({ id }, mgr);
 		/** @type {string} */
 		this.subjectid = subjectid;
 		/** @type {string[]} */

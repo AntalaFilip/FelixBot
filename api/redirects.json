@@ -10,5 +10,9 @@
 	{
 		"from": "identify-authorization",
 		"to": ""
+	},
+	{
+		"from": "privacy-policy",
+		"to": "/privacypolicy"
 	}
 ]

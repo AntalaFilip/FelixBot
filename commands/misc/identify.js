@@ -193,7 +193,7 @@ class IdentifyCommand extends Command {
 		/** @type {CommandInteraction} */
 		// eslint-disable-next-line no-self-assign
 		interaction = interaction;
-		const EDU = this.client.edupageManager;
+		const EDUs = this.client.edupageManager;
 		const DB = this.client.databaseManager;
 		const guild = interaction.guild || this.client.guilds.resolve(config.guild);
 		const user = interaction.user;
@@ -218,7 +218,7 @@ class IdentifyCommand extends Command {
 
 			if (eduid) {
 				const id = String(Array.from(eduid.matchAll('[0-9]')).map(o => o[0]).join(''));
-				const eusr = EDU.students.find(s => s.id === id);
+				const eusr = EDUs.flatMap(e => e.students).find(s => s.id === id);
 				if (!eusr) return await interaction.reply({ ephemeral: true, content: `Študent s takýmto identifikátorom neexistuje.` });
 
 				const { msg } = await this.exec(member, { name: `${fname} ${lname}`, vrf: 'PENDING', role: eusr.class.role }, eusr);
@@ -228,7 +228,7 @@ class IdentifyCommand extends Command {
 				}
 			}
 
-			const matches = EDU.students.filter(s => s.short === initials);
+			const matches = EDUs.flatMap(e => e.students).filter(s => s.short === initials);
 
 			if (matches.length === 0) {
 				await interaction.reply({
@@ -286,7 +286,7 @@ class IdentifyCommand extends Command {
 				const leadership = (type === 'leadership');
 				if (eduid) {
 					const id = String(Array.from(eduid.matchAll('[0-9]')).map(o => o[0]).join(''));
-					const eusr = EDU.teachers.find(t => t.id === id);
+					const eusr = EDUs.flatMap(e => e.teachers).find(t => t.id === id);
 					if (!eusr) return await interaction.reply({ ephemeral: true, content: `Učiteľ s takýmto identifikátorom neexistuje.` });
 
 					const { msg } = await this.exec(member, { vrf: 'VERIFY_EMAIL', email, role: leadership ? config.roles.leadership : config.roles.teacher }, eusr);
@@ -294,7 +294,7 @@ class IdentifyCommand extends Command {
 					await interaction.reply({ content: 'Odoslal som ti verifikačný email' });
 					return;
 				}
-				const matches = EDU.teachers.filter(t => latinise(t.short) === initials);
+				const matches = EDUs.flatMap(e => e.teachers).filter(t => latinise(t.short) === latinise(initials));
 				const embed = new MessageEmbed();
 				embed.setTitle('Zoznam zhôd');
 				embed.setTimestamp();
@@ -477,7 +477,7 @@ class IdentifyCommand extends Command {
 	 * @returns
 	 */
 	async component(interaction) {
-		const EDU = this.client.edupageManager;
+		const EDUs = this.client.edupageManager;
 		const split = interaction.customId.split('/');
 		const id = split[0];
 		const args = split.slice(1);
@@ -524,7 +524,7 @@ class IdentifyCommand extends Command {
 			if (!member) return await interaction.reply({ ephemeral: true, content: 'Prepáč, ale už nie si členom Felix Discordu.' });
 
 			const eduid = interaction.values[0];
-			const eduStudent = EDU.students.find(s => s.id === eduid);
+			const eduStudent = EDUs.flatMap(e => e.students).find(s => s.id === eduid);
 			const role = eduStudent.class.role;
 			await this.exec(member, { name: args[0], role, vrf: 'PENDING' }, eduStudent);
 			await interaction.update({ components: [], embeds: [], content: `Super! Úspešne som ťa zaradil ako ${member.displayName}, ${role.name}, EduPage ID ${eduStudent.id}` });
@@ -535,7 +535,7 @@ class IdentifyCommand extends Command {
 			if (!member) return await interaction.reply({ ephemeral: true, content: 'Prepáč, ale už nie si členom Felix Discordu.' });
 
 			const eduid = args[0];
-			const eduTeacher = EDU.teachers.find(t => t.id === eduid);
+			const eduTeacher = EDUs.flatMap(e => e.teachers).find(t => t.id === eduid);
 			const { msg } = await this.exec(member, { email: args[1], role: config.roles.teacher, vrf: 'VERIFY_EMAIL' }, eduTeacher);
 			if (msg) return interaction.update({ components: [], embeds: [], content: msg });
 			await interaction.update({ components: [], embeds: [], content: `Poslal som ti verifikačný email.` });

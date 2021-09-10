@@ -1,4 +1,4 @@
-const { MessageEmbed, GuildMember, VoiceChannel, CategoryChannel, TextChannel } = require('discord.js');
+const { MessageEmbed, GuildMember, VoiceChannel, CategoryChannel, TextChannel, Collection, MessageActionRow } = require('discord.js');
 const Logger = require("../util/logger");
 const Lesson = require("../types/lesson/lesson");
 const timetable = require("../timetable");
@@ -8,6 +8,8 @@ const LessonParticipant = require("../types/lesson/lessonparticipant");
 const LessonStudent = require("../types/lesson/lessonstudent");
 const LessonTeacher = require("../types/lesson/lessonteacher");
 const FelixBotClient = require('../client');
+const config = require('../config.json');
+const LessonCommand = require('../commands/lesson/lesson');
 
 class LessonManager {
 	/**
@@ -18,29 +20,26 @@ class LessonManager {
 		this.client = client;
 		this.logger = new Logger("LessonManager");
 		/**
-		 * @type {Lesson[]}
+		 * @type {Collection<import('discord.js').Snowflake, Lesson>}
 		 */
-		this.lessons = [];
+		this.lessons = new Collection();
 		this.ready = new Promise((resolve, reject) => {
 			client.databaseManager.getOngoingLessons()
 				.then(lss => {
-					this.lessons = lss;
+					this.lessons = new Collection(lss.map(ls => [ls.id, ls]));
 					this.lessons.forEach(ls => {
 						if (ls.teacher.present == false) {
 							let timeout = 150000;
 							if (time.getCurrentPeriod == null) timeout = 0;
-							setTimeout(() => {
+							setTimeout(async () => {
 								if (ls.teacher.present == false && !ls.endedAt) {
-									ls.teacher.member.createDM()
-										.then(dm => {
-											dm.send(`Your lesson has ended due to you not being present for five minutes, this in **not** the intended way to end the lesson!`);
-											this.end(ls);
-										});
+									await ls.teacher.member.send(`Your lesson has ended due to you not being present for five minutes, this in **not** the intended way to end the lesson!`);
+									this.end(ls);
 								}
 							}, timeout);
 						}
 					});
-					this.tick();
+					this.ticking = setInterval(() => this.tick(), 10000);
 					this.logger.log(`Ready; there are ${this.lessons.length} lessons ongoing!`);
 					resolve();
 				})
@@ -53,7 +52,7 @@ class LessonManager {
 	}
 
 	async tick() {
-		const gld = this.client.guilds.cache.find(g => g.id === `702836521622962198`);
+		const gld = this.client.guilds.resolve(config.guild);
 		if (time.getCurrentPeriod() != null) {
 			gld.voiceStates.cache.forEach(async vs => {
 				this.client.voiceManager.handleShouldStartLesson(vs);
@@ -66,21 +65,16 @@ class LessonManager {
 				}
 			});
 		}
-		setTimeout(() => this.tick(), 10000);
 	}
 
 	/**
 	 * Forces the manager to sync lessons from the database.
-	 * @returns {Promise<Lesson[]>} The currently ongoing lessons; an array of Lesson object, or an empty array.
+	 * @returns {Promise<Collection<import('discord.js').Snowflake, Lesson>>} The currently ongoing lessons; an array of Lesson object, or an empty array.
 	 */
-	forceSync() {
-		return new Promise((resolve, reject) => {
-			this.client.databaseManager.getOngoingLessons()
-				.then(lss => {
-					this.lessons = lss;
-					resolve(this.lessons);
-				}, err => reject(err));
-		});
+	async forceSync() {
+		const lss = await this.client.databaseManager.getOngoingLessons();
+		this.lessons = new Collection(lss.map(ls => [ls.id, ls]));
+		return this.lessons;
 	}
 
 	/**
@@ -137,21 +131,33 @@ class LessonManager {
 	 * @param {Lesson} lesson
 	 */
 	async start(lesson) {
-		if (lesson instanceof Lesson == false) throw new Error(`Something went wrong; the lesson is not a Lesson!`);
-		const settings = await this.client.databaseManager.getSettings();
-		const current = timetable[new Date().getDay()].filter(ls => ls.includes(`@${lesson.classid}`) && ls.includes(`%${lesson.period}`) && ls.includes(`^${settings.week}`));
+		const EDUs = this.client.edupageManager;
+		if (!Lesson.is(lesson)) throw new Error(`Something went wrong; the lesson is not a Lesson!`);
+		if (lesson.frozen) throw new Error(`Can not start a frozen lesson!`);
+
+		const card = lesson.card;
+		const current = card.manager.cards.filter(c =>
+			card.lesson.classes.find(
+				cl => c.lesson.classes.includes(cl),
+			)
+			&& card.period == c.period
+			&& card != c,
+		);
+
+		const teacher = lesson.teachers[0];
 		/** @type {CategoryChannel} */
-		const ctg = lesson.teacher.member.guild.channels.cache.find(ch => ch.name.startsWith(lesson.classid)).parent;
+		const ctg = (teacher && teacher.member.voice.channel && teacher.member.voice.channel.parent) || card.guild.channels.cache.find(c => c.type === 'GUILD_CATEGORY' && c.name === card.lesson.classes[0].name);
 		const vcs = ctg.children.filter(ch => ch.type == `voice` && !ch.name.includes('*')).sort((c1, c2) => c1.position - c2.position);
 		const les = this.lessons.find(ls => ls.classid == lesson.classid && ls != lesson);
 		if (les && les.period != lesson.period) await this.end(les);
+
 		if (current.length == 0) current.push(null);
 		const toAlloc = Math.round(vcs.size / current.length);
-		this.logger.info(`Starting a lesson (${lesson.lessonid}@${lesson.classid}); will allocate ${toAlloc} channels`);
+		this.logger.debug(`Starting a lesson (${lesson.lessonid}@${lesson.classid}); will allocate ${toAlloc} channels`);
 		this.lessons.push(lesson);
 		const id = await this.client.databaseManager.pushNewLesson(lesson);
 		lesson.id = id;
-		this.logger.debug(`Database returned ID ${id} for ${lesson.lessonid}@${lesson.classid}`);
+		this.logger.verbose(`Database returned ID ${id} for ${lesson.lessonid}@${lesson.classid}`);
 
 		let i = 0;
 		vcs.each(ch => {
@@ -161,11 +167,21 @@ class LessonManager {
 				i++;
 			}
 		});
-		this.logger.debug(`Allocated ${i} channels for ${lesson.id}`);
+		this.logger.verbose(`Allocated ${i} channels for ${lesson.id}`);
 		lesson.allocated.forEach(ch => {
 			ch.members.forEach(mem => {
 				if (!lesson.students.find(st => st.member == mem) && mem.id != lesson.teacher.member.id) this.joined(lesson, new LessonStudent(mem));
 			});
+		});
+		const mainc = lesson.allocated[0];
+		const ts = lesson.teachers.filter(t => t.member.voice.channel != mainc);
+		const other = lesson.participants.filter(p => p.member.voice.channel != mainc);
+		ts.concat(other).forEach(async toMove => {
+			try {
+				await toMove.member.voice.setChannel(mainc, `Lesson started in a different channel`);
+			}
+			// eslint-disable-next-line no-empty
+			catch { }
 		});
 
 		const embed = new MessageEmbed()
@@ -177,13 +193,32 @@ class LessonManager {
 			.setTimestamp()
 			.setURL(`https://felixbot.antala.tk/app/lessons/${lesson.id}`)
 			.setFooter(`End the lesson by reacting with the checkered flag`);
+		/** @type {LessonCommand} */
+		const cmd = this.client.interactionManager.commands.get('865158738066407434');
+		/** @type {import('discord.js').MessageOptions} */
+		const msg = {
+			embeds: [embed],
+			components: [
+				new MessageActionRow()
+					.addComponents(
+						cmd.components.endLessonButton(lesson.id),
+					),
+			],
+		};
 
+		const dateFormat = new Date().toLocaleDateString('sk-SK', { year: '2-digit', month: '2-digit', day: '2-digit' }).split(' ').join('');
 		/** @type {TextChannel} */
 		const tchan = ctg.children.find(ch => ch.name.includes('predmety'));
-		const thread = tchan.threads.cache.find(tc => !tc.archived && tc.name.includes(lesson.lessonid));
+		const thread = tchan.threads.cache.find(tc => tc.name === `${card.lesson.subject.short.toUpperCase()}-${dateFormat}`);
 
-		if (!thread) await tchan.threads.create({ startMessage: { embeds: [embed] }, name: `${lesson.lessonid.toUpperCase()}-${new Date().toLocaleDateString('sk-SK', { year: '2-digit', month: 'numeric', day: 'numeric' }).split(' ').join('')}` });
-		else await thread.send({ embeds: [embed] });
+		if (!thread) {
+			await tchan.threads.create({
+				startMessage: msg,
+				name: `${card.lesson.subject.short.toUpperCase()}-${dateFormat}`,
+				autoArchiveDuration: 1440,
+			});
+		}
+		else await thread.send(msg);
 
 		lesson.emit(`start`);
 		return embed;
@@ -302,9 +337,9 @@ class LessonManager {
 	 * @param {LessonParticipant} participant
 	 */
 	joined(lesson, participant) {
-		if (participant instanceof LessonTeacher) participant.member.createDM().then(dm => dm.send(`You have reconnected!`));
-		else if (participant instanceof LessonStudent && !lesson.students.includes(participant)) lesson.students.push(participant);
-		participant.voice.connects.push(new Date());
+		if (participant instanceof LessonTeacher) participant.member.send(`You have reconnected!`);
+		else if (participant instanceof LessonParticipant && !lesson.participants.has(participant.member.id)) lesson.participants.set(participant.member.id, participant);
+		participant.voice.push({ date: new Date(), type: 'JOIN' });
 		participant.present = true;
 		lesson.emit(`joined`, participant);
 		this.update(lesson);
@@ -335,7 +370,7 @@ class LessonManager {
 					});
 			}
 		}
-		participant.voice.disconnects.push(new Date());
+		participant.voice.push({ date: new Date(), type: 'LEAVE' });
 		participant.present = false;
 		lesson.emit(`left`, participant);
 		this.update(lesson);
@@ -348,7 +383,7 @@ class LessonManager {
 	 * @param {boolean} state
 	 */
 	togglemute(lesson, participant, state) {
-		participant.voice.mutes.push([new Date(), state]);
+		participant.voice.push({ date: new Date(), type: state ? 'MUTE' : 'UNMUTE' });
 		this.update(lesson);
 	}
 
@@ -359,7 +394,7 @@ class LessonManager {
 	 * @param {boolean} state
 	 */
 	toggledeaf(lesson, participant, state) {
-		participant.voice.deafs.push([new Date(), state]);
+		participant.voice.push({ date: new Date(), type: state ? 'DEAF' : 'UNDEAF' });
 		this.update(lesson);
 	}
 
@@ -370,7 +405,7 @@ class LessonManager {
 	 * @param {boolean} state
 	 */
 	togglevideo(lesson, participant, state) {
-		participant.voice.video.push([new Date(), state]);
+		participant.voice.push({ date: new Date(), type: state ? 'VIDEO_ON' : 'VIDEO_OFF' });
 		this.update(lesson);
 	}
 }

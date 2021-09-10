@@ -31,7 +31,7 @@ class TimetableCommand extends Command {
 					placeholder: 'Select class:',
 					minValues: 1,
 					maxValues: 1,
-					customId: `timetable_select_class/${member.id}`,
+					customId: `timetable_select_class/${member.id}/${edu[0].manager.id}`,
 				})
 					.addOptions(
 						edu.map(e => ({
@@ -57,7 +57,14 @@ class TimetableCommand extends Command {
 		const args = interaction.options;
 		const target = args.getMentionable('target') || member;
 		const silent = args.getBoolean('silent');
-		const EDU = this.client.edupageManager;
+		const EDU = this.client.edupageManager.find(
+			edu => (
+				edu.students.find(s => s.member === target)
+				|| edu.classes.find(c => c.role === target)
+				|| edu.teachers.find(t => t.member === target)
+				|| edu.subjects.find(s => s.role === target)
+			),
+		);
 
 		const edu = (target instanceof Role)
 			? EDU.classes.find(c => c.role === target)
@@ -92,7 +99,7 @@ class TimetableCommand extends Command {
 	 * @returns
 	 */
 	async exec(edu, member) {
-		const EDU = this.client.edupageManager;
+		const EDU = edu.manager;
 		const cards = EDU.cards.filter(c => c.lesson.teacherids.includes(edu.id) || c.lesson.studentids.includes(edu.id) || c.lesson.classids.includes(edu.id));
 		/** @type {string} */
 		const name = (edu.member && rsd(edu.member.displayName)) || edu.name || edu.short;
@@ -157,7 +164,7 @@ class TimetableCommand extends Command {
 		const id = split[0];
 		const args = split.slice(1);
 		if (id === `timetable_select_class` && interaction.isSelectMenu()) {
-			const EDU = this.client.edupageManager;
+			const EDU = this.client.edupageManager[args[1]];
 			const member = interaction.member;
 			const isOriginalAuthor = (args[0] == member.id);
 			const eduid = interaction.values[0];

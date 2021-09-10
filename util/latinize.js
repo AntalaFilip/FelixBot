@@ -834,6 +834,7 @@ Latinise.latin_map = {
  * @returns
  */
 function latinise(t) {
+	// eslint-disable-next-line no-useless-escape
 	return t.replace(/[^A-Za-z0-9\[\] ]/g, function(a) { return Latinise.latin_map[a] || a; });
 }
 

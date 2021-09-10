@@ -2,8 +2,8 @@ const EduDef = require("./edudef");
 const EduWeek = require("./eduweek");
 
 class EduWeekDef extends EduDef {
-	constructor(params) {
-		super(params);
+	constructor(...params) {
+		super(...params);
 	}
 
 	/**

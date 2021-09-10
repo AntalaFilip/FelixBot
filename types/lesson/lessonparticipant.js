@@ -1,42 +1,67 @@
 const { GuildMember } = require("discord.js");
 const { removeStartingDot } = require("../../util/stringutils");
 
+/**
+ * @typedef {"JOIN" | "LEAVE" | "MUTE" | "UNMUTE" | "DEAF" | "UNDEAF" | "VIDEO_ON" | "VIDEO_OFF"} LessonParticipantDataType
+ */
+
+/**
+ * @typedef LessonParticipantObject
+ * @property {GuildMember} member
+ * @property {string} name
+ * @property {{date: Date, type: LessonParticipantDataType}[]} data
+ */
+
 class LessonParticipant {
 	/**
 	 * Creates a LessonParticipant object
-	 * @param {GuildMember | {member: GuildMember, created: Date, voice: {connects: Array<Date>, disconnects: Array<Date>, mutes: Array, deafs: Array, video: Array, total: number | null}}} participant The member or object to create a LessonParticipant object from
+	 * @param {import("./lesson") | number} lesson
+	 * @param {GuildMember} member
+	 * @param {LessonParticipantObject} pobj
 	 */
-	constructor(participant) {
+	constructor(lesson, member, pobj) {
+		/** @type {{date: Date, type: LessonParticipantDataType}[]} */
+		this.voice = [];
 
-		/**
-		 * @type {{connects: Date[], disconnects: Date[], mutes: Array, deafs: Array, video: Array, total: number | null}}
-		 */
-		this.voice = {
-			connects: [],
-			disconnects: [],
-			mutes: [],
-			deafs: [],
-			video: [],
-			total: null,
-		};
+		/** @type {number} */
+		this.lsid = lesson.id ?? lesson;
 
 		this.present = true;
-		/**
-		 * @type {GuildMember}
-		 */
+		/** @type {GuildMember} */
 		this.member;
+		/** @type {string} */
+		this.name;
+		/** @type {Date} */
+		this.created;
 
-		if (participant instanceof GuildMember) {
-			this.member = participant;
-			this.name = removeStartingDot(participant.displayName);
+		if (member) {
+			this.member = member;
+			this.name = removeStartingDot(member.displayName);
 			this.created = new Date();
 		}
 		else {
-			this.member = participant.member;
-			this.name = removeStartingDot(participant.member.displayName);
-			this.created = participant.created;
-			this.voice = participant.voice;
+			this.member = pobj.member;
+			this.name = removeStartingDot(pobj.member ? pobj.member.displayName : pobj.name);
+			this.created = pobj.created;
+			this.voice = pobj.data;
 		}
+	}
+
+	/** @returns {import("../../client")} */
+	get client() {
+		return global.client;
+	}
+
+	get manager() {
+		return this.client.lessonManager;
+	}
+
+	get lesson() {
+		return this.manager.lessons.get(this.lsid);
+	}
+
+	get frozen() {
+		return this.lesson.frozen;
 	}
 }
 

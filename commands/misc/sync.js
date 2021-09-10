@@ -19,7 +19,7 @@ class SyncCommand extends Command {
 	 */
 	async run(interaction) {
 		const ls = await this.client.lessonManager.forceSync();
-		const ep = await this.client.edupageManager.loadEduPageData();
+		const ep = (await Promise.all(this.client.edupageManager.map(async edu => await edu.loadEduPageData()))).reduce((prev, curr) => prev + curr);
 		return interaction.reply({ content: `Re-synced ${ls.length} lessons from the database & ${ep} objects from EduPage`, ephemeral: true });
 	}
 }

@@ -20,6 +20,16 @@
 		"id": "DiscordUserSnowflake"
 	},
 	"domain": "example.com",
+	"edupage": [
+		{
+			"id": "edupage1",
+			"timetableFallback": "100"
+		},
+		{
+			"id": "extraEdupage",
+			"timetableFallback": "2"
+		}
+	],
 	"roles": {
 		"guest": "DiscordRoleSnowflake",
 		"teacher": "DiscordRoleSnowflake",

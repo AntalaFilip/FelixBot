@@ -47,7 +47,8 @@ class DatabaseManager {
 		const query = this.knex
 			.insert({
 				dsid: data.member.id,
-				eduid: Number(data.eusr.id) || null,
+				eduid: Number(data.eusr.id),
+				manager: data.eusr.manager.id,
 				name: data.member.displayName,
 				email: data.email,
 				autolessons: data.autolessons ?? 1,
@@ -118,6 +119,7 @@ class DatabaseManager {
 			.insert({
 				dsid: data.member.id,
 				eduid: (data.eusr && Number(data.eusr.id)) || null,
+				manager: (data.eusr && data.eusr.manager.id) || null,
 				name: data.member.displayName,
 				verification: data.verification,
 				role: data.role.id,

@@ -23,8 +23,8 @@ class FelixBotClient extends Client {
 
 		this.once('ready', async () => {
 			this.databaseManager = new DatabaseManager(this);
-			this.edupageManager = new EduPageManager(this);
-			await this.edupageManager.ready;
+			this.edupageManager = config.edupage.map(edupage => new EduPageManager(this, edupage.id));
+			await Promise.all(this.edupageManager.map(e => e.ready));
 			this.voiceManager = new VoiceManager(this);
 			this.permManager = new PermissionsManager(this);
 			this.lessonManager = new LessonManager(this);

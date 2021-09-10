@@ -26,7 +26,7 @@ client
 	.on(`reconnecting`, () => { logger.warn(`Reconnecting...`); })
 	.on(`voiceStateUpdate`, (oldstate, newstate) => client.voiceManager.voiceStateUpdate(oldstate, newstate))
 	.on(`channelCreate`, channel => {
-		logger.debug(`A ${channel.type} channel (${channel.id}) was created!`);
+		logger.verbose(`A ${channel.type} channel (${channel.id}) was created!`);
 		if (channel instanceof VoiceChannel) {
 			const lesson = client.lessonManager.lessons.find(ls => ls.classid == channel.parent.name.slice(0, 2));
 			if (Lesson.is(lesson) && !client.lessonManager.isAllocated(channel) && !channel.name.includes('*')) {
@@ -51,16 +51,20 @@ client
 				const role = dbm.role;
 				const name = dbm.name;
 				const roles = [];
+				client.logger.verbose(`Setting properties fetched from database for ${newm.id}`);
 				if (eusr instanceof EduStudent) roles.push(eusr.class.role);
 				else if (eusr instanceof EduTeacher) roles.push(eusr.subjects.map(s => s.role), config.roles.teacher);
 
 				if (role && !roles.includes(role)) roles.push(role);
 				await newm.roles.add(roles, `Automatic identification process; database`);
+				client.logger.verbose(`Added roles: ${roles.map(r => r.id || r)}`);
 				if (name) await newm.setNickname(name, `Automatic identification process; database`);
+				client.logger.verbose(`Set name: ${name}`);
 				await newm.send(`
 Ahoj, vitaj znovu vo Felix Discorde!
 Keďže už si raz bol/a členom, automaticky som ti nastavil údaje.
 Ak je niečo nesprávne, napíš prosím naším administrátorom.`);
+				client.logger.verbose(`Sent message, props set!`);
 				client.logger.debug(`Automatically set user properties for ${newm.id}`);
 			}
 		}

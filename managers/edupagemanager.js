@@ -24,12 +24,18 @@ const { getSchoolYear } = require("../util/timeutils");
 class EduPageManager {
 	/**
 	 * @param {FelixBotClient} client
+	 * @param {string} edupage The EduPage ID (ex. felix.edupage.org -> felix)
 	 */
-	constructor(client) {
+	constructor(client, edupage) {
 		const now = Date.now();
 		this.client = client;
 		this.guild = this.client.guilds.resolve(config.guild);
-		this.logger = new Logger('EduPageManager');
+
+		/** @type {string} */
+		this.edupage = edupage;
+		this.id = config.edupage.findIndex(e => e.id === edupage);
+
+		this.logger = new Logger(`EduPageManager - ${this.id}`);
 
 		this.raw = [];
 
@@ -80,13 +86,12 @@ class EduPageManager {
 	}
 
 	async loadEduPageData() {
-		const settings = await this.client.databaseManager.getSettings(config.guild);
 		const { y1 } = getSchoolYear();
-		const ttdata = await axios.post(`https://${settings.edupage}.edupage.org/timetable/server/ttviewer.js?__func=getTTViewerData`, { "__args": [null, y1], "__gsh": "00000000" });
-		const currentttid = ttdata.data.r.regular.default_num || config.timetableFallback;
+		const ttdata = await axios.post(`https://${this.edupage}.edupage.org/timetable/server/ttviewer.js?__func=getTTViewerData`, { "__args": [null, y1], "__gsh": "00000000" });
+		const currentttid = ttdata.data.r.regular.default_num || config.edupage.find(c => c.id === this.edupage).timetableFallback;
 		/** @type {{tt_num: string, year: number, text: string, datefrom: string, hidden: boolean}} */
 		const currenttt = ttdata.data.r.regular.timetables.find(tt => tt.tt_num === currentttid);
-		const timetable = await axios.post(`https://${settings.edupage}.edupage.org/timetable/server/regulartt.js?__func=regularttGetData`, { "__args": [null, currentttid], "__gsh": "00000000" });
+		const timetable = await axios.post(`https://${this.edupage}.edupage.org/timetable/server/regulartt.js?__func=regularttGetData`, { "__args": [null, currentttid], "__gsh": "00000000" });
 		const eduData = timetable.data;
 		const edupageDBI = eduData.r.dbiAccessorRes;
 		const tables = edupageDBI.tables;
@@ -117,7 +122,7 @@ class EduPageManager {
 		/** @type {[]} */
 		const data = weeks.data_rows;
 		const mapped = data.map(week => {
-			const w = new EduWeek(week);
+			const w = new EduWeek(week, this);
 			return w;
 		});
 		this.weeks = mapped;
@@ -128,7 +133,7 @@ class EduPageManager {
 		/** @type {[]} */
 		const data = weekdefs.data_rows;
 		const mapped = data.map(weekdef => {
-			const wd = new EduWeekDef(weekdef);
+			const wd = new EduWeekDef(weekdef, this);
 			return wd;
 		});
 		this.weekdefs = mapped;
@@ -139,7 +144,7 @@ class EduPageManager {
 		/** @type {[]} */
 		const data = days.data_rows;
 		const mapped = data.map(day => {
-			const d = new EduDay(day);
+			const d = new EduDay(day, this);
 			return d;
 		});
 		this.days = mapped;
@@ -150,7 +155,7 @@ class EduPageManager {
 		/** @type {[]} */
 		const data = daydefs.data_rows;
 		const mapped = data.map(daydef => {
-			const dd = new EduDayDef(daydef);
+			const dd = new EduDayDef(daydef, this);
 			return dd;
 		});
 		this.daydefs = mapped;
@@ -161,7 +166,7 @@ class EduPageManager {
 		/** @type {[]} */
 		const data = terms.data_rows;
 		const mapped = data.map(term => {
-			const t = new EduTerm(term);
+			const t = new EduTerm(term, this);
 			return t;
 		});
 		this.terms = mapped;
@@ -172,7 +177,7 @@ class EduPageManager {
 		/** @type {[]} */
 		const data = termdefs.data_rows;
 		const mapped = data.map(termdef => {
-			const td = new EduTermDef(termdef);
+			const td = new EduTermDef(termdef, this);
 			return td;
 		});
 		this.termdefs = mapped;
@@ -183,7 +188,7 @@ class EduPageManager {
 		/** @type {[]} */
 		const data = periods.data_rows;
 		const mapped = data.map(period => {
-			const p = new EduPeriod(period);
+			const p = new EduPeriod(period, this);
 			return p;
 		});
 		this.periods = mapped;
@@ -196,7 +201,7 @@ class EduPageManager {
 		const exc = config.subjectExceptions;
 		const filtered = data.filter(s => this.guild.roles.cache.find(r => r.name === s.short) || this.guild.roles.resolve(exc[s.short]) || exc[s.short]);
 		const mapped = filtered.map(subject => {
-			const s = new EduSubject(subject);
+			const s = new EduSubject(subject, this);
 			return s;
 		});
 		this.subjects = mapped;
@@ -207,7 +212,7 @@ class EduPageManager {
 		/** @type {[]} */
 		const data = classrooms.data_rows;
 		const mapped = data.map(classroom => {
-			const c = new EduClassroom(classroom);
+			const c = new EduClassroom(classroom, this);
 			return c;
 		});
 		this.classrooms = mapped;
@@ -220,7 +225,7 @@ class EduPageManager {
 		const prom = data.map(async teacher => {
 			const dbt = await DB.getTeacher(null, Number(teacher.id));
 			teacher.member = dbt && dbt.member;
-			const t = new EduTeacher(teacher);
+			const t = new EduTeacher(teacher, this);
 			return t;
 		});
 		const mapped = await Promise.all(prom);
@@ -235,7 +240,7 @@ class EduPageManager {
 			const dsrole = this.guild.roles.cache.find(r => r.name.toLowerCase() === cls.name.toLowerCase());
 			if (!dsrole) return;
 			cls.role = dsrole;
-			const c = new EduClass(cls);
+			const c = new EduClass(cls, this);
 			return c;
 		}).filter(o => o);
 		this.classes = mapped;
@@ -246,7 +251,7 @@ class EduPageManager {
 		/** @type {[]} */
 		const data = groups.data_rows;
 		const mapped = data.map(group => {
-			const g = new EduGroup(group);
+			const g = new EduGroup(group, this);
 			return g;
 		});
 		this.groups = mapped;
@@ -262,7 +267,7 @@ class EduPageManager {
 			if (!cls) return;
 			const dbs = await DB.getMember(null, student.id);
 			student.member = dbs && dbs.member;
-			const s = new EduStudent(student);
+			const s = new EduStudent(student, this);
 			return s;
 		});
 		const mapped = (await Promise.all(prom)).filter(o => o);
@@ -277,7 +282,7 @@ class EduPageManager {
 			const subject = this.subjects.find(s => s.id === lesson.subjectid);
 			const cls = this.classes.find(c => lesson.classids.includes(c.id));
 			if (!subject || !cls) return;
-			const l = new EduLesson(lesson);
+			const l = new EduLesson(lesson, this);
 			return l;
 		}).filter(o => o);
 		this.lessons = mapped;
@@ -291,7 +296,7 @@ class EduPageManager {
 			const lesson = this.lessons.find(l => l.id === card.lessonid);
 			const period = this.periods.find(p => p.id === card.period);
 			if (!lesson || !period) return;
-			const c = new EduCard(card);
+			const c = new EduCard(card, this);
 			return c;
 		}).filter(o => o);
 		this.cards = mapped;

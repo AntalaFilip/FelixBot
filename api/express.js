@@ -45,6 +45,10 @@ app.get('/howtoid', (req, res) => {
 	res.sendFile(path.join(__dirname, 'howtoid.html'));
 });
 
+app.get('/privacypolicy', (req, res) => {
+	res.sendFile(path.join(__dirname, 'privacypolicy.html'));
+});
+
 app.all('/*', (req, res) => {
 	res.status(404).send(`Not found`);
 });

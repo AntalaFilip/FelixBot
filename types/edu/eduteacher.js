@@ -2,8 +2,8 @@ const { GuildMember } = require("discord.js");
 const EduBase = require("./edubase");
 
 class EduTeacher extends EduBase {
-	constructor({ id, short, gender, bell, color, member }) {
-		super({ id, color });
+	constructor({ id, short, gender, bell, color, member }, mgr) {
+		super({ id, color }, mgr);
 		/** @type {string} */
 		this.short = short;
 		/** @type {"F" | "M" | ""} */
