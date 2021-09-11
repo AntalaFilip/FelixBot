@@ -1,4 +1,5 @@
 const express = require('express');
+const serveIndex = require('serve-index');
 
 const app = express();
 const lessonHandler = require('./lessonhandler');
@@ -33,8 +34,9 @@ app.get('/bot', (req, res) => {
 	res.send(global.client.user);
 });
 
-app.use('/download/secure', authorizer.bind(this, true), express.static('download/secure'));
+app.use('/download/secure', authorizer.bind(this, true));
 
+app.use('/download', serveIndex('download'));
 app.use('/download', express.static('download'));
 
 app.get('/owners', (req, res) => {
