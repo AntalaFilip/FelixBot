@@ -41,7 +41,7 @@ router.get('/callback', async (req, res) => {
 
 	try {
 		const r = await axios.post(`https://discord.com/api/oauth2/token`, params);
-		res.cookie('authToken', r.data.access_token, { domain: '.felixbot.antala.tk', maxAge: r.data.expires_in });
+		res.cookie('authToken', r.data.access_token, { domain: '.felixbot.antala.tk', maxAge: (r.data.expires_in * 1e3) });
 		if (uri) return res.redirect(uri);
 		else return res.send('Success!');
 	}
