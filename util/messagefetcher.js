@@ -58,7 +58,7 @@ async function fetch(fetchFrom) {
 				const urls = m.attachments.map(a => a.url).join('\n');
 				text += ' [ATTACHMENT] ' + urls + ' [END ATTACHMENT]';
 			}
-			if (m.embeds.size) {
+			if (m.embeds.length) {
 				text += ' [EMBED NOT SHOWN]';
 			}
 			return text;
