@@ -23,6 +23,34 @@ router.get('/', (req, res) => {
 		);
 });
 
+router.get('/token', (req, res) => {
+	const redir = req.query['redirect'];
+	const b64 = redir && Buffer.from(encodeURI(redir)).toString('base64');
+	res.redirect(`https://discord.com/api/oauth2/authorize?client_id=702922217155067924&redirect_uri=${process.env.REDIR_URI}&response_type=code&scope=identify%20guilds%20email&prompt=none${b64 ? '&state=' + b64 : ''}`);
+});
+
+router.get('/callback', async (req, res) => {
+	const { code, state } = req.query;
+	const uri = state && Buffer.from(state, 'base64').toString('ascii');
+	const params = new URLSearchParams();
+	params.append('client_id', process.env.APP_ID);
+	params.append('client_secret', process.env.CLIENT_SECRET);
+	params.append('grant_type', 'authorization_code');
+	params.append('code', code);
+	params.append('redirect_uri', encodeURI(process.env.REDIR_URI));
+
+	try {
+		const r = await axios.post(`https://discord.com/api/oauth2/token`, params);
+		res.cookie('authToken', r.data.access_token, { domain: '.felixbot.antala.tk', maxAge: r.data.expires_in });
+		if (uri) return res.redirect(uri);
+		else return res.send('Success!');
+	}
+	catch {
+		if (uri) return res.redirect(uri);
+		else return res.send('Error');
+	}
+});
+
 router.get('/verify/email/:token', async (req, res) => {
 	const token = req.params['token'];
 	if (!token) return res.status(400).send('Missing token!');
@@ -53,7 +81,7 @@ router.get('/verify/email/:token', async (req, res) => {
 
 function authorize(token) {
 	return new Promise((resolve, reject) => {
-		axios.get('https://discord.com/api/users/@me', { headers: { 'Authorization': token } })
+		axios.get('https://discord.com/api/users/@me', { headers: { 'Authorization': `Bearer ${token}` } })
 			.then(response => {
 				if (response.status != 200) return reject({ status: response.status });
 				/**
@@ -66,7 +94,7 @@ function authorize(token) {
 						resolve({
 							user: member.user,
 							member: member,
-							admin: member.hasPermission(`ADMINISTRATOR`) || member.roles.highest.id === `769952519832600607`,
+							admin: member.permissions.has('ADMINISTRATOR') || member.roles.highest.id === `769952519832600607`,
 							isTeacher: global.client.permManager.isTeacher(member),
 							subjects: global.client.permManager.getTeacherSubjects(member),
 							classTeacher: classteacher,
@@ -84,11 +112,19 @@ function authorize(token) {
 	});
 }
 
+/**
+ *
+ * @param {*} reject
+ * @param {import('express').Request} req
+ * @param {*} res
+ * @param {*} next
+ * @returns
+ */
 function reqauth(reject, req, res, next) {
 	const token = req.header(`Authorization`) || req.cookies.authToken;
 	req.authorized = false;
 	if (!token) {
-		if (reject) return res.status(403).send('Forbidden');
+		if (reject) return res.status(403).send(`<p>Forbidden, <a href='/auth/token?redirect=${req.originalUrl}'>login here</a></p>`);
 		return next();
 	}
 	authorize(token)
@@ -98,7 +134,7 @@ function reqauth(reject, req, res, next) {
 			return next();
 		})
 		.catch(err => {
-			if ((err.status || err.response) && reject) return res.status(403).send('Forbidden');
+			if ((err.status || err.response) && reject) return res.status(403).send(`<p>Forbidden, <a href='/auth/token?redirect=${req.originalUrl}'>login here</a></p>`);
 			next();
 		});
 }
