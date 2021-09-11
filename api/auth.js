@@ -26,7 +26,7 @@ router.get('/', (req, res) => {
 router.get('/token', (req, res) => {
 	const redir = req.query['redirect'];
 	const b64 = redir && Buffer.from(encodeURI(redir)).toString('base64');
-	res.redirect(`https://discord.com/api/oauth2/authorize?client_id=702922217155067924&redirect_uri=${process.env.REDIR_URI}&response_type=code&scope=identify%20guilds%20email&prompt=none${b64 ? '&state=' + b64 : ''}`);
+	res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${process.env.APP_ID}&redirect_uri=${process.env.REDIR_URI}&response_type=code&scope=identify%20guilds%20email&prompt=none${b64 ? '&state=' + b64 : ''}`);
 });
 
 router.get('/callback', async (req, res) => {
