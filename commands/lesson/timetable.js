@@ -66,14 +66,14 @@ class TimetableCommand extends Command {
 			),
 		);
 
-		const edu = (target instanceof Role)
-			? EDU.classes.find(c => c.role === target)
-			: (EDU.teachers.find(t => t.member && t.member === target) || EDU.students.find(s => s.member && s.member === target));
-
-		if (!edu) {
+		if (!EDU) {
 			if (target instanceof Role) return await interaction.reply({ ephemeral: true, content: `This role does not have a timetable!` });
 			else return await interaction.reply({ ephemeral: true, content: `This user is not linked to an EduPage user!` });
 		}
+
+		const edu = (target instanceof Role)
+			? EDU.classes.find(c => c.role === target)
+			: (EDU.teachers.find(t => t.member && t.member === target) || EDU.students.find(s => s.member && s.member === target));
 
 		const embed = await this.exec(edu, member);
 
