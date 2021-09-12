@@ -3,6 +3,7 @@ const axios = require('axios').default;
 const { GuildMember } = require('discord.js');
 const { verifyIdentity } = require('../util/verification');
 const { JsonWebTokenError, TokenExpiredError } = require('jsonwebtoken');
+const { removeStartingDot } = require('../util/stringutils');
 
 const router = express.Router();
 
@@ -89,6 +90,7 @@ function authorize(token) {
 				 */
 				const member = global.client.guilds.cache.find(g => g.id == `702836521622962198`).members.resolve(response.data.id);
 				if (!member) return resolve(false);
+				member.cleanName = removeStartingDot(member.displayName);
 				global.client.permManager.isClassTeacher(member)
 					.then(classteacher => {
 						resolve({
