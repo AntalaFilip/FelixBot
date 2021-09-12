@@ -35,11 +35,11 @@ client
 		}
 	})
 	.on(`guildMemberAdd`, async member => {
-		client.logger.debug(`${member.displayName} (${member.id}) has joined the server, awaiting screening pass...`);
+		client.logger.info(`${member.displayName} (${member.id}) has joined the server, awaiting screening pass...`);
 	})
 	.on('guildMemberUpdate', async (oldm, newm) => {
 		if (oldm.pending === true && newm.pending === false) {
-			client.logger.debug(`${newm.displayName} (${newm.id}) passed membership screening.`);
+			client.logger.info(`${newm.displayName} (${newm.id}) passed membership screening.`);
 			const DB = client.databaseManager;
 			const dbm = await DB.getMember(newm.id) || await DB.getTeacher(newm.id);
 			// When a new member joins, execute the SendWelcomeCommand
