@@ -68,6 +68,12 @@ Ak je niečo nesprávne, napíš prosím naším administrátorom.`);
 				client.logger.debug(`Automatically set user properties for ${newm.id}`);
 			}
 		}
+		if (oldm.displayName != newm.displayName) {
+			const user = client.databaseManager.getMember(null, newm.id);
+			if (user) {
+				client.databaseManager.updateMember(newm.id, { name: newm.displayName });
+			}
+		}
 	})
 	.on(`interactionCreate`, async interaction => {
 		await client.interactionManager.handleIncomingInteraction(interaction);
