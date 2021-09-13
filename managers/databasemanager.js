@@ -206,7 +206,7 @@ class DatabaseManager {
 			.where('l.endedat', null);
 
 		const res = await query;
-		if (res.length === 0) return null;
+		if (res.length === 0) return [];
 
 		const data = this.parseDatabaseResult(res);
 		const lessons = data.map(val => (
@@ -224,7 +224,7 @@ class DatabaseManager {
 			.from('lessons AS l');
 
 		const res = await query;
-		if (res.length === 0) return null;
+		if (res.length === 0) return [];
 
 		const data = this.parseDatabaseResult(res);
 		/** @type {Lesson[]} */
@@ -264,7 +264,7 @@ class DatabaseManager {
 			.where({ id });
 
 		const res = await query;
-		if (res.length === 0) return null;
+		if (res.length === 0) return [];
 
 		const data = this.parseDatabaseResult(res[0]);
 		const ls = new Lesson(data.id, data.allocated, guild.members.cache.find(t => t.id == data.teacher), data.lesson, data.classname.slice(0, 2), data.group, data.period, data.students, new Date(data.startedat), new Date(data.endedat));
