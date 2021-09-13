@@ -10,6 +10,7 @@ const Lesson = require('../types/lesson/lesson');
 const Logger = require('../util/logger');
 const Parsers = require('../util/parsers');
 const str = require('../util/stringutils');
+const config = require('../config.json');
 require('dotenv').config();
 
 class DatabaseManager {
@@ -204,6 +205,8 @@ class DatabaseManager {
 			.where('l.endedat', null);
 
 		const res = await query;
+		if (res.length === 0) return null;
+
 		const data = this.parseDatabaseResult(res);
 		const lessons = data.map(val => (
 			new Lesson(val.id, val.allocated, guild.members.cache.find(t => t.id == val.teacher), val.lesson, val.classname.slice(0, 2), val.group, val.period, val.students, val.startedat, null)
@@ -220,6 +223,8 @@ class DatabaseManager {
 			.from('lessons AS l');
 
 		const res = await query;
+		if (res.length === 0) return null;
+
 		const data = this.parseDatabaseResult(res);
 		/** @type {Lesson[]} */
 		const lessons = data.map(val => {
@@ -249,7 +254,7 @@ class DatabaseManager {
 	 * @param {Guild} guild
 	 * @param {number} id
 	 */
-	async getLesson(guild = this.client.guilds.cache.find(g => g.id == `702836521622962198`), id) {
+	async getLesson(guild = this.client.guilds.resolve(config.guild), id) {
 		const query = this.knex
 			.select(
 				'*',
@@ -258,6 +263,8 @@ class DatabaseManager {
 			.where({ id });
 
 		const res = await query;
+		if (res.length === 0) return null;
+
 		const data = this.parseDatabaseResult(res[0]);
 		const ls = new Lesson(data.id, data.allocated, guild.members.cache.find(t => t.id == data.teacher), data.lesson, data.classname.slice(0, 2), data.group, data.period, data.students, new Date(data.startedat), new Date(data.endedat));
 		return ls;
@@ -275,6 +282,8 @@ class DatabaseManager {
 			.from('teachers AS t');
 
 		const res = await query;
+		if (res.length === 0) return null;
+
 		const data = this.parseDatabaseResult(res);
 		const users = data.map(u => ({
 			member: guild.members.resolve(String(u.dsid)),
