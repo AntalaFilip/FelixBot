@@ -370,6 +370,15 @@ class IdentifyCommand extends Command {
 		const DB = this.client.databaseManager;
 		let n, r, db, m, tv;
 
+		if (name) {
+			try {
+				n = await member.setNickname(name, 'Automatic identification process');
+			}
+			catch {
+				n = false;
+			}
+		}
+
 		if (eusr instanceof EduStudent) {
 			if (!vrf) vrf = 'PENDING';
 			db = await DB.insertMember({
@@ -398,14 +407,6 @@ class IdentifyCommand extends Command {
 			});
 		}
 
-		if (name) {
-			try {
-				n = await member.setNickname(name, 'Automatic identification process');
-			}
-			catch {
-				n = false;
-			}
-		}
 		if (role && (vrf != 'VERIFY_EMAIL' && vrf != 'VERIFY_TEACHER')) {
 			try {
 				const toAdd = [role];

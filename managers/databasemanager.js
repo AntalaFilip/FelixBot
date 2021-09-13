@@ -152,6 +152,7 @@ class DatabaseManager {
 	 * @param {GuildMember} [data.member]
 	 * @param {EduStudent} [data.eusr]
 	 * @param {Role} [data.role]
+	 * @param {string} [data.name]
 	 * @param {import('../util/parsers').VerificationLevel} [data.verification]
 	 * @returns
 	 */

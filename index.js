@@ -35,11 +35,11 @@ client
 		}
 	})
 	.on(`guildMemberAdd`, async member => {
-		client.logger.debug(`${member.displayName} (${member.id}) has joined the server, awaiting screening pass...`);
+		client.logger.info(`${member.displayName} (${member.id}) has joined the server, awaiting screening pass...`);
 	})
 	.on('guildMemberUpdate', async (oldm, newm) => {
 		if (oldm.pending === true && newm.pending === false) {
-			client.logger.debug(`${newm.displayName} (${newm.id}) passed membership screening.`);
+			client.logger.info(`${newm.displayName} (${newm.id}) passed membership screening.`);
 			const DB = client.databaseManager;
 			const dbm = await DB.getMember(newm.id) || await DB.getTeacher(newm.id);
 			// When a new member joins, execute the SendWelcomeCommand
@@ -66,6 +66,12 @@ Keďže už si raz bol/a členom, automaticky som ti nastavil údaje.
 Ak je niečo nesprávne, napíš prosím naším administrátorom.`);
 				client.logger.verbose(`Sent message, props set!`);
 				client.logger.debug(`Automatically set user properties for ${newm.id}`);
+			}
+		}
+		if (oldm.displayName != newm.displayName) {
+			const user = client.databaseManager.getMember(null, newm.id);
+			if (user) {
+				client.databaseManager.updateMember(newm.id, { name: newm.displayName });
 			}
 		}
 	})
