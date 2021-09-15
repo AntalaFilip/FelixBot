@@ -34,6 +34,13 @@ client
 			}
 		}
 	})
+	.on(`message`, async (message) => {
+		if (message.content.startsWith('!')) {
+			const reply = await message.reply(`! commands are no longer supported. Please use slash (/) commands instead`);
+			await message.delete();
+			setTimeout(async () => reply.delete(), 10e3);
+		}
+	})
 	.on(`guildMemberAdd`, async member => {
 		client.logger.info(`${member.displayName} (${member.id}) has joined the server, awaiting screening pass...`);
 	})
