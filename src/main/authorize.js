@@ -10,16 +10,19 @@ import { Context } from '../context';
  */
 function Authorize(props) {
 	const { rootState: state } = useContext(Context);
+	console.log(state);
 	
 	const hasPerm = 
-		props.perms
-			? props.perms === 'teacher'
-				? (state.authdata.isTeacher || state.authdata.admin)
-				: props.perms === 'admin'
-					? state.authdata.admin
-					: true
-			: true;
-		;
+		state.authenticated
+		?
+			props.perms
+				? props.perms === 'teacher'
+					? (state.authdata.isTeacher || state.authdata.admin)
+					: props.perms === 'admin'
+						? state.authdata.admin
+						: true
+				: true
+		: false;
 
 	return (
 		<>
