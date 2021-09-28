@@ -34,8 +34,8 @@ client
 			}
 		}
 	})
-	.on(`message`, async (message) => {
-		if (message.content.startsWith('!')) {
+	.on(`messageCreate`, async (message) => {
+		if (message.content.startsWith('!') && !message.author.bot) {
 			const reply = await message.reply(`! commands are no longer supported. Please use slash (/) commands instead`);
 			await message.delete();
 			setTimeout(async () => reply.delete(), 10e3);
@@ -92,8 +92,8 @@ process.on('SIGINT', () => {
 	client.logger.log('Shutting down...');
 	if (client.server) {
 		client.server.close(() => {
-			process.exit(1);
+			process.exit(0);
 		});
 	}
-	else process.exit(1);
+	else process.exit(0);
 });
