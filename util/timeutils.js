@@ -96,9 +96,8 @@ const TimeUtils = {
 
 		const year = date.getFullYear();
 		const month = date.getMonth() + 1;
-		let y1 = year;
-		if (month < 9) y1--;
-		const y2 = y1++;
+		const y1 = year - (month < 9 ? 1 : 0);
+		const y2 = y1 + 1;
 
 		return {
 			y1,
