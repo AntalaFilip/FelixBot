@@ -41,8 +41,7 @@ class AuditManager {
 			delete newaudit.data.to;
 			delete newaudit.data.from;
 			newaudit.data.to = audit.data.to.id;
-			newaudit.data.from = [];
-			audit.data.from.forEach(ch => newaudit.data.from.push(ch.id));
+			newaudit.data.from = audit.data.from.map(ch => ch.id);
 			json = JSON.stringify(newaudit.data);
 		}
 		else if (audit instanceof SplitAudit) {
@@ -50,8 +49,7 @@ class AuditManager {
 			delete newaudit.data.to;
 			delete newaudit.data.from;
 			newaudit.data.from = audit.data.from.id;
-			newaudit.data.to = [];
-			audit.data.to.forEach(ch => newaudit.data.to.push(ch.id));
+			newaudit.data.to = audit.data.to.map(ch => ch.id);
 			json = JSON.stringify(newaudit.data);
 		}
 		else {
