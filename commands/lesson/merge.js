@@ -1,8 +1,7 @@
-const { GuildMember, VoiceChannel, TextChannel, MessageEmbed, Collection } = require("discord.js");
+const { GuildMember, VoiceChannel, TextChannel, MessageEmbed, Collection, CommandInteraction, MessageComponentInteraction, MessageActionRow, MessageButton } = require("discord.js");
 const MergeAudit = require("../../types/audit/mergeaudit");
 const SplitAudit = require("../../types/audit/splitaudit");
 const { Command } = require("../../types/command");
-const { CmdMessageResponse, CallbackType, MessageComponent, ButtonStyle } = require("../../util/interactions");
 
 class MergeCommand extends Command {
 	constructor(client) {
@@ -20,93 +19,103 @@ class MergeCommand extends Command {
 
 		this.components = {
 			runFinal: (member, audit) => (
-				MessageComponent.actionRow(
-					MessageComponent.button(
-						ButtonStyle.Secondary, { label: 'Resplit', emoji: { name: '🔀' } }, `merge_resplit/${member.id}/${audit.id}`,
-					),
-					MessageComponent.button(
-						ButtonStyle.Link, { label: 'Learn more about merging', emoji: { name: '📖' } }, null, 'https://felixbot.antala.tk/go/learn-merge',
-					),
-				)
+				new MessageActionRow()
+					.addComponents(
+						new MessageButton({
+							style: 'SECONDARY',
+							label: 'Resplit',
+							emoji: '🔀',
+							customId: `merge_resplit/${member.id}/${audit.id}`,
+							disabled: true,
+						}),
+						new MessageButton({
+							style: 'LINK',
+							label: 'Learn more about merging',
+							emoji: '📖',
+							url: `${process.env.URL}/go/learn-merge`,
+						}),
+					)
 			),
 			runWait: (member, tid) => (
-				MessageComponent.actionRow(
-					MessageComponent.button(
-						ButtonStyle.Destructive, { label: 'CANCEL', emoji: { name: '❌' } }, `merge_cancel/${member.id}/${tid}`,
-					),
-				)
+				new MessageActionRow()
+					.addComponents(
+						new MessageButton({
+							style: 'DANGER',
+							label: 'CANCEL',
+							emoji: '❌',
+							customId: `merge_cancel/${member.id}/${tid}`,
+						}),
+					)
 			),
 			runError: (ts) => (
-				MessageComponent.actionRow(
-					MessageComponent.button(
-						ButtonStyle.Link, { label: 'Report an error', emoji: { name: '💥' } }, null, `https://felixbot.antala.tk/go/report-error?data=timestamp:${ts}`,
-					),
+				new MessageActionRow(
+					new MessageButton({
+						style: 'LINK',
+						label: 'Report an error',
+						emoji: '💥',
+						url: `${process.env.URL}/go/report-error?data=timestamp:${ts}`,
+					}),
 				)
 			),
 		};
 	}
 
 	/**
-	 *
-	 * @param {CommandoMessage} message
-	 * @param {{time: number}} args
+	 * @param {CommandInteraction} interaction
 	 */
 	async run(interaction) {
-		const guild = this.client.guilds.resolve(interaction.guild_id);
-		const member = guild.members.resolve(interaction.member.user.id);
+		const guild = interaction.guild;
+		/** @type {GuildMember} */
+		const member = interaction.member;
+		const LMGR = this.client.lessonManager;
 
-		const args = interaction.data.options || [];
-		const time = (args[0] && Number(args[0].value)) || 10;
-		if (time > 600) return CmdMessageResponse(`The maximum timeout is 10 minutes (600s)!`, true);
+		const args = interaction.options;
+		const targ = args.getInteger('timeout');
+		const time = targ ?? 10;
+		if (time > 600) return await interaction.reply({ ephemeral: true, content: `The maximum timeout is 10 minutes (600s)!` });
 
 		const to = member.voice.channel;
-		if (!to) return CmdMessageResponse(`You have to be in a voice channel`, true);
+		if (!to) return await interaction.reply({ ephemeral: true, content: `You have to be in a voice channel` });
 
-		let lesson = this.client.lessonManager.isTeachingLesson(member);
-		if (!lesson) lesson = this.client.lessonManager.isInLesson(member);
+		const lesson = LMGR.isTeachingLesson(member) || LMGR.isInLesson(member);
 
 		let from = to.parent.children.filter(ch => ch.type == `GUILD_VOICE` && ch.id != to.id);
 		if (lesson) from = lesson.allocated;
 
-		if (from.size == 0) return CmdMessageResponse(`I didn't find any channels to merge from!`, true);
+		if (from.size === 0) return interaction.reply({ ephemeral: true, content: `I didn't find any channels to merge from!` });
 
 		const timeout = setTimeout(async () => {
 			try {
 				const data = await this.exec(member, to, from.array());
-				const edit = {
-					"content": null,
-					"embeds": [
-						data[1].toJSON(),
+				await interaction.editReply({
+					content: null,
+					embeds: [
+						data[1],
 					],
-					"components": [
+					components: [
 						this.components.runFinal(member, data[2]),
 					],
-				};
-				await this.client.interactionManager.editOriginal(interaction.token, edit);
+				});
 			}
 			catch (err) {
-				this.client.logger.error(err);
+				this.client.interactionManager.logger.error(err);
 				const ts = Date.now();
-				const edit = {
-					"content": `An error occurred while running this command at \`${ts}\``,
-					"components": [
+				await interaction.editReply({
+					content: `An error occurred while running this command.`,
+					embeds: [],
+					components: [
 						this.components.runError(ts),
 					],
-				};
-				await this.client.interactionManager.editOriginal(interaction.token, edit);
+				});
 			}
-		}, time * 1000);
+		}, time * 1e3);
 		const tid = timeout[Symbol.toPrimitive]();
-		const res = {
-			"type": CallbackType.CHANNEL_MESSAGE,
-			"data": {
-				"content": `Merging ${from.size} channels into ${to.name} in ${time} seconds`,
-				"components": [
-					this.components.runWait(member, tid),
-				],
-			},
-		};
-		return res;
+		return await interaction.reply({
+			content: `Merging ${from.size} channels into ${to.name} in ${time} seconds`,
+			components: [
+				this.components.runWait(member, tid),
+			],
+		});
 	}
 
 	/**
@@ -148,8 +157,11 @@ class MergeCommand extends Command {
 		return [list, embed, audit];
 	}
 
-	async component(rawid, interaction) {
-		const split = rawid.split('/');
+	/**
+	 * @param {MessageComponentInteraction} interaction
+	 */
+	async component(interaction) {
+		const split = interaction.customId.split('/');
 		const id = split[0];
 		const args = split.slice(1);
 
@@ -157,20 +169,17 @@ class MergeCommand extends Command {
 			const member_id = args[0];
 			const timeout = args[1];
 
-			if (member_id != interaction.member.user.id) {
-				return CmdMessageResponse(`Only the initiating member can cancel the merge!`, true);
+			if (member_id != interaction.member.id) {
+				return await interaction.reply({ ephemeral: true, content: `Only the initiating member can cancel the merge!` });
 			}
 
 			clearTimeout(timeout);
 
-			const res = {
-				"type": CallbackType.UPDATE_MESSAGE,
-				"data": {
-					"content": `This merge was cancelled`,
-					"components": [],
-				},
-			};
-			return res;
+			return await interaction.update({
+				content: `This merge was cancelled by ${interaction.member.displayName}`,
+				components: [],
+				embeds: [],
+			});
 		}
 		else if (id === `merge_resplit`) {
 			const SplitCommand = require("./split");
@@ -178,7 +187,7 @@ class MergeCommand extends Command {
 			const audit_id = Number(args[1]);
 
 			if (member_id != interaction.member.user.id) {
-				return CmdMessageResponse(`Only the initiating member can resplit`, true);
+				return await interaction.reply({ ephemeral: true, content: `Only the initiating member can resplit` });
 			}
 
 			const guild = this.client.guilds.resolve(interaction.guild_id);
@@ -187,35 +196,29 @@ class MergeCommand extends Command {
 			const audit = this.client.auditManager.audits.find(a => a.id == audit_id);
 			if (!audit) {
 				this.client.logger.error(new Error(`Cannot find audit ${audit_id} @ ${id}`), interaction);
-				return CmdMessageResponse(`Something went wrong, sorry!`, true);
+				return await interaction.reply({ ephemeral: true, content: `Something went wrong, sorry!` });
 			}
 
-			const arr = [...audit.data.list.values()];
-			let array = [];
-			arr.forEach(a => array = array.concat(a));
+			const arr = [...audit.data.list.values()].flat();
 			const Split = new SplitCommand(this.client);
-			const [_, embed, audt] = await Split.exec(member, audit.data.to, audit.data.from, array);
+			const [_, embed, audt] = await Split.exec(member, audit.data.to, audit.data.from, arr);
 
-			const res = {
-				"type": CallbackType.CHANNEL_MESSAGE,
-				"data": {
-					"content": "Resplit successfully",
-					"embeds": [
-						embed.toJSON(),
-					],
-					"components": [
-						Split.components.runRes(member, audt),
-					],
-				},
-			};
-			return res;
+			return await interaction.reply({
+				content: `Resplit succesfully`,
+				embeds: [
+					embed,
+				],
+				components: [
+					Split.components.runRes(member, audt),
+				],
+			});
 		}
 		else if (id === `merge_run`) {
 			const member_id = args[0];
 			const audit_id = Number(args[1]);
 
 			if (member_id != interaction.member.user.id) {
-				return CmdMessageResponse(`Only the initiating member can remerge`, true);
+				return await interaction.reply({ ephemeral: true, content: `Only the initiating member can remerge` });
 			}
 
 			const guild = this.client.guilds.resolve(interaction.guild_id);
@@ -224,22 +227,18 @@ class MergeCommand extends Command {
 			const audit = this.client.auditManager.audits.find(a => a.id == audit_id);
 			if (!audit) {
 				this.client.logger.error(new Error(`Cannot find audit ${audit_id} @ ${id}`), interaction);
-				return CmdMessageResponse(`Something went wrong, sorry!`, true);
+				return await interaction.reply({ ephemeral: true, content: `Something went wrong, sorry!` });
 			}
 
 			const [_, embed, audt] = await this.exec(member, audit.data.from, audit.data.to);
-			const res = {
-				"type": CallbackType.CHANNEL_MESSAGE,
-				"data": {
-					"embeds": [
-						embed.toJSON(),
-					],
-					"components": [
-						this.components.runFinal(member, audt),
-					],
-				},
-			};
-			return res;
+			return await interaction.reply({
+				embeds: [
+					embed,
+				],
+				components: [
+					this.components.runFinal(member, audt),
+				],
+			});
 		}
 	}
 }
