@@ -48,14 +48,15 @@ class MergeCommand extends Command {
 					)
 			),
 			runError: (ts) => (
-				new MessageActionRow(
-					new MessageButton({
-						style: 'LINK',
-						label: 'Report an error',
-						emoji: '💥',
-						url: `${process.env.URL}/go/report-error?data=timestamp:${ts}`,
-					}),
-				)
+				new MessageActionRow()
+					.addComponents(
+						new MessageButton({
+							style: 'LINK',
+							label: 'Report an error',
+							emoji: '💥',
+							url: `${process.env.URL}/go/report-error?data=timestamp:${ts}`,
+						}),
+					)
 			),
 		};
 	}
@@ -125,6 +126,7 @@ class MergeCommand extends Command {
 	 * @param {VoiceChannel[]} from
 	 */
 	async exec(initiator, to, from) {
+		/** @type {Collection<import("discord.js").Snowflake, string[]} */
 		const list = new Collection();
 		let i = 0;
 		for (const chan of from) {
@@ -151,7 +153,7 @@ class MergeCommand extends Command {
 			.setFooter(`Moving users is limited to 10 users per 10 seconds, thus in larger groups you will experience longer merge times.`)
 			.setTimestamp();
 		list.forEach((val, key) => {
-			embed.addField(to.guild.channels.resolve(key).name, val, true);
+			embed.addField(to.guild.channels.resolve(key).name, val.join('\n'), true);
 		});
 		const audit = await this.client.auditManager.newAudit(new MergeAudit(initiator, to, from, list));
 		return [list, embed, audit];
