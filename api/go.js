@@ -10,7 +10,12 @@ router.get('/:id', (req, res) => {
 
 	if (!redirect) return res.status(404).send();
 
-	res.redirect(redirect.to);
+	let link = redirect.to;
+	if (req.query) {
+		link += '?' + Object.entries(req.query).map(a => `${a[0]}=${a[1]}`).join('&');
+	}
+
+	res.redirect(link);
 });
 
 module.exports = router;
