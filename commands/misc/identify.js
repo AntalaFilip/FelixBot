@@ -422,9 +422,14 @@ class IdentifyCommand extends Command {
 		}
 
 		if (vrf === 'VERIFY_EMAIL') {
-			const sent = await sendEmailVerification(email, member.displayName, { userid: member.id, roleid: role.id });
-			if (sent.accepted.length > 0) m = true;
-			else m = false;
+			try {
+				const sent = await sendEmailVerification(email, member.displayName, { userid: member.id, roleid: role.id });
+				if (sent.accepted.length > 0) m = true;
+				else m = false;
+			}
+			catch {
+				m = false;
+			}
 		}
 		else if (vrf === 'VERIFY_TEACHER') {
 			role = member.guild.roles.resolve(role);
