@@ -18,6 +18,7 @@ import App from './app/app';
 import Authorize from './main/authorize';
 import { useContext } from 'react';
 import { Backdrop, CircularProgress } from '@material-ui/core';
+import Discord from './main/discord';
 
 ReactDOM.render(
 	<React.StrictMode>
@@ -56,6 +57,7 @@ function Root() {
 					<ChangePage page={2} />
 				</Route>
 				<Route path='/discord'>
+					<Discord />
 					<ChangePage page={3} />
 				</Route>
 			</Switch>
