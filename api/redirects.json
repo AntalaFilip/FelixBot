@@ -14,5 +14,9 @@
 	{
 		"from": "privacy-policy",
 		"to": "/privacypolicy"
+	},
+	{
+		"from": "tutorial",
+		"to": "/download/tutorial.pdf"
 	}
 ]
