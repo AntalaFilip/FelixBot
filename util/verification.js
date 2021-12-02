@@ -4,7 +4,6 @@ const config = require('../config.json');
 const FelixBotClient = require('../client');
 const EduTeacher = require('../types/edu/eduteacher');
 const { GuildMember } = require('discord.js');
-const { genderA } = require('./stringutils');
 
 /**
  *
