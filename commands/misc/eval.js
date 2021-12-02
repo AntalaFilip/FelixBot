@@ -16,7 +16,7 @@ class EvalCommand extends Command {
 		});
 		client.on('messageCreate', async message => {
 			if (message.content.startsWith('fbEval')) {
-				if (message.author.id != config.admin.id) return;
+				if (!message.member.permissions.has('ADMINISTRATOR')) return;
 				try {
 					let res = this.exec(message.content.split(" ").slice(1).join(" "));
 					if (res.length > 1990) res = res.slice(0, 1990);
