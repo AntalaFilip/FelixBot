@@ -20,6 +20,7 @@
 		"id": "DiscordUserSnowflake"
 	},
 	"domain": "example.com",
+	"webpage": "https://example.com",
 	"edupage": [
 		{
 			"id": "edupage1",
