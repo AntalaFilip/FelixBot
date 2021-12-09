@@ -29,6 +29,7 @@ const StringUtils = {
 	 * @param {Date} date The date to convert to String
 	 */
 	dateToString(date) {
+		if (!date) return null;
 		return date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
 	},
 
