@@ -9,8 +9,8 @@ const TimeUtils = {
 		const eduTime = this.timeToEduString({ date });
 		const eduNumTime = this.timeStringToTime(eduTime);
 		const period = periods.find(p => {
-			const start = this.timeStringToTime(p.starttime) < eduNumTime;
-			const end = this.timeStringToTime(p.endtime) > eduNumTime;
+			const start = this.timeStringToTime(p.starttime) <= eduNumTime;
+			const end = this.timeStringToTime(p.endtime) >= eduNumTime;
 			return start && end;
 		});
 
@@ -82,7 +82,7 @@ const TimeUtils = {
 		const currtimenum = this.timeStringToTime(currtimeedu);
 		const endtimenum = this.timeStringToTime(card.period.endtime);
 
-		if (currtimenum > endtimenum) return true;
+		if (currtimenum >= endtimenum) return true;
 
 		return false;
 	},
