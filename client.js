@@ -39,6 +39,7 @@ class FelixBotClient extends Client {
 		});
 	}
 
+	// TODO: getters
 	isDev() {
 		return process.env.NODE_ENV === 'DEVELOPMENT';
 	}
