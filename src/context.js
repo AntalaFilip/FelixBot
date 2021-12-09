@@ -7,7 +7,7 @@ export const Context = React.createContext();
 
 // Define the base URL
 export const api = axios.create({
-	baseURL: 'https://api.felixbot.antala.tk',
+	baseURL: 'https://api.felixbot.ahst.sk',
 });
 
 class ContextProvider extends React.Component {
@@ -24,7 +24,7 @@ class ContextProvider extends React.Component {
 			authpanel: false,
 			theme: 'dark',
 			lang: 'sk',
-			domain: 'felixbot.antala.tk',
+			domain: 'felixbot.ahst.sk',
 			page: 0,
 		}
 		this.setPage = this.setPage.bind(this);
