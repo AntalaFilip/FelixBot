@@ -10,7 +10,7 @@ class Logger {
 	}
 
 	get logHeader() {
-		return `FELIX [${new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')}] [${this.instance || 'SYSTEM'}]`;
+		return `FELIX [${new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '') + new Date().getMilliseconds()}] [${this.instance || 'SYSTEM'}]`;
 	}
 
 	log(...additional) {
@@ -54,7 +54,7 @@ class Logger {
 	}
 
 	formatMessage(msg, level) {
-		let format = `FELIX [${new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')}] [${this.instance || 'SYSTEM'}] [${level.toUpperCase()}]: ${msg}`;
+		let format = `FELIX [${new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '') + '.' + new Date().getMilliseconds()}] [${this.instance || 'SYSTEM'}] [${level.toUpperCase()}]: ${msg}`;
 		switch(level) {
 			case 'info':
 				format = chalk.blueBright(format);
