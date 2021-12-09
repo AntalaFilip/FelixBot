@@ -29,7 +29,7 @@ class HelpCommand extends Command {
 				},
 				{
 					name: 'Môj problém tu nie je',
-					value: 'Určite napíš našim administrátorom (Filip A, Mati H) na Discord, alebo pošli mail na filip@felixmuzikal.sk',
+					value: 'Určite napíš našim administrátorom (Filip A, Mati H) na Discord, alebo pošli mail na support@felixbot.ahst.sk',
 				},
 			]);
 		interaction.reply({
