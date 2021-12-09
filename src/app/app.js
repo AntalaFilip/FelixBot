@@ -1,4 +1,4 @@
-import { Card, CardActions, CardContent, CircularProgress, Typography, Button, Grid, makeStyles, Backdrop } from '@material-ui/core';
+import { Card, CardActions, CardContent, Typography, Button, Grid, makeStyles } from '@material-ui/core';
 import React, { useContext } from 'react';
 import {
 	Route,
