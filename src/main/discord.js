@@ -20,7 +20,7 @@ function Discord() {
 			</div>
 			<div>
 				<Typography variant="h6">
-					Obsiahlejší tutoriál (ako sa prihásiť a aj ako používať Discord) <Link href="https://api.felixbot.antala.tk/go/tutorial">nájdete tu</Link>.
+					Obsiahlejší tutoriál (ako sa prihásiť a aj ako používať Discord) <Link href="https://api.felixbot.ahst.sk/go/tutorial">nájdete tu</Link>.
 				</Typography>
 			</div>
 			<br/>
