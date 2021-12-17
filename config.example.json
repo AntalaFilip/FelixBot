@@ -19,8 +19,9 @@
 		"email": "john@example.com",
 		"id": "DiscordUserSnowflake"
 	},
-	"domain": "example.com",
+	"domain": "school.com",
 	"webpage": "https://example.com",
+	"rootDomain": "example.com",
 	"edupage": [
 		{
 			"id": "edupage1",
