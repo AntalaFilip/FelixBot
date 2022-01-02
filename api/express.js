@@ -34,6 +34,15 @@ app.get('/bot', (req, res) => {
 	res.send(global.client.user);
 });
 
+app.get('/health', (req, res) => {
+	if (global.client.isLoaded) {
+		res.status(200).send();
+	}
+	else {
+		res.status(500).send();
+	}
+});
+
 app.use('/download/secure', authorizer.bind(this, true));
 
 app.use('/download', serveIndex('download'));

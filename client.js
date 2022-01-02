@@ -37,6 +37,7 @@ class FelixBotClient extends Client {
 			this.server = http.createServer(require('./api/express')).listen(process.env.PORT, () => this.logger.log(`HTTP Server ready on ${process.env.PORT}!`));
 			this.user.setActivity(config.presenceStatus);
 		});
+		this.once('loaded', () => this.isLoaded = true);
 	}
 
 	isDev() {
