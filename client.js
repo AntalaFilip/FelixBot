@@ -40,6 +40,7 @@ class FelixBotClient extends Client {
 		this.once('loaded', () => this.isLoaded = true);
 	}
 
+	// TODO: getters
 	isDev() {
 		return process.env.NODE_ENV === 'DEVELOPMENT';
 	}

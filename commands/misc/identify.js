@@ -472,7 +472,7 @@ class IdentifyCommand extends Command {
 			if (m === false) msg += 'poslať ti verifikačný mail (dosť zlé, zadal/a si funkčný mail?)\n';
 			if (tv === false) msg += 'odoslať žiadosť o potvrdenie identity (veľmi zlé)\n';
 			if (db === false) msg += 'uložiť ťa do databázy (super zlé)\n';
-			msg += 'prosím, skús to ešte raz a ak problém pretrváva kontaktuj našich administrátorov';
+			msg += 'prosím, skús to ešte raz a ak problém pretrváva kontaktuj našich administrátorov (support@felixbot.ahst.sk)';
 		}
 
 		return { n, r, db, m, tv, msg };

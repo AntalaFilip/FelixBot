@@ -50,6 +50,7 @@ class Parsers {
 			const EDU = client.edupageManager[m.manager];
 			const id = m.dsid;
 			const member = guild.members.resolve(id);
+			if (!member) global.client.logger.error("Member from DB can't be parsed in Discord!", m.dsid);
 			const student = member.roles.cache.find(r => config.classRoles.find(rr => r.id == rr.value));
 			const eusr = (student && m.eduid) ? EDU.students.find(s => s.id == String(m.eduid)) : null;
 			const role = guild.roles.resolve(m.role);

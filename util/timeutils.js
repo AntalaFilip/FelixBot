@@ -1,9 +1,6 @@
 const EduCard = require("../types/edu/educard");
 
 const TimeUtils = {
-	/**
-	 * @returns {number | null} returns a number representing a period
-	 */
 	getCurrentPeriod() {
 		const date = new Date();
 		/** @type {import("../managers/edupagemanager")[]} */
@@ -12,18 +9,20 @@ const TimeUtils = {
 		const eduTime = this.timeToEduString({ date });
 		const eduNumTime = this.timeStringToTime(eduTime);
 		const period = periods.find(p => {
-			const start = this.timeStringToTime(p.starttime) < eduNumTime;
-			const end = this.timeStringToTime(p.endtime) > eduNumTime;
+			const start = this.timeStringToTime(p.starttime) <= eduNumTime;
+			const end = this.timeStringToTime(p.endtime) >= eduNumTime;
 			return start && end;
 		});
 
 		if (!period) return null;
 
+		return period;
 
-		if (date.getUTCHours() < 7 || date.getUTCHours() > 13) return null;
+
+		/* if (date.getUTCHours() < 7 || date.getUTCHours() > 13) return null;
 		if (date.getUTCMinutes() > 45) return null;
 
-		return date.getUTCHours() - 6;
+		return date.getUTCHours() - 6; */
 	},
 
 	/**
@@ -83,7 +82,7 @@ const TimeUtils = {
 		const currtimenum = this.timeStringToTime(currtimeedu);
 		const endtimenum = this.timeStringToTime(card.period.endtime);
 
-		if (currtimenum > endtimenum) return true;
+		if (currtimenum >= endtimenum) return true;
 
 		return false;
 	},

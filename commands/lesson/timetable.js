@@ -109,7 +109,7 @@ class TimetableCommand extends Command {
 		const embed = new MessageEmbed()
 			.setColor(`FUCHSIA`)
 			.setTitle(`Timetable for ${name}`)
-			.setURL(`https://felix.edupage.org/timetable/`)
+			.setURL(`https://${EDU.edupage}.edupage.org/timetable/`)
 			.setAuthor(this.client.user.username, this.client.user.avatarURL())
 			.setDescription(`${mtext || name}'s timetable, requested by <@${member.id}>`)
 			.setThumbnail(`https://cdn.discordapp.com/attachments/371283762853445643/768906541277380628/Felix-logo-01.png`)
