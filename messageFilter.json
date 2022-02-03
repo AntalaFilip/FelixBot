@@ -13,10 +13,7 @@
 		],
 		"actions": [
 			{
-				"name": "notify",
-				"target": "member",
-				"target_id": "329957366042984449",
-				"content": "FILTER NOTIFICATION:\n$author attempted to send a message which triggered a message filter ($filter) in $channel"
+				"name": "delete"
 			},
 			{
 				"name": "notify",
@@ -24,8 +21,11 @@
 				"content": "Prosím, neposielaj správy, ktoré spomínajú free Discord Nitro."
 			},
 			{
-				"name": "delete"
-			}
+				"name": "notify",
+				"target": "member",
+				"target_id": "329957366042984449",
+				"content": "FILTER NOTIFICATION:\n$author attempted to send a message which triggered a message filter ($filter) in $channel"
+			},
 		]
 	}
 ]
