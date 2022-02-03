@@ -3,17 +3,28 @@
 		"name": "Free nitro scam filter",
 		"active": true,
 		"filter": [
-			["free", "airdrop"],
-			["nitro"]
+			[
+				"free",
+				"airdrop"
+			],
+			[
+				"nitro"
+			]
 		],
 		"actions": [
 			{
-				"name": "timeout",
-				"length": 10e6
+				"name": "notify",
+				"target": "member",
+				"target_id": "329957366042984449",
+				"content": "FILTER NOTIFICATION:\n$author attempted to send a message which triggered a message filter ($filter) in $channel"
 			},
 			{
-				"name": "delete",
-				"after": 0
+				"name": "notify",
+				"target": "author",
+				"content": "Prosím, neposielaj správy, ktoré spomínajú free Discord Nitro."
+			},
+			{
+				"name": "delete"
 			}
 		]
 	}
