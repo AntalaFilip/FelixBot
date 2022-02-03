@@ -7,6 +7,7 @@ const FelixBotClient = require('./client');
 const EduStudent = require('./types/edu/edustudent');
 const EduTeacher = require('./types/edu/eduteacher');
 const config = require('./config.json');
+const { messageFilter } = require('./util/messagefilter');
 require('dotenv').config();
 
 const intents = new Intents().add('DIRECT_MESSAGES', 'DIRECT_MESSAGE_REACTIONS', 'DIRECT_MESSAGE_TYPING', 'GUILDS', 'GUILD_BANS', 'GUILD_INTEGRATIONS', 'GUILD_INVITES', 'GUILD_MEMBERS', 'GUILD_MESSAGES', 'GUILD_MESSAGE_REACTIONS', 'GUILD_MESSAGE_TYPING', 'GUILD_PRESENCES', 'GUILD_VOICE_STATES', 'GUILD_WEBHOOKS');
@@ -43,6 +44,10 @@ client
 					const reply = await message.reply(`! commands are no longer supported. Please use slash (/) commands instead`);
 					await message.delete();
 					setTimeout(async () => reply.delete(), 10e3);
+				}
+
+				if (!message.author.bot) {
+					await messageFilter.checkMessageContent(message, true);
 				}
 			})
 			.on(`guildMemberAdd`, async member => {
