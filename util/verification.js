@@ -33,7 +33,7 @@ async function sendEmailVerification(email, name, data) {
 		<h4>If this wasn't you:</h4>
 		<p>Please, contact the administrator of the FELIX Discord here: ${config.admin.email}</p>
 		</div>
-		<p><small>This email was sent automatically on behalf of ${config.admin.name} &bull; <a href="https://api.felixbot.antala.tk/go/privacy-policy">Privacy policy</a></small></p>
+		<p><small>This email was sent automatically on behalf of ${config.admin.name} &bull; <a href="https://api.felixbot.ahst.sk/go/privacy-policy">Privacy policy</a></small></p>
 		`,
 	});
 
