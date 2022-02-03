@@ -25,7 +25,7 @@
 				"target": "member",
 				"target_id": "329957366042984449",
 				"content": "FILTER NOTIFICATION:\n$author attempted to send a message which triggered a message filter ($filter) in $channel"
-			},
+			}
 		]
 	}
 ]
