@@ -1,0 +1,20 @@
+[
+	{
+		"name": "Free nitro scam filter",
+		"active": true,
+		"filter": [
+			["free", "airdrop"],
+			["nitro"]
+		],
+		"actions": [
+			{
+				"name": "timeout",
+				"length": 10e6
+			},
+			{
+				"name": "delete",
+				"after": 0
+			}
+		]
+	}
+]
