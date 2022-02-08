@@ -33,7 +33,7 @@ class SplitCommand extends Command {
 						ButtonStyle.Primary, { label: 'Merge back', emoji: { name: '↩' } }, `merge_run/${member.id}/${audit.id}`,
 					),
 					MessageComponent.button(
-						ButtonStyle.Link, { label: 'Learn more about splitting', emoji: { name: '📖' } }, null, `https://felibot.antala.tk/go/learn-split`,
+						ButtonStyle.Link, { label: 'Learn more about splitting', emoji: { name: '📖' } }, null, `${process.env.URL}/go/learn-split`,
 					),
 				)
 			),

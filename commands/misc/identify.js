@@ -199,7 +199,7 @@ class IdentifyCommand extends Command {
 		const user = interaction.user;
 		const member = interaction.member ?? await guild.members.fetch(user);
 		const opts = interaction.options;
-		const subcmd = opts.getSubCommand();
+		const subcmd = opts.getSubcommand();
 
 		if (!member) return await interaction.reply({ ephemeral: true, content: `Nie si členom tohto Discord serveru!` });
 		if (member.pending) return await interaction.reply({ ephemeral: true, content: `Najprv, prosím dokonči membership screening vo FELIX serveri.` });
