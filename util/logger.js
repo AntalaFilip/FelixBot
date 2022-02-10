@@ -1,4 +1,6 @@
 const chalk = require("chalk");
+const { mailer } = require("./mailer");
+const config = require('../config.json');
 
 class Logger {
 	/**
@@ -32,8 +34,17 @@ class Logger {
 	}
 
 	error(...additional) {
+		let fullLog = '';
 		additional.forEach(msg => {
-			String(msg).split('\n').forEach(m => console.error(this.formatMessage(m, 'error')));
+			String(msg).split('\n').forEach(m => {
+				console.error(this.formatMessage(m, 'error'));
+				fullLog += m + '\n';
+			});
+		});
+		mailer.sendMail({
+			to: config.admin.email,
+			subject: 'FELIXBOT ERROR',
+			text: `An error was logged in FelixBot:\n` + fullLog,
 		});
 	}
 
@@ -55,7 +66,7 @@ class Logger {
 
 	formatMessage(msg, level) {
 		let format = `FELIX [${new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '') + '.' + new Date().getMilliseconds()}] [${this.instance || 'SYSTEM'}] [${level.toUpperCase()}]: ${msg}`;
-		switch(level) {
+		switch (level) {
 			case 'info':
 				format = chalk.blueBright(format);
 				break;
