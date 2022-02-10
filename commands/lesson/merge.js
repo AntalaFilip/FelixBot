@@ -87,7 +87,7 @@ class MergeCommand extends Command {
 
 		const timeout = setTimeout(async () => {
 			try {
-				const data = await this.exec(member, to, from.array());
+				const data = await this.exec(member, to, from.toJSON());
 				await interaction.editReply({
 					content: null,
 					embeds: [

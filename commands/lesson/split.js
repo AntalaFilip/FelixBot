@@ -61,7 +61,7 @@ class SplitCommand extends Command {
 
 		// Get the channel's category and get the channels to split to
 		const ctg = chan.parent;
-		let chans = ctg.children.filter(ch => ch.type === 'voice' && !ch.name.includes('*') && ch.id != chan.id).array();
+		let chans = ctg.children.filter(ch => ch.type === 'voice' && !ch.name.includes('*') && ch.id != chan.id).toJSON();
 		if (lesson) chans = lesson.allocated.filter(ch => ch.id != chan.id);
 
 		// Sort the channels by their position, and if the user provided a groupcount, reduce them to that count.
